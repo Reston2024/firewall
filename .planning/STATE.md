@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 01-03-PLAN.md — zone-policy-runbook.md and validate-firewall.sh
-last_updated: "2026-03-22T06:00:46.686Z"
+stopped_at: Completed 01-02-PLAN.md — udev NIC persistence rules, ethernet/settings template, firewall.local anti-lockout script, backup-include.user
+last_updated: "2026-03-22T06:01:01.599Z"
 progress:
   total_phases: 7
   completed_phases: 0
@@ -48,6 +48,7 @@ Plan: 4 of 4
 *Updated after each plan completion*
 | Phase 01-platform-foundation-and-firewall P01 | 10 | 3 tasks | 15 files |
 | Phase 01-platform-foundation-and-firewall P03 | 2 | 2 tasks | 2 files |
+| Phase 01 P02 | 2 | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -64,6 +65,9 @@ Recent decisions affecting current work:
 - [Phase 01-platform-foundation-and-firewall]: validate-phase1.sh calls validate-nics.sh as first check, then verifies CUSTOMINPUT anti-lockout rules (ports 222/444), repo structure, backup include list, and firewall.local
 - [Phase 01-platform-foundation-and-firewall]: FW-02 masquerade documented as WUI-only action (anti-pattern to hand-roll iptables MASQUERADE)
 - [Phase 01-platform-foundation-and-firewall]: validate-firewall.sh uses SKIP (not FAIL) when no drop log entries — requires triggering blocked traffic first
+- [Phase 01-platform-foundation-and-firewall]: FILL_IN_FROM_NIC_MAP placeholders used for all MAC addresses in udev rules and ethernet/settings — human must populate from hardware before deployment
+- [Phase 01-platform-foundation-and-firewall]: firewall.local sources /var/ipfire/ethernet/settings to avoid hardcoded interface names — GREEN_DEV variable resolved at runtime
+- [Phase 01-platform-foundation-and-firewall]: check-before-delete pattern (iptables -C before -D) used in firewall.local stop case to prevent errors on empty CUSTOMINPUT chain
 
 ### Pending Todos
 
@@ -78,6 +82,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T06:00:35.339Z
-Stopped at: Completed 01-03-PLAN.md — zone-policy-runbook.md and validate-firewall.sh
+Last session: 2026-03-22T06:01:01.595Z
+Stopped at: Completed 01-02-PLAN.md — udev NIC persistence rules, ethernet/settings template, firewall.local anti-lockout script, backup-include.user
 Resume file: None

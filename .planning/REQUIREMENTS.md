@@ -9,11 +9,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Platform Foundation
 
-- [ ] **PLAT-01**: All 6 NICs persistently mapped to IPFire zones via MAC-based udev rules, surviving reboots and kernel updates
-- [ ] **PLAT-02**: Anti-lockout rules in firewall.local ensuring management access (SSH + WUI) is preserved during all firewall changes
+- [x] **PLAT-01**: All 6 NICs persistently mapped to IPFire zones via MAC-based udev rules, surviving reboots and kernel updates
+- [x] **PLAT-02**: Anti-lockout rules in firewall.local ensuring management access (SSH + WUI) is preserved during all firewall changes
 - [x] **PLAT-03**: Git repository initialized with project structure (/configs, /scripts, /services, /docs, /validation, /rollback, /manifests, /decision-log)
 - [x] **PLAT-04**: IPFire hostname, timezone, and base system updates applied and documented
-- [ ] **PLAT-05**: Backup strategy defined — config export + backup include list for Core Update survival
+- [x] **PLAT-05**: Backup strategy defined — config export + backup include list for Core Update survival
 
 ### Firewall & NAT
 
@@ -23,7 +23,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **FW-04**: Port forwarding (DNAT) capability configured and validated
 - [x] **FW-05**: Firewall logging enabled for all drop/reject actions
 - [x] **FW-06**: Firewall rules persist across reboot
-- [ ] **FW-07**: Anti-lockout: MGMT allow rules applied FIRST before any deny rules during changes
+- [x] **FW-07**: Anti-lockout: MGMT allow rules applied FIRST before any deny rules during changes
 
 ### Core Services
 
@@ -148,18 +148,18 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PLAT-01 | Phase 1 | Pending |
-| PLAT-02 | Phase 1 | Pending |
+| PLAT-01 | Phase 1 | Complete |
+| PLAT-02 | Phase 1 | Complete |
 | PLAT-03 | Phase 1 | Complete |
 | PLAT-04 | Phase 1 | Complete |
-| PLAT-05 | Phase 1 | Pending |
+| PLAT-05 | Phase 1 | Complete |
 | FW-01 | Phase 1 | Complete |
 | FW-02 | Phase 1 | Complete |
 | FW-03 | Phase 1 | Complete |
 | FW-04 | Phase 1 | Complete |
 | FW-05 | Phase 1 | Complete |
 | FW-06 | Phase 1 | Complete |
-| FW-07 | Phase 1 | Pending |
+| FW-07 | Phase 1 | Complete |
 | SVC-01 | Phase 2 | Pending |
 | SVC-02 | Phase 2 | Pending |
 | SVC-03 | Phase 2 | Pending |
