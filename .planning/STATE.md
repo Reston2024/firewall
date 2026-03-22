@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 01-02-PLAN.md — udev NIC persistence rules, ethernet/settings template, firewall.local anti-lockout script, backup-include.user
-last_updated: "2026-03-22T06:52:37.962Z"
+stopped_at: Completed 02-01-PLAN.md — validate-phase2.sh, DHCP config templates (dhcpd.conf.local, fixleases.template, README)
+last_updated: "2026-03-22T07:27:28.290Z"
 progress:
   total_phases: 7
   completed_phases: 0
-  total_plans: 4
-  completed_plans: 3
+  total_plans: 7
+  completed_plans: 5
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** A secure, observable network perimeter that can be rebuilt from scratch in minutes
-**Current focus:** Phase 01 — platform-foundation-and-firewall
+**Current focus:** Phase 02 — core-network-services
 
 ## Current Position
 
-Phase: 2
-Plan: Not started
+Phase: 02 (core-network-services) — EXECUTING
+Plan: 3 of 3
 
 ## Performance Metrics
 
@@ -49,6 +49,8 @@ Plan: Not started
 | Phase 01-platform-foundation-and-firewall P01 | 10 | 3 tasks | 15 files |
 | Phase 01-platform-foundation-and-firewall P03 | 2 | 2 tasks | 2 files |
 | Phase 01 P02 | 2 | 3 tasks | 4 files |
+| Phase 02-core-network-services P01 | 7 | 2 tasks | 4 files |
+| Phase 02-core-network-services P02 | 10 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -68,6 +70,11 @@ Recent decisions affecting current work:
 - [Phase 01-platform-foundation-and-firewall]: FILL_IN_FROM_NIC_MAP placeholders used for all MAC addresses in udev rules and ethernet/settings — human must populate from hardware before deployment
 - [Phase 01-platform-foundation-and-firewall]: firewall.local sources /var/ipfire/ethernet/settings to avoid hardcoded interface names — GREEN_DEV variable resolved at runtime
 - [Phase 01-platform-foundation-and-firewall]: check-before-delete pattern (iptables -C before -D) used in firewall.local stop case to prevent errors on empty CUSTOMINPUT chain
+- [Phase 02-core-network-services]: validate-phase2.sh uses SKIP (not FAIL) for SVC-02 static leases — no static leases is a valid initial deployment state
+- [Phase 02-core-network-services]: SVC-04 wire verification (tcpdump port 53/853) is always SKIP — cannot automate from repo, requires live RED interface
+- [Phase 02-core-network-services]: Templates document expected WUI output (not deployable) — human verifies WUI produced correct results by comparing live file to template
+- [Phase 02-core-network-services]: Runbook Section 1 is NTP to enforce NTP-before-DHCP ordering constraint preventing WARNING log
+- [Phase 02-core-network-services]: ISP DNS disable documented as first step in DNS section — mutual exclusivity with TLS protocol in IPFire
 
 ### Pending Todos
 
@@ -82,6 +89,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T06:01:01.595Z
-Stopped at: Completed 01-02-PLAN.md — udev NIC persistence rules, ethernet/settings template, firewall.local anti-lockout script, backup-include.user
+Last session: 2026-03-22T07:27:19.549Z
+Stopped at: Completed 02-01-PLAN.md — validate-phase2.sh, DHCP config templates (dhcpd.conf.local, fixleases.template, README)
 Resume file: None

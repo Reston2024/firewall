@@ -27,12 +27,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Core Services
 
-- [ ] **SVC-01**: DHCP server on GREEN zone with correct gateway, DNS, and NTP options
-- [ ] **SVC-02**: DHCP static leases capability for known hosts
+- [x] **SVC-01**: DHCP server on GREEN zone with correct gateway, DNS, and NTP options
+- [x] **SVC-02**: DHCP static leases capability for known hosts
 - [ ] **SVC-03**: DNS resolver via Unbound with mandatory DNSSEC validation
 - [ ] **SVC-04**: DNS-over-TLS enforcement with configured upstream resolvers (Cloudflare/Quad9)
 - [ ] **SVC-05**: NTP service synchronized to upstream pools and serving clients
-- [ ] **SVC-06**: All core services persist and auto-start after reboot
+- [x] **SVC-06**: All core services persist and auto-start after reboot
 
 ### SSH & Management Security
 
@@ -160,12 +160,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FW-05 | Phase 1 | Complete |
 | FW-06 | Phase 1 | Complete |
 | FW-07 | Phase 1 | Complete |
-| SVC-01 | Phase 2 | Pending |
-| SVC-02 | Phase 2 | Pending |
+| SVC-01 | Phase 2 | Complete |
+| SVC-02 | Phase 2 | Complete |
 | SVC-03 | Phase 2 | Pending |
 | SVC-04 | Phase 2 | Pending |
 | SVC-05 | Phase 2 | Pending |
-| SVC-06 | Phase 2 | Pending |
+| SVC-06 | Phase 2 | Complete |
 | SSH-01 | Phase 3 | Pending |
 | SSH-02 | Phase 3 | Pending |
 | SSH-03 | Phase 3 | Pending |
