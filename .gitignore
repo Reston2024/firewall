@@ -1,0 +1,16 @@
+# OS artifacts
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Backup artifacts (not to be committed)
+*.bak
+*.tar.gz
+*.iso
+
+# Sensitive — never commit real credentials or private keys
+*.pem
+*.key
+id_rsa
+id_ed25519
