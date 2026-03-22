@@ -59,22 +59,22 @@ echo ""
 
 # --- SVC-03: DNSSEC validation active (AD flag in response) ---
 echo "[SVC-03] DNSSEC validation"
-if command -v drill >/dev/null 2>&1; then
-  DRILL_OUTPUT=$(drill -D sigok.verteiltesysteme.net 2>/dev/null)
-  if echo "$DRILL_OUTPUT" | grep -q "flags:.*ad"; then
+if command -v dig >/dev/null 2>&1; then
+  DIG_OUTPUT=$(dig +dnssec sigok.verteiltesysteme.net @127.0.0.1 2>/dev/null)
+  if echo "$DIG_OUTPUT" | grep -q "flags:.*ad"; then
     pass "DNSSEC AD flag present — sigok.verteiltesysteme.net validates correctly"
   else
     fail "DNSSEC AD flag NOT present — check Unbound DNSSEC config (should be on by default since CU80)"
   fi
 
-  SERVFAIL_OUTPUT=$(drill -D sigfail.verteiltesysteme.net 2>/dev/null)
+  SERVFAIL_OUTPUT=$(dig sigfail.verteiltesysteme.net @127.0.0.1 2>/dev/null)
   if echo "$SERVFAIL_OUTPUT" | grep -qi "SERVFAIL"; then
     pass "DNSSEC enforcement active — sigfail.verteiltesysteme.net returns SERVFAIL as expected"
   else
     fail "DNSSEC not enforcing — sigfail.verteiltesysteme.net should return SERVFAIL"
   fi
 else
-  fail "drill command not found — expected on IPFire (part of unbound-utils)"
+  fail "dig command not found — install bind-utils or equivalent"
 fi
 
 if /etc/init.d/unbound status 2>/dev/null | grep -qi "running\|started"; then
