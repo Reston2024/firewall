@@ -29,10 +29,10 @@ echo ""
 
 # --- PLAT-02 / FW-07: Anti-lockout rules in CUSTOMINPUT ---
 echo "[PLAT-02/FW-07] CUSTOMINPUT anti-lockout rules"
-if iptables -L CUSTOMINPUT -n -v 2>/dev/null | grep -q ":222 "; then
-  pass "SSH (port 222) ACCEPT rule present in CUSTOMINPUT"
+if iptables -L CUSTOMINPUT -n -v 2>/dev/null | grep -q ":22 "; then
+  pass "SSH (port 22) ACCEPT rule present in CUSTOMINPUT"
 else
-  fail "SSH (port 222) ACCEPT rule MISSING from CUSTOMINPUT — run: /etc/init.d/firewall restart"
+  fail "SSH (port 22) ACCEPT rule MISSING from CUSTOMINPUT — run: /etc/init.d/firewall restart"
 fi
 
 if iptables -L CUSTOMINPUT -n -v 2>/dev/null | grep -q ":444 "; then

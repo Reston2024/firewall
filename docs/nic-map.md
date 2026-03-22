@@ -2,7 +2,7 @@
 
 **Hardware:** N100 6-NIC mini-PC
 **NICs:** 6x Intel i226-V (PCI device ID 8086:125c, kernel driver: igc)
-**Status:** TEMPLATE — fill in MAC addresses and PCIe bus IDs from live hardware
+**Status:** POPULATED — MAC addresses identified 2026-03-21
 
 ## Identification Commands (run on IPFire console)
 
@@ -35,22 +35,22 @@ Fill in this table before writing udev rules. Every cell marked FILL_IN must be 
 
 | Physical Port | Zone | Device Name | MAC Address | PCIe Bus | Driver | Notes |
 |--------------|------|-------------|-------------|----------|--------|-------|
-| Port 1 | RED (WAN) | red0 | FILL_IN | FILL_IN | FILL_IN | Connect to ISP/modem |
-| Port 2 | GREEN (LAN) | green0 | FILL_IN | FILL_IN | FILL_IN | Primary trusted LAN |
-| Port 3 | BLUE (Wireless) | blue0 | FILL_IN | FILL_IN | FILL_IN | Wireless/guest zone |
-| Port 4 | ORANGE (DMZ) | orange0 | FILL_IN | FILL_IN | FILL_IN | DMZ / untrusted servers |
-| Port 5 | GREEN Bridge | green1 | FILL_IN | FILL_IN | FILL_IN | Bridged to green0 |
-| Port 6 | GREEN Bridge | green2 | FILL_IN | FILL_IN | FILL_IN | Bridged to green0 |
+| Port 1 | GREEN (LAN) | green0 | a8:b8:e0:09:83:39 | 0000:01:00.0 | igc | Primary trusted LAN |
+| Port 2 | BLUE (Wireless) | blue0 | a8:b8:e0:09:83:3a | 0000:02:00.0 | igc | Wireless/guest zone |
+| Port 3 | RED (WAN) | red0 | a8:b8:e0:09:83:3b | 0000:03:00.0 | igc | Connect to ISP/modem |
+| Port 4 | ORANGE (DMZ) | orange0 | a8:b8:e0:09:83:3c | 0000:04:00.0 | igc | DMZ / untrusted servers |
+| Port 5 | GREEN Bridge | green1 | a8:b8:e0:09:83:3d | 0000:05:00.0 | igc | Bridged to green0 |
+| Port 6 | GREEN Bridge | green2 | a8:b8:e0:09:83:3e | 0000:07:00.0 | igc | Bridged to green0 |
 
 ## IP Addressing
 
 | Zone | Interface | IP Address | Subnet | Purpose |
 |------|-----------|------------|--------|---------|
-| GREEN | green0 | FILL_IN | FILL_IN | Default gateway for LAN clients |
-| GREEN Bridge | green1 | FILL_IN | FILL_IN | Bridged with green0 (same subnet) |
-| GREEN Bridge | green2 | FILL_IN | FILL_IN | Bridged with green0 (same subnet) |
-| BLUE | blue0 | FILL_IN | FILL_IN | Default gateway for wireless clients |
-| ORANGE | orange0 | FILL_IN | FILL_IN | Default gateway for DMZ hosts |
+| GREEN | green0 | 192.168.1.1 | 255.255.255.0 | Default gateway for LAN clients |
+| GREEN Bridge | green1 | (bridged) | (bridged) | Bridged with green0 (same subnet) |
+| GREEN Bridge | green2 | (bridged) | (bridged) | Bridged with green0 (same subnet) |
+| BLUE | blue0 | 192.168.2.1 | 255.255.255.0 | Default gateway for wireless clients |
+| ORANGE | orange0 | 192.168.3.1 | 255.255.255.0 | Default gateway for DMZ hosts |
 | RED | red0 | DHCP from ISP | N/A | WAN / internet uplink |
 
 ## After Filling This Table

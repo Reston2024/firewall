@@ -25,10 +25,10 @@ echo ""
 # --- FW-07 / PLAT-02: CUSTOMINPUT anti-lockout rules ---
 echo "[FW-07/PLAT-02] CUSTOMINPUT anti-lockout rules"
 
-if iptables -L CUSTOMINPUT -n -v 2>/dev/null | grep -q "dpt:222"; then
-  pass "SSH port 222 ACCEPT rule present in CUSTOMINPUT"
+if iptables -L CUSTOMINPUT -n -v 2>/dev/null | grep -q "dpt:22"; then
+  pass "SSH port 22 ACCEPT rule present in CUSTOMINPUT"
 else
-  fail "SSH port 222 ACCEPT rule MISSING from CUSTOMINPUT"
+  fail "SSH port 22 ACCEPT rule MISSING from CUSTOMINPUT"
   echo "  Fix: deploy configs/firewall/firewall.local to /etc/sysconfig/firewall.local"
   echo "       then run: /etc/init.d/firewall restart"
 fi
