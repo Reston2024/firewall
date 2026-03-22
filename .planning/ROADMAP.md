@@ -26,7 +26,13 @@ Seven phases build a hardened, reproducible IPFire firewall appliance from the h
   3. A host on GREEN can reach the internet (NAT/masquerade on RED is active) and cannot reach a host on ORANGE without an explicit allow rule (zone isolation enforced)
   4. Dropped packets from blocked inbound traffic appear in `/var/log/messages` firewall log entries (drop logging active)
   5. The git repo exists at the documented path with the full directory structure (/configs, /scripts, /services, /docs, /validation, /rollback, /manifests, /decision-log) and a backup include list is committed
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Repository structure, NIC map template, and validation scripts
+- [ ] 01-02-PLAN.md — udev NIC persistence rules, ethernet/settings template, firewall.local, backup include list
+- [ ] 01-03-PLAN.md — Zone policy runbook and firewall validation script
+- [ ] 01-04-PLAN.md — Human deployment checkpoint: NIC identification, hardware deploy, reboot persistence test, acceptance verification
 
 ### Phase 2: Core Network Services
 **Goal**: DHCP, DNS, and NTP are fully configured and serving all internal zones, with DNSSEC validation and DNS-over-TLS to upstream resolvers enforced from the start
@@ -103,7 +109,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Platform Foundation and Firewall | 0/TBD | Not started | - |
+| 1. Platform Foundation and Firewall | 0/4 | Planned | - |
 | 2. Core Network Services | 0/TBD | Not started | - |
 | 3. SSH Hardening and Management Security | 0/TBD | Not started | - |
 | 4. Suricata IDS/IPS | 0/TBD | Not started | - |
