@@ -1,0 +1,30 @@
+# EVE JSON configuration reference block
+# REFERENCE ONLY — not deployed directly
+# Compare with live: grep -A30 "^outputs:" /etc/suricata/suricata.yaml
+# Source: IPFire CU200 suricata.yaml template (nopaste.ipfire.org/view/mKfhrhSu)
+# If EVE JSON is disabled after Core Update, this block shows expected configuration
+#
+# Usage:
+#   ssh root@192.168.1.1 'grep -A20 "^outputs:" /etc/suricata/suricata.yaml'
+# Then compare the live outputs section to the expected block below.
+# If "enabled: no" is found, change to "enabled: yes" and update the sha256 baseline.
+
+outputs:
+  - eve-log:
+      enabled: yes
+      filetype: regular
+      filename: eve.json
+      types:
+        - alert:
+            payload: yes
+            payload-buffer-size: 4kb
+            payload-printable: yes
+            packet: yes
+            metadata: yes
+        - http:
+            extended: yes
+        - dns:
+            version: 3
+        - tls:
+            extended: yes
+        - flow

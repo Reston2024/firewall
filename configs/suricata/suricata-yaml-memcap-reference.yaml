@@ -1,0 +1,41 @@
+# Suricata memcap tuning reference — N100 16GB single-channel DDR5
+# REFERENCE ONLY — not deployed directly
+# Apply values manually to /etc/suricata/suricata.yaml via SSH (see suricata-ids-runbook.md Section 4)
+# CRITICAL: After applying, run: sha256sum /etc/suricata/suricata.yaml > /root/suricata-yaml.sha256
+# CRITICAL: Core Updates overwrite suricata.yaml — re-apply after each Core Update if check-suricata-integrity.sh warns
+#
+# Hardware: Intel N100, 16GB single-channel DDR5 ~50GB/s bandwidth
+# Estimated steady-state: 400-600MB RSS; maximum allocation: ~960MB if all pools fill
+# 16GB total: leaves 14.4GB+ for kernel, IPFire services, and headroom
+
+defrag:
+  memcap: 64mb          # Default: 32mb — doubled for SOHO; IP fragmentation uncommon in home networks
+  hash-size: 65536
+  trackers: 65535
+  max-frags: 65535
+
+flow:
+  memcap: 128mb         # Default: ~32mb — 4x for SOHO traffic volume
+  hash-size: 65536
+  prealloc: 30000       # Default: 10000 — 3x for burst connections (browser tabs, streaming)
+
+stream:
+  memcap: 256mb         # Default: 64mb — 4x; tracks TCP connection state
+  # checksum-validation: no is REQUIRED for Intel i226-V NIC hardware
+  # i226-V performs checksum calculation in hardware; Suricata sees incomplete checksums
+  # as invalid before the NIC finalizes them. This causes flooding of ICMP invalid checksum
+  # alerts. Setting no suppresses false positive checksum alerts on i226-V hardware.
+  checksum-validation: no
+  reassembly:
+    memcap: 512mb       # Default: 256mb — 2x; keep modest on single-channel bandwidth constraint
+    depth: 1mb          # Per-connection reassembly limit — limits memory impact of long-lived flows
+
+# Verification after 30 minutes of normal traffic:
+# cat /proc/$(pgrep -o suricata)/status | grep VmRSS
+# tail -100 /var/log/suricata/eve.json | jq 'select(.event_type=="stats") | .stats.flow.memuse'
+# grep -i "emergency" /var/log/suricata/suricata.log  (should return nothing)
+#
+# If memcap events appear in stats output: increase the relevant memcap value.
+# If RSS exceeds 2GB steadily: reduce memcaps or disable heavy rule categories.
+# If "emergency" appears in suricata.log: a memcap was reached and the engine entered
+#   bypass mode for affected traffic. Increase that pool's memcap.
