@@ -11,8 +11,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [ ] **PLAT-01**: All 6 NICs persistently mapped to IPFire zones via MAC-based udev rules, surviving reboots and kernel updates
 - [ ] **PLAT-02**: Anti-lockout rules in firewall.local ensuring management access (SSH + WUI) is preserved during all firewall changes
-- [ ] **PLAT-03**: Git repository initialized with project structure (/configs, /scripts, /services, /docs, /validation, /rollback, /manifests, /decision-log)
-- [ ] **PLAT-04**: IPFire hostname, timezone, and base system updates applied and documented
+- [x] **PLAT-03**: Git repository initialized with project structure (/configs, /scripts, /services, /docs, /validation, /rollback, /manifests, /decision-log)
+- [x] **PLAT-04**: IPFire hostname, timezone, and base system updates applied and documented
 - [ ] **PLAT-05**: Backup strategy defined — config export + backup include list for Core Update survival
 
 ### Firewall & NAT
@@ -150,8 +150,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | PLAT-01 | Phase 1 | Pending |
 | PLAT-02 | Phase 1 | Pending |
-| PLAT-03 | Phase 1 | Pending |
-| PLAT-04 | Phase 1 | Pending |
+| PLAT-03 | Phase 1 | Complete |
+| PLAT-04 | Phase 1 | Complete |
 | PLAT-05 | Phase 1 | Pending |
 | FW-01 | Phase 1 | Pending |
 | FW-02 | Phase 1 | Pending |
