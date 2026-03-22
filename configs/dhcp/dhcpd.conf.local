@@ -1,0 +1,25 @@
+# dhcpd.conf.local — DHCP customizations for GREEN zone
+# Deploy to: /var/ipfire/dhcp/dhcpd.conf.local on IPFire
+# This file is INCLUDED by dhcpd.conf and survives WUI regeneration.
+# Use this file for options the WUI does not expose directly.
+#
+# Phase 2 note: The NTP option is set via the WUI DHCP page (Primary NTP field).
+# This file documents the expected options and adds the DHCP domain-name option
+# which the WUI does not always set explicitly.
+#
+# Verify the WUI has set these in dhcpd.conf after configuration:
+#   option domain-name-servers 192.168.1.1;
+#   option ntp-servers 192.168.1.1;
+#   option routers 192.168.1.1;
+#
+# Deploy and syntax-check:
+#   scp configs/dhcp/dhcpd.conf.local root@192.168.1.1:/var/ipfire/dhcp/
+#   ssh root@192.168.1.1 '/usr/sbin/dhcpd -t -cf /var/ipfire/dhcp/dhcpd.conf'
+#   ssh root@192.168.1.1 '/etc/init.d/dhcp restart'
+
+# Domain name suffix for LAN clients (optional — remove if not desired)
+# This causes DHCP clients to resolve short names like "server01" as "server01.lan.local"
+# option domain-name "lan.local";
+
+# Log DHCP activity verbosely (useful during Phase 2 validation)
+# log-facility local7;

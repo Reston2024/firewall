@@ -1,0 +1,34 @@
+# fixleases.template — Static DHCP lease template
+# Deploy as: /var/ipfire/dhcp/fixleases on IPFire (rename from .template)
+#
+# FORMAT: MAC,IP,hostname,enabled,nextIP,remark,interface
+# Field 0: MAC address (lowercase, colon-separated)
+# Field 1: IP address (MUST be outside dynamic range 192.168.1.100-200)
+# Field 2: Hostname (becomes DNS entry automatically — no spaces)
+# Field 3: enabled (use "on" to enable, blank to disable)
+# Field 4: nextIP (leave blank)
+# Field 5: remark (leave blank or short description — no commas)
+# Field 6: interface (leave blank for GREEN default)
+#
+# IP RANGE DESIGN:
+#   Static assignments: 192.168.1.2  - 192.168.1.99   (reserve for known hosts)
+#   Dynamic pool:       192.168.1.100 - 192.168.1.200 (set in DHCP WUI)
+#   IPFire GREEN IP:    192.168.1.1   (gateway — never assign to a client)
+#
+# CRITICAL: After deploying this file, open WUI > Network > DHCP Server.
+# Each entry must be toggled off then on once so WUI writes the host block
+# to dhcpd.conf. Without this step, clients will NOT receive static IPs.
+#
+# DEPLOY STEPS:
+#   1. Edit this file with real MACs and IPs (remove comment lines)
+#   2. scp configs/dhcp/fixleases root@192.168.1.1:/var/ipfire/dhcp/fixleases
+#   3. ssh root@192.168.1.1 'sed -i "s/\r$//" /var/ipfire/dhcp/fixleases'
+#   4. Open WUI > Network > DHCP Server — verify entries appear
+#   5. Toggle each entry off then on to force dhcpd.conf host block generation
+#   6. ssh root@192.168.1.1 '/etc/init.d/dhcp restart'
+#   7. Verify: grep "hardware ethernet" /var/ipfire/dhcp/dhcpd.conf
+#
+# EXAMPLE ENTRIES (replace with real MACs and IPs):
+# aa:bb:cc:dd:ee:01,192.168.1.10,server01,on,,,
+# aa:bb:cc:dd:ee:02,192.168.1.11,nas01,on,,,
+# aa:bb:cc:dd:ee:03,192.168.1.12,workstation01,on,,,
