@@ -78,7 +78,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — validate-phase4.sh, check-suricata-integrity.sh, suricata-ids-runbook.md, config reference files
+- [x] 04-01-PLAN.md — validate-phase4.sh, check-suricata-integrity.sh, suricata-ids-runbook.md, config reference files
 - [ ] 04-02-PLAN.md — Human deployment checkpoint: WUI enable, memcap apply, EVE verify, sha256 baseline, export configs
 
 ### Phase 5: Telemetry Pipeline and Dashboards
@@ -125,7 +125,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 1. Platform Foundation and Firewall | 3/4 | In Progress|  |
 | 2. Core Network Services | 2/3 | In Progress|  |
 | 3. SSH Hardening and Management Security | 1/2 | In Progress|  |
-| 4. Suricata IDS/IPS | 0/2 | Not started | - |
+| 4. Suricata IDS/IPS | 1/2 | In Progress|  |
 | 5. Telemetry Pipeline and Dashboards | 0/TBD | Not started | - |
 | 6. System Hardening and Validation Suite | 0/TBD | Not started | - |
 | 7. Reproducibility and Disaster Recovery | 0/TBD | Not started | - |

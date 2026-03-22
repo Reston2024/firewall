@@ -44,14 +44,14 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### IDS/IPS (Suricata)
 
-- [ ] **IDS-01**: Suricata enabled with ET Community ruleset at minimum
-- [ ] **IDS-02**: IPS zone selection configured (monitor RED + GREEN traffic)
-- [ ] **IDS-03**: Automatic rule updates enabled (daily)
-- [ ] **IDS-04**: Monitor-only mode validated before enabling blocking
-- [ ] **IDS-05**: Memory cap tuned for N100 single-channel RAM constraints
-- [ ] **IDS-06**: EVE JSON logging active at /var/log/suricata/eve.json
-- [ ] **IDS-07**: Rule categories enabled incrementally (not all at once) to prevent self-lockout
-- [ ] **IDS-08**: Post-Core-Update validation script checks suricata.yaml integrity
+- [x] **IDS-01**: Suricata enabled with ET Community ruleset at minimum
+- [x] **IDS-02**: IPS zone selection configured (monitor RED + GREEN traffic)
+- [x] **IDS-03**: Automatic rule updates enabled (daily)
+- [x] **IDS-04**: Monitor-only mode validated before enabling blocking
+- [x] **IDS-05**: Memory cap tuned for N100 single-channel RAM constraints
+- [x] **IDS-06**: EVE JSON logging active at /var/log/suricata/eve.json
+- [x] **IDS-07**: Rule categories enabled incrementally (not all at once) to prevent self-lockout
+- [x] **IDS-08**: Post-Core-Update validation script checks suricata.yaml integrity
 
 ### System Hardening
 
@@ -171,14 +171,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SSH-03 | Phase 3 | Complete |
 | SSH-04 | Phase 3 | Complete |
 | SSH-05 | Phase 3 | Complete |
-| IDS-01 | Phase 4 | Pending |
-| IDS-02 | Phase 4 | Pending |
-| IDS-03 | Phase 4 | Pending |
-| IDS-04 | Phase 4 | Pending |
-| IDS-05 | Phase 4 | Pending |
-| IDS-06 | Phase 4 | Pending |
-| IDS-07 | Phase 4 | Pending |
-| IDS-08 | Phase 4 | Pending |
+| IDS-01 | Phase 4 | Complete |
+| IDS-02 | Phase 4 | Complete |
+| IDS-03 | Phase 4 | Complete |
+| IDS-04 | Phase 4 | Complete |
+| IDS-05 | Phase 4 | Complete |
+| IDS-06 | Phase 4 | Complete |
+| IDS-07 | Phase 4 | Complete |
+| IDS-08 | Phase 4 | Complete |
 | HARD-01 | Phase 6 | Pending |
 | HARD-02 | Phase 6 | Pending |
 | HARD-03 | Phase 6 | Pending |

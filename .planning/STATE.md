@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 03-01-PLAN.md — validate-phase3.sh, extended firewall.local, sshd_config.hardened, ssh-management-runbook.md
-last_updated: "2026-03-22T15:08:00.375Z"
+stopped_at: Completed 04-01-PLAN.md — validate-phase4.sh, check-suricata-integrity.sh, suricata-ids-runbook.md, suricata config references
+last_updated: "2026-03-22T19:15:53.319Z"
 progress:
   total_phases: 7
   completed_phases: 0
-  total_plans: 9
-  completed_plans: 6
+  total_plans: 11
+  completed_plans: 7
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** A secure, observable network perimeter that can be rebuilt from scratch in minutes
-**Current focus:** Phase 03 — ssh-hardening-and-management-security
+**Current focus:** Phase 04 — suricata-ids-ips
 
 ## Current Position
 
-Phase: 4
-Plan: Not started
+Phase: 04 (suricata-ids-ips) — EXECUTING
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -52,6 +52,7 @@ Plan: Not started
 | Phase 02-core-network-services P01 | 7 | 2 tasks | 4 files |
 | Phase 02-core-network-services P02 | 10 | 2 tasks | 5 files |
 | Phase 03 P01 | 4 | 3 tasks | 4 files |
+| Phase 04-suricata-ids-ips P01 | 4 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -79,6 +80,10 @@ Recent decisions affecting current work:
 - [Phase 03-ssh-hardening-and-management-security]: firewall.local extended (not replaced) — Phase 1 broad GREEN ACCEPT rules preserved as anti-lockout fallback while Phase 3 adds management-host-specific rules
 - [Phase 03-ssh-hardening-and-management-security]: ORANGE_DEV and BLUE_DEV guarded with [ -n ] in firewall.local — variables unset if zones not configured; unguarded use causes iptables syntax errors
 - [Phase 03-ssh-hardening-and-management-security]: sshd_config.hardened is reference-only — sshctrl binary manages sshd_config via WUI saves; direct deployment risks being overwritten
+- [Phase 04-suricata-ids-ips]: IDS-04 always SKIP in validate-phase4.sh — monitor mode cannot be read from CLI reliably; WUI-only
+- [Phase 04-suricata-ids-ips]: IDS-05 gated behind --full flag — memory check requires 30+ minutes of traffic
+- [Phase 04-suricata-ids-ips]: check-suricata-integrity.sh uses exit 2 for WARN (hash mismatch) so validate-phase4.sh maps it to SKIP
+- [Phase 04-suricata-ids-ips]: stream.checksum-validation: no required for Intel i226-V NIC hardware checksum offload — prevents false positive ICMP alerts
 
 ### Pending Todos
 
@@ -93,6 +98,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T11:52:52.199Z
-Stopped at: Completed 03-01-PLAN.md — validate-phase3.sh, extended firewall.local, sshd_config.hardened, ssh-management-runbook.md
+Last session: 2026-03-22T19:15:53.314Z
+Stopped at: Completed 04-01-PLAN.md — validate-phase4.sh, check-suricata-integrity.sh, suricata-ids-runbook.md, suricata config references
 Resume file: None
