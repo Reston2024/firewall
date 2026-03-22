@@ -36,11 +36,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### SSH & Management Security
 
-- [ ] **SSH-01**: SSH configured with key-only authentication (password auth disabled)
-- [ ] **SSH-02**: SSH access restricted to management IP/subnet whitelist
-- [ ] **SSH-03**: Guardian installed via Pakfire for SSH brute-force protection
-- [ ] **SSH-04**: IPFire WUI access restricted to GREEN/management subnet only
-- [ ] **SSH-05**: SSH 15-minute expiry feature documented and operational
+- [x] **SSH-01**: SSH configured with key-only authentication (password auth disabled)
+- [x] **SSH-02**: SSH access restricted to management IP/subnet whitelist
+- [x] **SSH-03**: Guardian installed via Pakfire for SSH brute-force protection
+- [x] **SSH-04**: IPFire WUI access restricted to GREEN/management subnet only
+- [x] **SSH-05**: SSH 15-minute expiry feature documented and operational
 
 ### IDS/IPS (Suricata)
 
@@ -166,11 +166,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SVC-04 | Phase 2 | Complete |
 | SVC-05 | Phase 2 | Complete |
 | SVC-06 | Phase 2 | Complete |
-| SSH-01 | Phase 3 | Pending |
-| SSH-02 | Phase 3 | Pending |
-| SSH-03 | Phase 3 | Pending |
-| SSH-04 | Phase 3 | Pending |
-| SSH-05 | Phase 3 | Pending |
+| SSH-01 | Phase 3 | Complete |
+| SSH-02 | Phase 3 | Complete |
+| SSH-03 | Phase 3 | Complete |
+| SSH-04 | Phase 3 | Complete |
+| SSH-05 | Phase 3 | Complete |
 | IDS-01 | Phase 4 | Pending |
 | IDS-02 | Phase 4 | Pending |
 | IDS-03 | Phase 4 | Pending |

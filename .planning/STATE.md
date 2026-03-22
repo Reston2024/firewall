@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 02-02-PLAN.md — DNS and NTP config templates, services-runbook.md
-last_updated: "2026-03-22T08:36:13.266Z"
+stopped_at: Completed 03-01-PLAN.md — validate-phase3.sh, extended firewall.local, sshd_config.hardened, ssh-management-runbook.md
+last_updated: "2026-03-22T11:52:52.203Z"
 progress:
   total_phases: 7
   completed_phases: 0
-  total_plans: 7
-  completed_plans: 5
+  total_plans: 9
+  completed_plans: 6
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** A secure, observable network perimeter that can be rebuilt from scratch in minutes
-**Current focus:** Phase 02 — core-network-services
+**Current focus:** Phase 03 — ssh-hardening-and-management-security
 
 ## Current Position
 
-Phase: 3
-Plan: Not started
+Phase: 03 (ssh-hardening-and-management-security) — EXECUTING
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Plan: Not started
 | Phase 01 P02 | 2 | 3 tasks | 4 files |
 | Phase 02-core-network-services P01 | 7 | 2 tasks | 4 files |
 | Phase 02-core-network-services P02 | 10 | 2 tasks | 5 files |
+| Phase 03 P01 | 4 | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,9 @@ Recent decisions affecting current work:
 - [Phase 02-core-network-services]: Templates document expected WUI output (not deployable) — human verifies WUI produced correct results by comparing live file to template
 - [Phase 02-core-network-services]: Runbook Section 1 is NTP to enforce NTP-before-DHCP ordering constraint preventing WARNING log
 - [Phase 02-core-network-services]: ISP DNS disable documented as first step in DNS section — mutual exclusivity with TLS protocol in IPFire
+- [Phase 03-ssh-hardening-and-management-security]: firewall.local extended (not replaced) — Phase 1 broad GREEN ACCEPT rules preserved as anti-lockout fallback while Phase 3 adds management-host-specific rules
+- [Phase 03-ssh-hardening-and-management-security]: ORANGE_DEV and BLUE_DEV guarded with [ -n ] in firewall.local — variables unset if zones not configured; unguarded use causes iptables syntax errors
+- [Phase 03-ssh-hardening-and-management-security]: sshd_config.hardened is reference-only — sshctrl binary manages sshd_config via WUI saves; direct deployment risks being overwritten
 
 ### Pending Todos
 
@@ -89,6 +93,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T07:27:33.625Z
-Stopped at: Completed 02-02-PLAN.md — DNS and NTP config templates, services-runbook.md
+Last session: 2026-03-22T11:52:52.199Z
+Stopped at: Completed 03-01-PLAN.md — validate-phase3.sh, extended firewall.local, sshd_config.hardened, ssh-management-runbook.md
 Resume file: None

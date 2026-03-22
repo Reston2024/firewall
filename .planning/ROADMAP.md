@@ -62,7 +62,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — validate-phase3.sh, extended firewall.local, ssh-management-runbook.md
+- [x] 03-01-PLAN.md — validate-phase3.sh, extended firewall.local, ssh-management-runbook.md
 - [ ] 03-02-PLAN.md — Human checkpoint: deploy SSH key, configure WUI, Guardian setup, export live configs
 
 ### Phase 4: Suricata IDS/IPS
@@ -120,7 +120,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 |-------|----------------|--------|-----------|
 | 1. Platform Foundation and Firewall | 3/4 | In Progress|  |
 | 2. Core Network Services | 2/3 | In Progress|  |
-| 3. SSH Hardening and Management Security | 0/2 | Not started | - |
+| 3. SSH Hardening and Management Security | 1/2 | In Progress|  |
 | 4. Suricata IDS/IPS | 0/TBD | Not started | - |
 | 5. Telemetry Pipeline and Dashboards | 0/TBD | Not started | - |
 | 6. System Hardening and Validation Suite | 0/TBD | Not started | - |
