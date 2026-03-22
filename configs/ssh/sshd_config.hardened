@@ -1,0 +1,29 @@
+# sshd_config.hardened — REFERENCE ONLY
+# This file is NOT deployed directly to IPFire.
+# It documents the expected state of /etc/ssh/sshd_config after Phase 3 WUI configuration.
+#
+# HOW TO USE:
+#   1. After completing WUI SSH settings (System > SSH Access), export the live file:
+#      scp root@192.168.1.1:/etc/ssh/sshd_config configs/ssh/sshd_config
+#   2. Compare the live file to this reference to confirm all settings applied correctly.
+#
+# WHY NOT DEPLOY:
+#   /usr/local/bin/sshctrl (the WUI SSH settings binary) modifies /etc/ssh/sshd_config
+#   on every WUI SSH save. Only the Port directive is targeted; manual edits to other
+#   directives may survive. Use WUI checkboxes for all WUI-managed settings.
+#
+# WUI settings that produce these directives (System > SSH Access):
+#   [ ] "Allow password based authentication"  -> PasswordAuthentication no
+#   [x] "Allow public key based authentication" -> PubkeyAuthentication yes
+#   [x] "Set SSH port to default 22"           -> Port 22
+#   [ ] "Allow SSH Agent Forwarding"           -> AllowAgentForwarding no
+#   [ ] "Allow TCP forwarding"                 -> AllowTcpForwarding no
+
+Port 22
+PasswordAuthentication no
+PubkeyAuthentication yes
+AuthorizedKeysFile     .ssh/authorized_keys
+AllowAgentForwarding no
+AllowTcpForwarding no
+UsePAM yes
+Subsystem sftp /usr/lib/ssh/sftp-server
