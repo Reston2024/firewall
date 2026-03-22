@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 01-01-PLAN.md — repo structure, NIC map template, deployment checklist, validate-nics.sh, validate-phase1.sh
-last_updated: "2026-03-22T05:56:31.408Z"
+stopped_at: Completed 01-03-PLAN.md — zone-policy-runbook.md and validate-firewall.sh
+last_updated: "2026-03-22T06:00:46.686Z"
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 4
-  completed_plans: 1
+  completed_plans: 3
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 ## Current Position
 
 Phase: 01 (platform-foundation-and-firewall) — EXECUTING
-Plan: 2 of 4
+Plan: 4 of 4
 
 ## Performance Metrics
 
@@ -47,6 +47,7 @@ Plan: 2 of 4
 
 *Updated after each plan completion*
 | Phase 01-platform-foundation-and-firewall P01 | 10 | 3 tasks | 15 files |
+| Phase 01-platform-foundation-and-firewall P03 | 2 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -61,6 +62,8 @@ Recent decisions affecting current work:
 - Project setup: NIC persistence via udev MAC rules must be established before any other config
 - [Phase 01-platform-foundation-and-firewall]: validate-nics.sh uses FILL_IN_FROM_NIC_MAP placeholders — human must populate from hardware identification before Plan 02 udev rules can be written
 - [Phase 01-platform-foundation-and-firewall]: validate-phase1.sh calls validate-nics.sh as first check, then verifies CUSTOMINPUT anti-lockout rules (ports 222/444), repo structure, backup include list, and firewall.local
+- [Phase 01-platform-foundation-and-firewall]: FW-02 masquerade documented as WUI-only action (anti-pattern to hand-roll iptables MASQUERADE)
+- [Phase 01-platform-foundation-and-firewall]: validate-firewall.sh uses SKIP (not FAIL) when no drop log entries — requires triggering blocked traffic first
 
 ### Pending Todos
 
@@ -75,6 +78,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T05:56:31.403Z
-Stopped at: Completed 01-01-PLAN.md — repo structure, NIC map template, deployment checklist, validate-nics.sh, validate-phase1.sh
+Last session: 2026-03-22T06:00:35.339Z
+Stopped at: Completed 01-03-PLAN.md — zone-policy-runbook.md and validate-firewall.sh
 Resume file: None

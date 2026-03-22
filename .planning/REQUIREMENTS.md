@@ -17,12 +17,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Firewall & NAT
 
-- [ ] **FW-01**: Stateful firewall with default-deny inbound on all zones
-- [ ] **FW-02**: NAT/IP masquerade on RED (WAN) for all internal zones
-- [ ] **FW-03**: Zone segmentation policies: GREEN/RED/ORANGE/BLUE with explicit inter-zone rules
-- [ ] **FW-04**: Port forwarding (DNAT) capability configured and validated
-- [ ] **FW-05**: Firewall logging enabled for all drop/reject actions
-- [ ] **FW-06**: Firewall rules persist across reboot
+- [x] **FW-01**: Stateful firewall with default-deny inbound on all zones
+- [x] **FW-02**: NAT/IP masquerade on RED (WAN) for all internal zones
+- [x] **FW-03**: Zone segmentation policies: GREEN/RED/ORANGE/BLUE with explicit inter-zone rules
+- [x] **FW-04**: Port forwarding (DNAT) capability configured and validated
+- [x] **FW-05**: Firewall logging enabled for all drop/reject actions
+- [x] **FW-06**: Firewall rules persist across reboot
 - [ ] **FW-07**: Anti-lockout: MGMT allow rules applied FIRST before any deny rules during changes
 
 ### Core Services
@@ -153,12 +153,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PLAT-03 | Phase 1 | Complete |
 | PLAT-04 | Phase 1 | Complete |
 | PLAT-05 | Phase 1 | Pending |
-| FW-01 | Phase 1 | Pending |
-| FW-02 | Phase 1 | Pending |
-| FW-03 | Phase 1 | Pending |
-| FW-04 | Phase 1 | Pending |
-| FW-05 | Phase 1 | Pending |
-| FW-06 | Phase 1 | Pending |
+| FW-01 | Phase 1 | Complete |
+| FW-02 | Phase 1 | Complete |
+| FW-03 | Phase 1 | Complete |
+| FW-04 | Phase 1 | Complete |
+| FW-05 | Phase 1 | Complete |
+| FW-06 | Phase 1 | Complete |
 | FW-07 | Phase 1 | Pending |
 | SVC-01 | Phase 2 | Pending |
 | SVC-02 | Phase 2 | Pending |

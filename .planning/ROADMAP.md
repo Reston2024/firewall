@@ -30,8 +30,8 @@ Seven phases build a hardened, reproducible IPFire firewall appliance from the h
 
 Plans:
 - [x] 01-01-PLAN.md — Repository structure, NIC map template, and validation scripts
-- [ ] 01-02-PLAN.md — udev NIC persistence rules, ethernet/settings template, firewall.local, backup include list
-- [ ] 01-03-PLAN.md — Zone policy runbook and firewall validation script
+- [x] 01-02-PLAN.md — udev NIC persistence rules, ethernet/settings template, firewall.local, backup include list
+- [x] 01-03-PLAN.md — Zone policy runbook and firewall validation script
 - [ ] 01-04-PLAN.md — Human deployment checkpoint: NIC identification, hardware deploy, reboot persistence test, acceptance verification
 
 ### Phase 2: Core Network Services
@@ -109,7 +109,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Platform Foundation and Firewall | 1/4 | In Progress|  |
+| 1. Platform Foundation and Firewall | 3/4 | In Progress|  |
 | 2. Core Network Services | 0/TBD | Not started | - |
 | 3. SSH Hardening and Management Security | 0/TBD | Not started | - |
 | 4. Suricata IDS/IPS | 0/TBD | Not started | - |
