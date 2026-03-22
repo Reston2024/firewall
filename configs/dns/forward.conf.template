@@ -1,0 +1,20 @@
+# forward.conf.template — Expected /etc/unbound/forward.conf after WUI DNS-over-TLS setup
+# This file is WUI-GENERATED on IPFire — do NOT deploy this file to IPFire.
+# Use it as a reference to verify the WUI produced the correct output.
+#
+# After configuring DNS in WUI, export the actual file:
+#   scp root@192.168.1.1:/etc/unbound/forward.conf configs/dns/forward.conf
+# Then compare to this template.
+#
+# VERIFICATION:
+#   ssh root@192.168.1.1 'grep "forward-tls-upstream: yes" /etc/unbound/forward.conf'
+#   ssh root@192.168.1.1 'grep "@853#" /etc/unbound/forward.conf'
+# Both must return matches. If either is missing, TLS is NOT active.
+
+forward-zone:
+    name: "."
+    forward-tls-upstream: yes
+    forward-addr: 1.1.1.1@853#1dot1dot1dot1.cloudflare-dns.com
+    forward-addr: 1.0.0.1@853#1dot1dot1dot1.cloudflare-dns.com
+    forward-addr: 9.9.9.9@853#dns.quad9.net
+    forward-addr: 149.112.112.112@853#dns.quad9.net

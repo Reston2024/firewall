@@ -1,0 +1,17 @@
+# time-settings.template — Expected /var/ipfire/time/settings after WUI NTP setup
+# This file is WUI-GENERATED on IPFire — do NOT deploy this file to IPFire.
+# Use it as a reference to verify the WUI produced the correct output.
+#
+# After configuring NTP in WUI, export the actual file:
+#   scp root@192.168.1.1:/var/ipfire/time/settings configs/ntp/time-settings
+# Then compare to this template.
+#
+# KEY FIELD: ENABLECLIENTS=on means "Provide time to local network" is enabled.
+# If this is off or missing, clients cannot sync to IPFire and DHCP NTP option
+# points to a server that is not listening on port 123.
+
+SERVER=0.pool.ntp.org
+SERVER2=1.pool.ntp.org
+ENABLECLIENTS=on
+SYNCDATETIME=daily
+FORCETIMEONBOOT=on
