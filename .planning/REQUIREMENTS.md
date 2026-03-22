@@ -148,77 +148,77 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PLAT-01 | — | Pending |
-| PLAT-02 | — | Pending |
-| PLAT-03 | — | Pending |
-| PLAT-04 | — | Pending |
-| PLAT-05 | — | Pending |
-| FW-01 | — | Pending |
-| FW-02 | — | Pending |
-| FW-03 | — | Pending |
-| FW-04 | — | Pending |
-| FW-05 | — | Pending |
-| FW-06 | — | Pending |
-| FW-07 | — | Pending |
-| SVC-01 | — | Pending |
-| SVC-02 | — | Pending |
-| SVC-03 | — | Pending |
-| SVC-04 | — | Pending |
-| SVC-05 | — | Pending |
-| SVC-06 | — | Pending |
-| SSH-01 | — | Pending |
-| SSH-02 | — | Pending |
-| SSH-03 | — | Pending |
-| SSH-04 | — | Pending |
-| SSH-05 | — | Pending |
-| IDS-01 | — | Pending |
-| IDS-02 | — | Pending |
-| IDS-03 | — | Pending |
-| IDS-04 | — | Pending |
-| IDS-05 | — | Pending |
-| IDS-06 | — | Pending |
-| IDS-07 | — | Pending |
-| IDS-08 | — | Pending |
-| HARD-01 | — | Pending |
-| HARD-02 | — | Pending |
-| HARD-03 | — | Pending |
-| HARD-04 | — | Pending |
-| HARD-05 | — | Pending |
-| TEL-01 | — | Pending |
-| TEL-02 | — | Pending |
-| TEL-03 | — | Pending |
-| TEL-04 | — | Pending |
-| TEL-05 | — | Pending |
-| TEL-06 | — | Pending |
-| TEL-07 | — | Pending |
-| TEL-08 | — | Pending |
-| DASH-01 | — | Pending |
-| DASH-02 | — | Pending |
-| DASH-03 | — | Pending |
-| DASH-04 | — | Pending |
-| REPO-01 | — | Pending |
-| REPO-02 | — | Pending |
-| REPO-03 | — | Pending |
-| REPO-04 | — | Pending |
-| REPO-05 | — | Pending |
-| REPO-06 | — | Pending |
-| VAL-01 | — | Pending |
-| VAL-02 | — | Pending |
-| VAL-03 | — | Pending |
-| VAL-04 | — | Pending |
-| VAL-05 | — | Pending |
-| VAL-06 | — | Pending |
-| VAL-07 | — | Pending |
-| VAL-08 | — | Pending |
-| VAL-09 | — | Pending |
-| VAL-10 | — | Pending |
-| VAL-11 | — | Pending |
+| PLAT-01 | Phase 1 | Pending |
+| PLAT-02 | Phase 1 | Pending |
+| PLAT-03 | Phase 1 | Pending |
+| PLAT-04 | Phase 1 | Pending |
+| PLAT-05 | Phase 1 | Pending |
+| FW-01 | Phase 1 | Pending |
+| FW-02 | Phase 1 | Pending |
+| FW-03 | Phase 1 | Pending |
+| FW-04 | Phase 1 | Pending |
+| FW-05 | Phase 1 | Pending |
+| FW-06 | Phase 1 | Pending |
+| FW-07 | Phase 1 | Pending |
+| SVC-01 | Phase 2 | Pending |
+| SVC-02 | Phase 2 | Pending |
+| SVC-03 | Phase 2 | Pending |
+| SVC-04 | Phase 2 | Pending |
+| SVC-05 | Phase 2 | Pending |
+| SVC-06 | Phase 2 | Pending |
+| SSH-01 | Phase 3 | Pending |
+| SSH-02 | Phase 3 | Pending |
+| SSH-03 | Phase 3 | Pending |
+| SSH-04 | Phase 3 | Pending |
+| SSH-05 | Phase 3 | Pending |
+| IDS-01 | Phase 4 | Pending |
+| IDS-02 | Phase 4 | Pending |
+| IDS-03 | Phase 4 | Pending |
+| IDS-04 | Phase 4 | Pending |
+| IDS-05 | Phase 4 | Pending |
+| IDS-06 | Phase 4 | Pending |
+| IDS-07 | Phase 4 | Pending |
+| IDS-08 | Phase 4 | Pending |
+| HARD-01 | Phase 6 | Pending |
+| HARD-02 | Phase 6 | Pending |
+| HARD-03 | Phase 6 | Pending |
+| HARD-04 | Phase 6 | Pending |
+| HARD-05 | Phase 6 | Pending |
+| TEL-01 | Phase 5 | Pending |
+| TEL-02 | Phase 5 | Pending |
+| TEL-03 | Phase 5 | Pending |
+| TEL-04 | Phase 5 | Pending |
+| TEL-05 | Phase 5 | Pending |
+| TEL-06 | Phase 5 | Pending |
+| TEL-07 | Phase 5 | Pending |
+| TEL-08 | Phase 5 | Pending |
+| DASH-01 | Phase 5 | Pending |
+| DASH-02 | Phase 5 | Pending |
+| DASH-03 | Phase 5 | Pending |
+| DASH-04 | Phase 5 | Pending |
+| REPO-01 | Phase 7 | Pending |
+| REPO-02 | Phase 7 | Pending |
+| REPO-03 | Phase 7 | Pending |
+| REPO-04 | Phase 7 | Pending |
+| REPO-05 | Phase 7 | Pending |
+| REPO-06 | Phase 7 | Pending |
+| VAL-01 | Phase 6 | Pending |
+| VAL-02 | Phase 6 | Pending |
+| VAL-03 | Phase 6 | Pending |
+| VAL-04 | Phase 6 | Pending |
+| VAL-05 | Phase 6 | Pending |
+| VAL-06 | Phase 6 | Pending |
+| VAL-07 | Phase 6 | Pending |
+| VAL-08 | Phase 6 | Pending |
+| VAL-09 | Phase 6 | Pending |
+| VAL-10 | Phase 6 | Pending |
+| VAL-11 | Phase 6 | Pending |
 
 **Coverage:**
-- v1 requirements: 56 total
-- Mapped to phases: 0
-- Unmapped: 56 ⚠️
+- v1 requirements: 65 total
+- Mapped to phases: 65
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-21*
-*Last updated: 2026-03-21 after initial definition*
+*Last updated: 2026-03-21 — traceability filled after roadmap creation*

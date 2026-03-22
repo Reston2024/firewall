@@ -17,15 +17,15 @@ A secure, observable network perimeter that can be rebuilt from scratch in minut
 ### Active
 
 - [ ] Platform verified and documented (OS, NICs, services)
-- [ ] All 6 NICs mapped persistently to network zones (WAN, LAN, MGMT, OPT1-3)
+- [ ] All 6 NICs mapped persistently to IPFire zones (RED/GREEN/BLUE/ORANGE + Bridge)
 - [ ] Native firewall with default-deny inbound, NAT/masquerade, zone policies
 - [ ] Anti-lockout protections for management access during all changes
 - [ ] Core services: DHCP server, DNS resolver, NTP
-- [ ] SSH hardened + brute-force protection (fail2ban or equivalent)
+- [ ] SSH hardened + brute-force protection (Guardian)
 - [ ] IDS/IPS via Suricata with auto-updating rules
 - [ ] Network telemetry pipeline (logs → processing → visualization)
 - [ ] Threat-tracing dashboard (end-to-end: source IP → alert → action)
-- [ ] Docker for non-core services (telemetry, dashboards, reverse proxy)
+- [ ] Off-box telemetry host (Docker Compose: Grafana + Loki + Alloy + Prometheus)
 - [ ] System hardening (unused services disabled, permissions locked, audit logging)
 - [ ] Full validation suite (interfaces, routing, NAT, DNS, DHCP, firewall, reboot persistence)
 - [ ] Reproducible rebuild from repo (scripts, configs, manifests)
@@ -43,7 +43,7 @@ A secure, observable network perimeter that can be rebuilt from scratch in minut
 ## Context
 
 - **Hardware:** Intel N100-class mini-PC with 6 Intel i225/i226 NICs, ~16GB RAM, NVMe storage
-- **OS:** IPFire (Linux-based, detected via management UI at 192.168.1.1:444)
+- **OS:** IPFire 2.29 Core Update 200 (March 2, 2026) — Suricata 8.0.3, kernel 6.18.7 LTS
 - **Current state:** Fresh or near-fresh install, basic WAN+LAN connectivity working
 - **Management access:** Web UI at https://192.168.1.1:444, SSH available
 - **Network position:** Between ISP modem/ONT and internal network
@@ -53,10 +53,12 @@ A secure, observable network perimeter that can be rebuilt from scratch in minut
 ## Constraints
 
 - **Platform:** IPFire-native tools and architecture only — no mixing distro paradigms
-- **Architecture:** Core firewall/routing/NAT MUST be native; Docker only for supporting services
+- **Architecture:** Core firewall/routing/NAT MUST be native; Docker rejected by IPFire — telemetry runs off-box
 - **Hardware:** N100 is low-power — telemetry stack must be lightweight or off-boxable
 - **Access:** Must preserve management access (anti-lockout) during all network changes
-- **Repos:** Only vetted, actively maintained upstream repos (Suricata, OpenSearch, Zeek)
+- **Repos:** Only vetted, actively maintained upstream repos (Suricata, Grafana, Loki, Alloy, Prometheus)
+- **Zones:** IPFire hard limit of 4 named zones (RED/GREEN/BLUE/ORANGE); extra NICs use Bridge mode
+- **Updates:** Core Updates overwrite custom configs — must use backup includes + post-update validation
 - **No placeholders:** All configs must be complete and executable, no pseudocode
 
 ## Key Decisions
@@ -68,6 +70,9 @@ A secure, observable network perimeter that can be rebuilt from scratch in minut
 | Suricata for IDS/IPS | Industry standard, IPFire-native support, active community | — Pending |
 | Git-based reproducibility | All configs in repo enables rebuild and audit trail | — Pending |
 | Phased log ingest | Prevent resource exhaustion on N100; start with firewall logs, add sources incrementally | — Pending |
+| Off-box telemetry | Docker rejected by IPFire devs; telemetry stack on separate host in GREEN zone | — Pending |
+| Grafana+Loki over OpenSearch | OpenSearch too heavy for N100; Loki+Alloy is lightweight and purpose-built | — Pending |
+| Guardian over fail2ban | fail2ban not in Pakfire; Guardian is IPFire-native with WUI integration | — Pending |
 
 ## Evolution
 
@@ -87,4 +92,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-21 after initialization*
+*Last updated: 2026-03-21 after research (Docker off-box, zone limits, Guardian, Alloy stack)*
