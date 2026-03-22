@@ -43,7 +43,12 @@ Plans:
   2. DNS resolution works from an internal client, DNSSEC validation is active (`dig +dnssec example.com` shows AD flag), and DNS-over-TLS is the upstream transport (confirmed by `tcpdump` on port 853)
   3. NTP is synchronized to upstream pools and clients receive time service (`ntpq -p` shows sync, client clocks converge within acceptable tolerance)
   4. All three services (dhcpd, unbound, ntpd) auto-start and are running after a clean reboot
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — validate-phase2.sh + DHCP config templates (dhcpd.conf.local, fixleases.template)
+- [ ] 02-02-PLAN.md — DNS/NTP config reference templates + services deployment runbook
+- [ ] 02-03-PLAN.md — Human WUI deployment checkpoint + validation run + live config export to git
 
 ### Phase 3: SSH Hardening and Management Security
 **Goal**: Remote management is locked down to key authentication from a whitelisted subnet, with Guardian blocking brute-force attempts before any Suricata IPS rules could interfere with management traffic
@@ -110,7 +115,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Platform Foundation and Firewall | 3/4 | In Progress|  |
-| 2. Core Network Services | 0/TBD | Not started | - |
+| 2. Core Network Services | 0/3 | Not started | - |
 | 3. SSH Hardening and Management Security | 0/TBD | Not started | - |
 | 4. Suricata IDS/IPS | 0/TBD | Not started | - |
 | 5. Telemetry Pipeline and Dashboards | 0/TBD | Not started | - |
