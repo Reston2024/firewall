@@ -59,7 +59,11 @@ Plans:
   2. An SSH connection attempt from an IP outside the management subnet is refused at the firewall level (packet dropped, not just auth failure)
   3. Guardian is installed and active; repeated failed SSH attempts from a non-whitelisted IP result in a temporary block visible in Guardian's WUI panel
   4. The IPFire WUI at port 444 is unreachable from a host on ORANGE or BLUE, but reachable from the management host on GREEN
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — validate-phase3.sh, extended firewall.local, ssh-management-runbook.md
+- [ ] 03-02-PLAN.md — Human checkpoint: deploy SSH key, configure WUI, Guardian setup, export live configs
 
 ### Phase 4: Suricata IDS/IPS
 **Goal**: Suricata is running inline on RED and GREEN in monitor-then-active mode with ET Community rulesets, N100-appropriate memcap limits, and EVE JSON output confirmed at `/var/log/suricata/eve.json`
@@ -116,7 +120,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 |-------|----------------|--------|-----------|
 | 1. Platform Foundation and Firewall | 3/4 | In Progress|  |
 | 2. Core Network Services | 2/3 | In Progress|  |
-| 3. SSH Hardening and Management Security | 0/TBD | Not started | - |
+| 3. SSH Hardening and Management Security | 0/2 | Not started | - |
 | 4. Suricata IDS/IPS | 0/TBD | Not started | - |
 | 5. Telemetry Pipeline and Dashboards | 0/TBD | Not started | - |
 | 6. System Hardening and Validation Suite | 0/TBD | Not started | - |
