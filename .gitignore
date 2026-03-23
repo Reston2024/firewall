@@ -3,8 +3,9 @@
 Thumbs.db
 *.swp
 *~
+desktop.ini
 
-# Backup artifacts (not to be committed)
+# Backup artifacts
 *.bak
 *.tar.gz
 *.iso
@@ -14,3 +15,17 @@ Thumbs.db
 *.key
 id_rsa
 id_ed25519
+*.p12
+*.pfx
+
+# Docker runtime
+telemetry/data/
+telemetry/loki-data/
+telemetry/grafana-data/
+
+# Logs (runtime only — not config)
+*.log
+
+# Editor configs
+.vscode/
+.idea/
