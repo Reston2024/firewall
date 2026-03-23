@@ -25,6 +25,7 @@ loki.source.syslog "ipfire_syslog" {
 
 // Retain __syslog_ internal labels as proper stream labels
 loki.relabel "syslog_labels" {
+  forward_to = [loki.process.firewall_parse.receiver]
   rule {
     source_labels = ["__syslog_message_hostname"]
     target_label  = "hostname"
