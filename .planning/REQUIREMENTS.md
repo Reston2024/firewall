@@ -65,12 +65,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [ ] **TEL-01**: Remote syslog forwarding configured (UDP 514) for firewall logs
 - [ ] **TEL-02**: IPS alert syslog forwarding configured (CU198+ feature)
-- [ ] **TEL-03**: Off-box telemetry host provisioned with Docker Compose
-- [ ] **TEL-04**: Grafana Alloy collector receiving syslog + reading EVE JSON
-- [ ] **TEL-05**: Loki ingesting parsed firewall and IDS logs
-- [ ] **TEL-06**: Grafana dashboards displaying firewall drops and IDS alerts
-- [ ] **TEL-07**: Phased ingest: firewall logs first, then IDS, then auth/DHCP/DNS
-- [ ] **TEL-08**: Log retention policy defined and configured
+- [x] **TEL-03**: Off-box telemetry host provisioned with Docker Compose
+- [x] **TEL-04**: Grafana Alloy collector receiving syslog + reading EVE JSON
+- [x] **TEL-05**: Loki ingesting parsed firewall and IDS logs
+- [x] **TEL-06**: Grafana dashboards displaying firewall drops and IDS alerts
+- [x] **TEL-07**: Phased ingest: firewall logs first, then IDS, then auth/DHCP/DNS
+- [x] **TEL-08**: Log retention policy defined and configured
 
 ### Threat-Tracing Dashboard
 
@@ -186,12 +186,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HARD-05 | Phase 6 | Pending |
 | TEL-01 | Phase 5 | Pending |
 | TEL-02 | Phase 5 | Pending |
-| TEL-03 | Phase 5 | Pending |
-| TEL-04 | Phase 5 | Pending |
-| TEL-05 | Phase 5 | Pending |
-| TEL-06 | Phase 5 | Pending |
-| TEL-07 | Phase 5 | Pending |
-| TEL-08 | Phase 5 | Pending |
+| TEL-03 | Phase 5 | Complete |
+| TEL-04 | Phase 5 | Complete |
+| TEL-05 | Phase 5 | Complete |
+| TEL-06 | Phase 5 | Complete |
+| TEL-07 | Phase 5 | Complete |
+| TEL-08 | Phase 5 | Complete |
 | DASH-01 | Phase 5 | Pending |
 | DASH-02 | Phase 5 | Pending |
 | DASH-03 | Phase 5 | Pending |

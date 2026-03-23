@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 04-01-PLAN.md — validate-phase4.sh, check-suricata-integrity.sh, suricata-ids-runbook.md, suricata config references
-last_updated: "2026-03-22T20:07:22.710Z"
+stopped_at: Completed 05-01-PLAN.md — Docker Compose stack files, Alloy/Loki/Grafana/Prometheus configs, rsync-eve.sh, validate-phase5.sh
+last_updated: "2026-03-23T07:39:28.091Z"
 progress:
   total_phases: 7
   completed_phases: 0
-  total_plans: 11
-  completed_plans: 7
+  total_plans: 15
+  completed_plans: 8
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** A secure, observable network perimeter that can be rebuilt from scratch in minutes
-**Current focus:** Phase 04 — suricata-ids-ips
+**Current focus:** Phase 05 — telemetry-pipeline-and-dashboards
 
 ## Current Position
 
-Phase: 5
-Plan: Not started
+Phase: 05 (telemetry-pipeline-and-dashboards) — EXECUTING
+Plan: 2 of 4
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Plan: Not started
 | Phase 02-core-network-services P02 | 10 | 2 tasks | 5 files |
 | Phase 03 P01 | 4 | 3 tasks | 4 files |
 | Phase 04-suricata-ids-ips P01 | 4 | 2 tasks | 5 files |
+| Phase 05-telemetry-pipeline-and-dashboards P01 | 10 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -84,6 +85,9 @@ Recent decisions affecting current work:
 - [Phase 04-suricata-ids-ips]: IDS-05 gated behind --full flag — memory check requires 30+ minutes of traffic
 - [Phase 04-suricata-ids-ips]: check-suricata-integrity.sh uses exit 2 for WARN (hash mismatch) so validate-phase4.sh maps it to SKIP
 - [Phase 04-suricata-ids-ips]: stream.checksum-validation: no required for Intel i226-V NIC hardware checksum offload — prevents false positive ICMP alerts
+- [Phase 05-telemetry-pipeline-and-dashboards]: rsync --checksum (not --append-verify) for EVE JSON: prevents duplicate entries after IPFire nightly logrotate
+- [Phase 05-telemetry-pipeline-and-dashboards]: stage.structured_metadata for src_ip on firewall syslog path: prevents high-cardinality Loki stream explosion from FORWARDFW drop lines
+- [Phase 05-telemetry-pipeline-and-dashboards]: rfc3164_default_to_current_year=true in Alloy syslog listener: prevents year=0000 timestamp bug (GitHub issue #2287) for RFC3164 IPFire syslog
 
 ### Pending Todos
 
@@ -98,6 +102,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T19:15:53.314Z
-Stopped at: Completed 04-01-PLAN.md — validate-phase4.sh, check-suricata-integrity.sh, suricata-ids-runbook.md, suricata config references
+Last session: 2026-03-23T07:39:28.086Z
+Stopped at: Completed 05-01-PLAN.md — Docker Compose stack files, Alloy/Loki/Grafana/Prometheus configs, rsync-eve.sh, validate-phase5.sh
 Resume file: None
