@@ -91,7 +91,13 @@ Plans:
   3. The threat-tracing dashboard shows a single-pane view connecting a source IP to its IDS alert and to the resulting firewall action for the same flow
   4. The top blocked IPs and top triggered rule names are visible in dedicated dashboard panels
   5. Log retention policy is configured (defined maximum age or volume) and confirmed in Loki config
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — Docker Compose stack files, Alloy config, Loki config, Grafana provisioning, rsync-eve.sh, validate-phase5.sh
+- [ ] 05-02-PLAN.md — Telemetry deployment runbook + human checkpoint: deploy stack, configure IPFire syslog, verify syslog path live
+- [ ] 05-03-PLAN.md — Human checkpoint: EVE JSON rsync path — SSH key setup, cron install, verify EVE entries in Loki
+- [ ] 05-04-PLAN.md — Dashboard import (22247 + custom ipfire-firewall), human verification of threat-trace panels, final validate-phase5.sh
 
 ### Phase 6: System Hardening and Validation Suite
 **Goal**: All unnecessary services are disabled, IPFire hardening recommendations are applied, and a scripted validation suite produces a pass/fail report covering every capability from NIC binding through telemetry ingestion
@@ -126,6 +132,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 2. Core Network Services | 2/3 | In Progress|  |
 | 3. SSH Hardening and Management Security | 1/2 | In Progress|  |
 | 4. Suricata IDS/IPS | 1/2 | In Progress|  |
-| 5. Telemetry Pipeline and Dashboards | 0/TBD | Not started | - |
+| 5. Telemetry Pipeline and Dashboards | 0/4 | Planned | - |
 | 6. System Hardening and Validation Suite | 0/TBD | Not started | - |
 | 7. Reproducibility and Disaster Recovery | 0/TBD | Not started | - |
