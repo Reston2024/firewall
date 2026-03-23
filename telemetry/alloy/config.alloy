@@ -1,0 +1,117 @@
+// Grafana Alloy config for IPFire telemetry
+// Path A: UDP syslog from IPFire 192.168.1.1:514 (firewall drops, system events)
+// Path B: Suricata EVE JSON via rsync-pull to /var/log/ipfire-eve/eve.json
+// CRITICAL: rfc3164_default_to_current_year=true prevents year=0000 timestamp bug (GitHub issue #2287)
+// Deploy to: /opt/telemetry/alloy/config.alloy on supportTAK-server
+
+// === PATH A: UDP Syslog from IPFire (firewall drops, system events) ===
+
+loki.source.syslog "ipfire_syslog" {
+  listener {
+    address                         = "0.0.0.0:514"
+    protocol                        = "udp"
+    use_incoming_timestamp          = true
+    rfc3164_default_to_current_year = true
+    syslog_format                   = "rfc3164"
+    max_message_length              = 0
+    labels = {
+      job  = "ipfire-syslog",
+      host = "ipfire",
+    }
+  }
+  relabel_rules = loki.relabel.syslog_labels.rules
+  forward_to    = [loki.process.firewall_parse.receiver]
+}
+
+// Retain __syslog_ internal labels as proper stream labels
+loki.relabel "syslog_labels" {
+  rule {
+    source_labels = ["__syslog_message_hostname"]
+    target_label  = "hostname"
+  }
+  rule {
+    source_labels = ["__syslog_message_app_name"]
+    target_label  = "app"
+  }
+}
+
+// Parse FORWARDFW firewall drop lines from syslog message body
+// src_ip and proto go to structured_metadata (NOT labels) to avoid high-cardinality stream explosion
+// Firewall drops have thousands of unique src_ips — making them labels creates stream explosion in Loki
+loki.process "firewall_parse" {
+  stage.regex {
+    expression = `FORWARDFW.*SRC=(?P<src_ip>\d+\.\d+\.\d+\.\d+).*DST=(?P<dst_ip>\d+\.\d+\.\d+\.\d+).*PROTO=(?P<proto>\w+)`
+  }
+  stage.structured_metadata {
+    values = {
+      src_ip = "src_ip",
+      proto  = "proto",
+    }
+  }
+  forward_to = [loki.write.default.receiver]
+}
+
+
+// === PATH B: Suricata EVE JSON file-read (IDS alerts) ===
+// Source: /var/log/ipfire-eve/eve.json (rsync'd from IPFire /var/log/suricata/eve.json)
+// src_ip IS promoted as a label here — this is intentional for alert tracking
+// EVE alert src_ips are attacker IPs with low unique-count relative to firewall drops
+
+loki.source.file "suricata_eve" {
+  targets = [
+    {
+      __path__ = "/var/log/ipfire-eve/eve.json",
+      job      = "suricata-eve",
+      host     = "ipfire",
+    },
+  ]
+  tail_from_end = true
+  forward_to    = [loki.process.eve_parse.receiver]
+}
+
+loki.process "eve_parse" {
+  // Stage 1: Parse top-level EVE JSON fields
+  stage.json {
+    expressions = {
+      event_type = "event_type",
+      src_ip     = "src_ip",
+      dest_ip    = "dest_ip",
+      proto      = "proto",
+      dest_port  = "dest_port",
+      alert      = "alert",
+    }
+  }
+  // Stage 2: Parse nested alert object
+  stage.json {
+    source = "alert"
+    expressions = {
+      signature    = "signature",
+      category     = "category",
+      severity     = "severity",
+      signature_id = "signature_id",
+    }
+  }
+  // Stage 3: Promote as Loki stream labels (required for Dashboard 22247)
+  stage.labels {
+    values = {
+      event_type   = "event_type",
+      src_ip       = "src_ip",
+      proto        = "proto",
+      dest_port    = "dest_port",
+      signature    = "signature",
+      category     = "category",
+      severity     = "severity",
+      signature_id = "signature_id",
+    }
+  }
+  forward_to = [loki.write.default.receiver]
+}
+
+
+// === SHARED: Write to Loki ===
+
+loki.write "default" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

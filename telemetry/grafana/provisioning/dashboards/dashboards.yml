@@ -1,0 +1,13 @@
+# Dashboard provider — loads JSON files from /var/lib/grafana/dashboards
+# Maps to Docker volume mount ./grafana/dashboards:/var/lib/grafana/dashboards
+# Add dashboard JSON files to telemetry/grafana/dashboards/ in the repo
+
+apiVersion: 1
+providers:
+  - name: default
+    orgId: 1
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/dashboards

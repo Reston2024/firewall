@@ -1,0 +1,45 @@
+# Loki 3.6.0 configuration for IPFire telemetry stack
+# Single-node filesystem storage, TSDB schema v13
+# Retention: 30 days global (720h) — reduce to 336h (14 days) if disk is limited
+# max_query_series: 200000 required for dashboard 22247 topk queries
+# Deploy to: /opt/telemetry/loki/loki-config.yml on supportTAK-server
+
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+  grpc_listen_port: 9096
+
+common:
+  instance_addr: 127.0.0.1
+  path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory:  /loki/rules
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+schema_config:
+  configs:
+    - from: 2024-01-01
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+limits_config:
+  retention_period: 720h
+  max_query_series: 200000
+
+compactor:
+  working_directory:              /loki/compactor
+  retention_enabled:              true
+  retention_delete_delay:         2h
+  retention_delete_worker_count:  150
+  delete_request_store:           filesystem
+  compaction_interval:            10m

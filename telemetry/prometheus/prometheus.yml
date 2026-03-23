@@ -1,0 +1,20 @@
+# Prometheus scrape config for supportTAK-server telemetry stack
+# Scrapes: Prometheus self, Alloy metrics, node-exporter (host metrics)
+# IPFire metrics deferred to v2 (collectd_exporter not in Phase 5 scope)
+
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: alloy
+    static_configs:
+      - targets: ["alloy:12345"]
+
+  - job_name: node-exporter
+    static_configs:
+      - targets: ["node-exporter:9100"]
