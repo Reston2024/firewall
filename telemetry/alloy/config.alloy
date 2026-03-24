@@ -1,39 +1,23 @@
 // Grafana Alloy config for IPFire telemetry
-// Path A: UDP syslog from IPFire 192.168.1.1:514 (firewall drops, system events)
+// Path A: IPFire syslog via rsyslog file → /var/log/ipfire/syslog.log
 // Path B: Suricata EVE JSON via rsync-pull to /var/log/ipfire-eve/eve.json
-// CRITICAL: rfc3164_default_to_current_year=true prevents year=0000 timestamp bug (GitHub issue #2287)
 // Deploy to: /opt/telemetry/alloy/config.alloy on supportTAK-server
 
-// === PATH A: UDP Syslog from IPFire (firewall drops, system events) ===
+// === PATH A: IPFire syslog (file-tailed from rsyslog output) ===
+// IPFire's BusyBox syslogd sends non-standard syslog (no RFC3164 header).
+// rsyslog normalizes and writes to /var/log/ipfire/syslog.log.
+// Alloy tails the file — avoids all syslog parsing issues.
 
-loki.source.syslog "ipfire_syslog" {
-  listener {
-    address                         = "0.0.0.0:514"
-    protocol                        = "udp"
-    use_incoming_timestamp          = true
-    rfc3164_default_to_current_year = true
-    syslog_format                   = "rfc3164"
-    max_message_length              = 0
-    labels = {
-      job  = "ipfire-syslog",
-      host = "ipfire",
-    }
-  }
-  relabel_rules = loki.relabel.syslog_labels.rules
+loki.source.file "ipfire_syslog" {
+  targets = [
+    {
+      __path__ = "/var/log/ipfire/syslog.log",
+      job      = "ipfire-syslog",
+      host     = "ipfire",
+    },
+  ]
+  tail_from_end = true
   forward_to    = [loki.process.firewall_parse.receiver]
-}
-
-// Retain __syslog_ internal labels as proper stream labels
-loki.relabel "syslog_labels" {
-  forward_to = [loki.process.firewall_parse.receiver]
-  rule {
-    source_labels = ["__syslog_message_hostname"]
-    target_label  = "hostname"
-  }
-  rule {
-    source_labels = ["__syslog_message_app_name"]
-    target_label  = "app"
-  }
 }
 
 // Parse FORWARDFW firewall drop lines from syslog message body

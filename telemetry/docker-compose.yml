@@ -27,13 +27,12 @@ services:
   alloy:
     image: grafana/alloy:v1.14.1
     container_name: alloy
-    # REQUIRED: root for binding UDP 514 (privileged port <1024).
     user: root
     ports:
-      - "514:514/udp"
       - "127.0.0.1:12345:12345"
     volumes:
       - ./alloy/config.alloy:/etc/alloy/config.alloy
+      - /var/log/ipfire:/var/log/ipfire:ro
       - /var/log/ipfire-eve:/var/log/ipfire-eve:ro
     command:
       - run
