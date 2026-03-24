@@ -16,12 +16,7 @@ services:
     mem_limit: 512m
     security_opt:
       - no-new-privileges:true
-    healthcheck:
-      test: ["CMD-SHELL", "echo > /dev/tcp/localhost/3100 || exit 1"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
+    # Loki uses a scratch image with no shell — health check via host-side monitoring
     restart: unless-stopped
 
   alloy:
@@ -43,7 +38,7 @@ services:
     security_opt:
       - no-new-privileges:true
     healthcheck:
-      test: ["CMD-SHELL", "echo > /dev/tcp/localhost/12345 || exit 1"]
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/12345' || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 3
