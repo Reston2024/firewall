@@ -27,3 +27,22 @@ AllowAgentForwarding no
 AllowTcpForwarding no
 UsePAM yes
 Subsystem sftp /usr/lib/ssh/sftp-server
+
+# --- CIS hardening (reference — not all manageable via WUI) ---
+# These directives may survive WUI saves since sshctrl only targets Port.
+# Verify after every WUI SSH change.
+
+# prohibit-password allows key-based root login (required for IPFire management)
+PermitRootLogin prohibit-password
+PermitEmptyPasswords no
+X11Forwarding no
+MaxAuthTries 3
+ClientAliveInterval 300
+ClientAliveCountMax 2
+LogLevel VERBOSE
+
+# Cryptographic hardening — restrict to modern algorithms
+Ciphers aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
+KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org
+HostKey /etc/ssh/ssh_host_ed25519_key

@@ -1,11 +1,20 @@
 #!/bin/bash
 # validate-phase5.sh — Phase 5 validation suite: Telemetry Pipeline and Dashboards
 # Run ON supportTAK-server (192.168.1.101) as opsadmin
-# Usage: bash /opt/telemetry/scripts/validate-phase5.sh [--full]
+# Usage: source /opt/telemetry/telemetry/.env && bash /opt/telemetry/scripts/validate-phase5.sh [--full]
 # Quick mode: TEL-01 through TEL-08 and DASH-01 through DASH-04 smoke tests
 # Full mode (--full): includes live EVE JSON ingest verification (requires 90 seconds)
 
 if [ "${1}" = "--full" ]; then FULL=1; else FULL=0; fi
+
+# Grafana credentials — read from environment to avoid hardcoding secrets
+GRAFANA_USER="${GRAFANA_USER:-admin}"
+GRAFANA_PASS="${GF_SECURITY_ADMIN_PASSWORD:-}"
+if [ -z "$GRAFANA_PASS" ]; then
+  echo "WARNING: GF_SECURITY_ADMIN_PASSWORD not set. Grafana API checks will be skipped."
+  echo "         Run: source /opt/telemetry/telemetry/.env before running this script."
+  echo ""
+fi
 
 FAIL=0
 PASS=0
@@ -102,17 +111,21 @@ echo ""
 # --- TEL-06: Grafana accessible and Loki datasource healthy ---
 echo "[TEL-06] Grafana accessible and Loki datasource healthy"
 
-TEL06_RESULT=$(curl -s -u admin:changeme http://localhost:3000/api/datasources 2>/dev/null)
-TEL06_EXIT=$?
-
-if [ $TEL06_EXIT -ne 0 ] || echo "$TEL06_RESULT" | grep -q "connection refused"; then
-  skip "TEL-06: Cannot reach Grafana at http://localhost:3000 — Grafana container not running. Check TEL-03 first"
-elif echo "$TEL06_RESULT" | grep -q '"name":"Loki"'; then
-  pass "TEL-06: Grafana is accessible and Loki datasource is provisioned"
-elif echo "$TEL06_RESULT" | grep -q "Invalid username or password"; then
-  skip "TEL-06: Grafana auth failed — admin password may have been changed from 'changeme'. Update check or verify manually at http://localhost:3000"
+if [ -z "$GRAFANA_PASS" ]; then
+  skip "TEL-06: GF_SECURITY_ADMIN_PASSWORD not set — source .env first"
 else
-  fail "TEL-06: Loki datasource not found in Grafana. Check provisioning: docker exec grafana ls /etc/grafana/provisioning/datasources/"
+  TEL06_RESULT=$(curl -s -u "${GRAFANA_USER}:${GRAFANA_PASS}" http://localhost:3000/api/datasources 2>/dev/null)
+  TEL06_EXIT=$?
+
+  if [ $TEL06_EXIT -ne 0 ] || echo "$TEL06_RESULT" | grep -q "connection refused"; then
+    skip "TEL-06: Cannot reach Grafana at http://localhost:3000 — Grafana container not running. Check TEL-03 first"
+  elif echo "$TEL06_RESULT" | grep -q '"name":"Loki"'; then
+    pass "TEL-06: Grafana is accessible and Loki datasource is provisioned"
+  elif echo "$TEL06_RESULT" | grep -q "Invalid username or password"; then
+    fail "TEL-06: Grafana auth failed — check GF_SECURITY_ADMIN_PASSWORD in .env matches the deployed password"
+  else
+    fail "TEL-06: Loki datasource not found in Grafana. Check provisioning: docker exec grafana ls /etc/grafana/provisioning/datasources/"
+  fi
 fi
 echo ""
 
@@ -174,17 +187,21 @@ echo ""
 # --- DASH-03: Dashboard 22247 imported ---
 echo "[DASH-03] Dashboard 22247 (Suricata Logs Eve JSON) imported"
 
-DASH03_RESULT=$(curl -s -u admin:changeme "http://localhost:3000/api/search?query=suricata" 2>/dev/null)
-DASH03_EXIT=$?
-
-if [ $DASH03_EXIT -ne 0 ] || echo "$DASH03_RESULT" | grep -q "connection refused"; then
-  skip "DASH-03: Cannot reach Grafana — check TEL-03 and TEL-06 first"
-elif echo "$DASH03_RESULT" | grep -qi "suricata"; then
-  pass "DASH-03: Suricata dashboard found in Grafana"
-elif echo "$DASH03_RESULT" | grep -q "Invalid username or password"; then
-  skip "DASH-03: Grafana auth failed — admin password may have been changed from 'changeme'"
+if [ -z "$GRAFANA_PASS" ]; then
+  skip "DASH-03: GF_SECURITY_ADMIN_PASSWORD not set — source .env first"
 else
-  fail "DASH-03: Dashboard 22247 not found. Import via Plan 04 Task 2. Or manually: Grafana > Dashboards > Import > ID 22247. Download URL: https://grafana.com/api/dashboards/22247/revisions/latest/download"
+  DASH03_RESULT=$(curl -s -u "${GRAFANA_USER}:${GRAFANA_PASS}" "http://localhost:3000/api/search?query=suricata" 2>/dev/null)
+  DASH03_EXIT=$?
+
+  if [ $DASH03_EXIT -ne 0 ] || echo "$DASH03_RESULT" | grep -q "connection refused"; then
+    skip "DASH-03: Cannot reach Grafana — check TEL-03 and TEL-06 first"
+  elif echo "$DASH03_RESULT" | grep -qi "suricata"; then
+    pass "DASH-03: Suricata dashboard found in Grafana"
+  elif echo "$DASH03_RESULT" | grep -q "Invalid username or password"; then
+    fail "DASH-03: Grafana auth failed — check GF_SECURITY_ADMIN_PASSWORD in .env matches the deployed password"
+  else
+    fail "DASH-03: Dashboard 22247 not found. Import via Plan 04 Task 2. Or manually: Grafana > Dashboards > Import > ID 22247. Download URL: https://grafana.com/api/dashboards/22247/revisions/latest/download"
+  fi
 fi
 echo ""
 

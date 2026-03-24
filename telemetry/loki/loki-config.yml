@@ -4,6 +4,9 @@
 # max_query_series: 200000 required for dashboard 22247 topk queries
 # Deploy to: /opt/telemetry/loki/loki-config.yml on supportTAK-server
 
+# auth_enabled: false is acceptable for single-tenant home lab.
+# Loki port 3100 is bound to 127.0.0.1 in docker-compose.yml (not reachable from LAN).
+# Enable multi-tenant auth if Loki is ever exposed to untrusted networks.
 auth_enabled: false
 
 server:
