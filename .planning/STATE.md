@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 05-01-PLAN.md — Docker Compose stack files, Alloy/Loki/Grafana/Prometheus configs, rsync-eve.sh, validate-phase5.sh
-last_updated: "2026-03-23T07:39:28.091Z"
+stopped_at: Completed Task 1 of 05-02-PLAN.md — telemetry-deployment-runbook.md created; awaiting human checkpoint (syslog-live)
+last_updated: "2026-03-24T15:04:41.698Z"
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 15
-  completed_plans: 8
+  completed_plans: 9
 ---
 
 # Project State
@@ -54,6 +54,7 @@ Plan: 2 of 4
 | Phase 03 P01 | 4 | 3 tasks | 4 files |
 | Phase 04-suricata-ids-ips P01 | 4 | 2 tasks | 5 files |
 | Phase 05-telemetry-pipeline-and-dashboards P01 | 10 | 2 tasks | 8 files |
+| Phase 05 P02 | 5 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,8 @@ Recent decisions affecting current work:
 - [Phase 05-telemetry-pipeline-and-dashboards]: rsync --checksum (not --append-verify) for EVE JSON: prevents duplicate entries after IPFire nightly logrotate
 - [Phase 05-telemetry-pipeline-and-dashboards]: stage.structured_metadata for src_ip on firewall syslog path: prevents high-cardinality Loki stream explosion from FORWARDFW drop lines
 - [Phase 05-telemetry-pipeline-and-dashboards]: rfc3164_default_to_current_year=true in Alloy syslog listener: prevents year=0000 timestamp bug (GitHub issue #2287) for RFC3164 IPFire syslog
+- [Phase 05-telemetry-pipeline-and-dashboards]: Deploy stack before IPFire syslog: Alloy must bind UDP 514 before IPFire starts forwarding to prevent silent log loss
+- [Phase 05-telemetry-pipeline-and-dashboards]: rsyslog pre-flight check placed as Section 2: stopping rsyslog before docker compose up prevents port 514 binding race
 
 ### Pending Todos
 
@@ -102,6 +105,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-23T07:39:28.086Z
-Stopped at: Completed 05-01-PLAN.md — Docker Compose stack files, Alloy/Loki/Grafana/Prometheus configs, rsync-eve.sh, validate-phase5.sh
+Last session: 2026-03-24T15:04:41.692Z
+Stopped at: Completed Task 1 of 05-02-PLAN.md — telemetry-deployment-runbook.md created; awaiting human checkpoint (syslog-live)
 Resume file: None

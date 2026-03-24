@@ -63,8 +63,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Telemetry Pipeline (Off-Box)
 
-- [ ] **TEL-01**: Remote syslog forwarding configured (UDP 514) for firewall logs
-- [ ] **TEL-02**: IPS alert syslog forwarding configured (CU198+ feature)
+- [x] **TEL-01**: Remote syslog forwarding configured (UDP 514) for firewall logs
+- [x] **TEL-02**: IPS alert syslog forwarding configured (CU198+ feature)
 - [x] **TEL-03**: Off-box telemetry host provisioned with Docker Compose
 - [x] **TEL-04**: Grafana Alloy collector receiving syslog + reading EVE JSON
 - [x] **TEL-05**: Loki ingesting parsed firewall and IDS logs
@@ -184,8 +184,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HARD-03 | Phase 6 | Pending |
 | HARD-04 | Phase 6 | Pending |
 | HARD-05 | Phase 6 | Pending |
-| TEL-01 | Phase 5 | Pending |
-| TEL-02 | Phase 5 | Pending |
+| TEL-01 | Phase 5 | Complete |
+| TEL-02 | Phase 5 | Complete |
 | TEL-03 | Phase 5 | Complete |
 | TEL-04 | Phase 5 | Complete |
 | TEL-05 | Phase 5 | Complete |
