@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 06-01-PLAN.md — 6 hardening artifacts created, all scripts bash -n verified
-last_updated: "2026-03-25T18:22:42.158Z"
+stopped_at: Completed 06-02-PLAN.md — validate-phase6.sh and validate-all.sh created
+last_updated: "2026-03-25T18:28:26.531Z"
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 19
-  completed_plans: 12
+  completed_plans: 13
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 ## Current Position
 
 Phase: 06 (system-hardening-and-validation-suite) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 
 ## Performance Metrics
 
@@ -58,6 +58,7 @@ Plan: 2 of 4
 | Phase 05-telemetry-pipeline-and-dashboards P03 | 150 | 1 tasks | 5 files |
 | Phase 05 P04 | 6 | 2 tasks | 2 files |
 | Phase 06 P01 | 523942 | 2 tasks | 6 files |
+| Phase 06 P02 | 5 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -105,6 +106,8 @@ Recent decisions affecting current work:
 - [Phase 06-system-hardening-and-validation-suite]: check-integrity.sh exit codes: 0=all match, 1=error (missing baseline/file), 2=mismatch — mirrors check-suricata-integrity.sh pattern
 - [Phase 06-system-hardening-and-validation-suite]: validate-reboot.sh captures iptables-save hash (not full ruleset) to enable clean diff comparison across reboots
 - [Phase 06-system-hardening-and-validation-suite]: Pakfire manifest lists only guardian — Suricata is bundled in IPFire core (not a Pakfire add-on) since CU131
+- [Phase 06]: validate-phase6.sh HARD-03 maps check-integrity.sh exit 2 to skip() — mismatch may be intentional after Core Update
+- [Phase 06]: validate-all.sh Phase 5 SSH failure is SKIP not FAIL — supportTAK-server is optional off-box infrastructure
 
 ### Pending Todos
 
@@ -119,6 +122,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-25T18:22:42.152Z
-Stopped at: Completed 06-01-PLAN.md — 6 hardening artifacts created, all scripts bash -n verified
+Last session: 2026-03-25T18:28:26.525Z
+Stopped at: Completed 06-02-PLAN.md — validate-phase6.sh and validate-all.sh created
 Resume file: None

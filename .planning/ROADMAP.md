@@ -112,7 +112,7 @@ Plans:
 
 Plans:
 - [x] 06-01-PLAN.md — Sysctl hardening config, integrity baseline script, reboot snapshot script, WUI cert docs, Pakfire manifest, backup include list
-- [ ] 06-02-PLAN.md — validate-phase6.sh (hardening checks) and validate-all.sh (unified orchestrator)
+- [x] 06-02-PLAN.md — validate-phase6.sh (hardening checks) and validate-all.sh (unified orchestrator)
 - [ ] 06-03-PLAN.md — Hardening deployment runbook + human checkpoint: deploy to IPFire, verify, capture pre-reboot snapshot
 - [ ] 06-04-PLAN.md — Human checkpoint: reboot persistence test + full validate-all.sh acceptance run
 
@@ -139,5 +139,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 3. SSH Hardening and Management Security | 1/2 | In Progress|  |
 | 4. Suricata IDS/IPS | 1/2 | In Progress|  |
 | 5. Telemetry Pipeline and Dashboards | 4/4 | Complete   | 2026-03-25 |
-| 6. System Hardening and Validation Suite | 1/4 | In Progress|  |
+| 6. System Hardening and Validation Suite | 2/4 | In Progress|  |
 | 7. Reproducibility and Disaster Recovery | 0/TBD | Not started | - |

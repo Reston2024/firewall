@@ -90,17 +90,17 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Validation
 
-- [ ] **VAL-01**: Interface status validation (all 6 NICs up, correct zone assignment)
-- [ ] **VAL-02**: Routing validation (GREEN can reach RED, inter-zone isolation verified)
-- [ ] **VAL-03**: Firewall rule validation (default deny confirmed, allowed traffic passes)
-- [ ] **VAL-04**: NAT validation (internal hosts reach internet, external sees WAN IP)
-- [ ] **VAL-05**: DHCP validation (clients receive correct IP, gateway, DNS, NTP)
-- [ ] **VAL-06**: DNS validation (resolution works, DNSSEC validates, DoT active)
-- [ ] **VAL-07**: IDS validation (test signature triggers alert)
-- [ ] **VAL-08**: Reboot persistence (all configs survive clean reboot)
-- [ ] **VAL-09**: Service health checks (all services running post-boot)
-- [ ] **VAL-10**: Telemetry validation (logs appearing in Grafana within 60 seconds)
-- [ ] **VAL-11**: Full acceptance checklist script (runs all above, outputs pass/fail)
+- [x] **VAL-01**: Interface status validation (all 6 NICs up, correct zone assignment)
+- [x] **VAL-02**: Routing validation (GREEN can reach RED, inter-zone isolation verified)
+- [x] **VAL-03**: Firewall rule validation (default deny confirmed, allowed traffic passes)
+- [x] **VAL-04**: NAT validation (internal hosts reach internet, external sees WAN IP)
+- [x] **VAL-05**: DHCP validation (clients receive correct IP, gateway, DNS, NTP)
+- [x] **VAL-06**: DNS validation (resolution works, DNSSEC validates, DoT active)
+- [x] **VAL-07**: IDS validation (test signature triggers alert)
+- [x] **VAL-08**: Reboot persistence (all configs survive clean reboot)
+- [x] **VAL-09**: Service health checks (all services running post-boot)
+- [x] **VAL-10**: Telemetry validation (logs appearing in Grafana within 60 seconds)
+- [x] **VAL-11**: Full acceptance checklist script (runs all above, outputs pass/fail)
 
 ## v2 Requirements
 
@@ -202,17 +202,17 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REPO-04 | Phase 7 | Pending |
 | REPO-05 | Phase 7 | Pending |
 | REPO-06 | Phase 7 | Pending |
-| VAL-01 | Phase 6 | Pending |
-| VAL-02 | Phase 6 | Pending |
-| VAL-03 | Phase 6 | Pending |
-| VAL-04 | Phase 6 | Pending |
-| VAL-05 | Phase 6 | Pending |
-| VAL-06 | Phase 6 | Pending |
-| VAL-07 | Phase 6 | Pending |
-| VAL-08 | Phase 6 | Pending |
-| VAL-09 | Phase 6 | Pending |
-| VAL-10 | Phase 6 | Pending |
-| VAL-11 | Phase 6 | Pending |
+| VAL-01 | Phase 6 | Complete |
+| VAL-02 | Phase 6 | Complete |
+| VAL-03 | Phase 6 | Complete |
+| VAL-04 | Phase 6 | Complete |
+| VAL-05 | Phase 6 | Complete |
+| VAL-06 | Phase 6 | Complete |
+| VAL-07 | Phase 6 | Complete |
+| VAL-08 | Phase 6 | Complete |
+| VAL-09 | Phase 6 | Complete |
+| VAL-10 | Phase 6 | Complete |
+| VAL-11 | Phase 6 | Complete |
 
 **Coverage:**
 - v1 requirements: 65 total
