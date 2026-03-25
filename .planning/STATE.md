@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-stopped_at: Completed Task 1 of 05-02-PLAN.md — telemetry-deployment-runbook.md created; awaiting human checkpoint (syslog-live)
-last_updated: "2026-03-24T15:04:41.698Z"
+status: executing
+stopped_at: Completed 05-02-PLAN.md — stack deployed, syslog live, 112,769 entries in Loki; advancing to Plan 03
+last_updated: "2026-03-24T17:00:00.000Z"
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 15
-  completed_plans: 9
+  completed_plans: 10
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 ## Current Position
 
 Phase: 05 (telemetry-pipeline-and-dashboards) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 
 ## Performance Metrics
 
@@ -54,7 +54,7 @@ Plan: 2 of 4
 | Phase 03 P01 | 4 | 3 tasks | 4 files |
 | Phase 04-suricata-ids-ips P01 | 4 | 2 tasks | 5 files |
 | Phase 05-telemetry-pipeline-and-dashboards P01 | 10 | 2 tasks | 8 files |
-| Phase 05 P02 | 5 | 1 tasks | 1 files |
+| Phase 05 P02 | 120 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -91,6 +91,9 @@ Recent decisions affecting current work:
 - [Phase 05-telemetry-pipeline-and-dashboards]: rfc3164_default_to_current_year=true in Alloy syslog listener: prevents year=0000 timestamp bug (GitHub issue #2287) for RFC3164 IPFire syslog
 - [Phase 05-telemetry-pipeline-and-dashboards]: Deploy stack before IPFire syslog: Alloy must bind UDP 514 before IPFire starts forwarding to prevent silent log loss
 - [Phase 05-telemetry-pipeline-and-dashboards]: rsyslog pre-flight check placed as Section 2: stopping rsyslog before docker compose up prevents port 514 binding race
+- [Phase 05-telemetry-pipeline-and-dashboards]: Actual Path A architecture is rsyslog→file→Alloy tailing (not direct UDP receive): rsyslog must be running as relay; original runbook Section 2 disable-rsyslog instruction was incorrect
+- [Phase 05-telemetry-pipeline-and-dashboards]: validate-phase5.sh TEL-02 checks rsyslog IS running (not absent): fixed post-deployment when architecture confirmed
+- [Phase 05-telemetry-pipeline-and-dashboards]: validate-phase5.sh TEL-04 uses query_range not instant query: instant query returns empty for log streams; range query with 5m window required
 
 ### Pending Todos
 
@@ -105,6 +108,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-24T15:04:41.692Z
-Stopped at: Completed Task 1 of 05-02-PLAN.md — telemetry-deployment-runbook.md created; awaiting human checkpoint (syslog-live)
+Last session: 2026-03-24T17:00:00.000Z
+Stopped at: Completed 05-02-PLAN.md — stack deployed on supportTAK-server, syslog path live (112,769 Loki entries), advancing to Plan 03
 Resume file: None
