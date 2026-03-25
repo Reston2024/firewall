@@ -10,10 +10,10 @@ interface. The certificate is NOT trusted by a public CA.
 
 | File | Purpose | Notes |
 |------|---------|-------|
-| `/etc/httpd/server.crt` | RSA certificate (primary) | Used by Apache httpd |
-| `/etc/httpd/server-ecdsa.crt` | ECDSA certificate (secondary) | Preferred by modern clients |
-| `/etc/httpd/server.key` | RSA private key | **Not stored in repo** |
+| `/etc/httpd/server-ecdsa.crt` | ECDSA certificate (only cert on this system) | Used by Apache httpd |
 | `/etc/httpd/server-ecdsa.key` | ECDSA private key | **Not stored in repo** |
+
+**Note:** This IPFire installation uses ECDSA only — no RSA certificate was generated.
 
 **Important:** Private keys are never stored in this repository. Only fingerprints and
 certificate metadata are recorded here for verification purposes.
@@ -43,21 +43,16 @@ openssl s_client -connect 127.0.0.1:444 </dev/null 2>/dev/null | openssl x509 -n
 > IPFire appliance and record the results here.
 
 ### RSA Certificate
-```
-Subject:    [FILL IN FROM: openssl x509 -in /etc/httpd/server.crt -noout -subject]
-Issuer:     [FILL IN FROM: openssl x509 -in /etc/httpd/server.crt -noout -issuer]
-Not Before: [FILL IN]
-Not After:  [FILL IN]
-SHA256 Fingerprint: [FILL IN]
-```
 
-### ECDSA Certificate
+Not present on this system — ECDSA only.
+
+### ECDSA Certificate (Deployed 2026-03-25)
 ```
-Subject:    [FILL IN FROM: openssl x509 -in /etc/httpd/server-ecdsa.crt -noout -subject]
-Issuer:     [FILL IN FROM: openssl x509 -in /etc/httpd/server-ecdsa.crt -noout -issuer]
-Not Before: [FILL IN]
-Not After:  [FILL IN]
-SHA256 Fingerprint: [FILL IN]
+Subject:    CN=ipfire.localdomain
+Issuer:     CN=ipfire.localdomain
+Not Before: Mar 22 07:55:33 2026 GMT
+Not After:  Feb 16 07:55:33 4764 GMT
+SHA256 Fingerprint: 0B:F3:6A:87:FD:1C:D6:13:22:AB:1F:66:94:69:3E:A7:CC:B0:04:46:34:05:83:16:F7:A6:70:1D:15:70:04:DA
 ```
 
 ## Self-Signed Certificate Context
