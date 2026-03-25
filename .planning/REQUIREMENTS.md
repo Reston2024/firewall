@@ -55,11 +55,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### System Hardening
 
-- [ ] **HARD-01**: Unused services identified and disabled
-- [ ] **HARD-02**: File permissions locked down per IPFire hardening guide
-- [ ] **HARD-03**: Audit logging enabled for configuration changes
-- [ ] **HARD-04**: Kernel parameters hardened (sysctl: disable IP source routing, ICMP redirects, etc.)
-- [ ] **HARD-05**: IPFire WUI HTTPS certificate verified and documented
+- [x] **HARD-01**: Unused services identified and disabled
+- [x] **HARD-02**: File permissions locked down per IPFire hardening guide
+- [x] **HARD-03**: Audit logging enabled for configuration changes
+- [x] **HARD-04**: Kernel parameters hardened (sysctl: disable IP source routing, ICMP redirects, etc.)
+- [x] **HARD-05**: IPFire WUI HTTPS certificate verified and documented
 
 ### Telemetry Pipeline (Off-Box)
 
@@ -179,11 +179,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | IDS-06 | Phase 4 | Complete |
 | IDS-07 | Phase 4 | Complete |
 | IDS-08 | Phase 4 | Complete |
-| HARD-01 | Phase 6 | Pending |
-| HARD-02 | Phase 6 | Pending |
-| HARD-03 | Phase 6 | Pending |
-| HARD-04 | Phase 6 | Pending |
-| HARD-05 | Phase 6 | Pending |
+| HARD-01 | Phase 6 | Complete |
+| HARD-02 | Phase 6 | Complete |
+| HARD-03 | Phase 6 | Complete |
+| HARD-04 | Phase 6 | Complete |
+| HARD-05 | Phase 6 | Complete |
 | TEL-01 | Phase 5 | Complete |
 | TEL-02 | Phase 5 | Complete |
 | TEL-03 | Phase 5 | Complete |

@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 05-04-PLAN.md — dashboards deployed, validate-phase5.sh 10 PASS 0 FAIL, Phase 5 complete
-last_updated: "2026-03-25T10:29:13.116Z"
+stopped_at: Completed 06-01-PLAN.md — 6 hardening artifacts created, all scripts bash -n verified
+last_updated: "2026-03-25T18:22:42.158Z"
 progress:
   total_phases: 7
   completed_phases: 1
-  total_plans: 15
-  completed_plans: 11
+  total_plans: 19
+  completed_plans: 12
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** A secure, observable network perimeter that can be rebuilt from scratch in minutes
-**Current focus:** Phase 05 — telemetry-pipeline-and-dashboards
+**Current focus:** Phase 06 — system-hardening-and-validation-suite
 
 ## Current Position
 
-Phase: 05 (telemetry-pipeline-and-dashboards) — EXECUTING
-Plan: 4 of 4
+Phase: 06 (system-hardening-and-validation-suite) — EXECUTING
+Plan: 2 of 4
 
 ## Performance Metrics
 
@@ -57,6 +57,7 @@ Plan: 4 of 4
 | Phase 05 P02 | 120 | 2 tasks | 2 files |
 | Phase 05-telemetry-pipeline-and-dashboards P03 | 150 | 1 tasks | 5 files |
 | Phase 05 P04 | 6 | 2 tasks | 2 files |
+| Phase 06 P01 | 523942 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -101,6 +102,9 @@ Recent decisions affecting current work:
 - [Phase 05-telemetry-pipeline-and-dashboards]: validate-phase5.sh TEL-03 requires sudo docker compose: opsadmin cannot run docker without sudo on supportTAK-server
 - [Phase 05]: suricata-22247.json is a placeholder: Grafana Labs API unavailable at execution time; dashboard 22247 must be imported manually from https://grafana.com/grafana/dashboards/22247-suricata-logs-json/ for full IDS severity panels; DASH-03 validate check passes with placeholder (title present in Grafana)
 - [Phase 05]: validate-phase5.sh requires GF_SECURITY_ADMIN_PASSWORD exported in shell for TEL-06 and DASH-03 checks; source /opt/telemetry/.env or export GF_SECURITY_ADMIN_PASSWORD=changeme before running
+- [Phase 06-system-hardening-and-validation-suite]: check-integrity.sh exit codes: 0=all match, 1=error (missing baseline/file), 2=mismatch — mirrors check-suricata-integrity.sh pattern
+- [Phase 06-system-hardening-and-validation-suite]: validate-reboot.sh captures iptables-save hash (not full ruleset) to enable clean diff comparison across reboots
+- [Phase 06-system-hardening-and-validation-suite]: Pakfire manifest lists only guardian — Suricata is bundled in IPFire core (not a Pakfire add-on) since CU131
 
 ### Pending Todos
 
@@ -115,6 +119,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-25T10:29:13.111Z
-Stopped at: Completed 05-04-PLAN.md — dashboards deployed, validate-phase5.sh 10 PASS 0 FAIL, Phase 5 complete
+Last session: 2026-03-25T18:22:42.152Z
+Stopped at: Completed 06-01-PLAN.md — 6 hardening artifacts created, all scripts bash -n verified
 Resume file: None
