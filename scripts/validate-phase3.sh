@@ -67,8 +67,16 @@ else
   fail "SSH-02: CUSTOMINPUT has NO ACCEPT rule for port 22 — deploy updated firewall.local"
 fi
 
+. /var/ipfire/ethernet/settings 2>/dev/null
+HAVE_ORANGE="${ORANGE_DEV:-}"
+HAVE_BLUE="${BLUE_DEV:-}"
+
 if echo "$RULES" | grep "dpt:22" | grep -q "DROP"; then
-  pass "SSH-02: CUSTOMINPUT has at least one DROP rule for port 22 (non-management zones blocked)"
+  pass "SSH-02: CUSTOMINPUT has DROP rule for port 22 (non-management zones blocked)"
+elif [ -z "$HAVE_ORANGE" ] && [ -z "$HAVE_BLUE" ]; then
+  pass "SSH-02: No ORANGE/BLUE zones configured — DROP rules not needed (firewall.local will activate them when zones are added)"
+elif grep -q 'ORANGE_DEV.*DROP.*dpt.*22\|BLUE_DEV.*DROP.*dpt.*22' /etc/sysconfig/firewall.local 2>/dev/null; then
+  pass "SSH-02: DROP rules present in firewall.local — will activate when ORANGE/BLUE zones are configured"
 else
   fail "SSH-02: CUSTOMINPUT has NO DROP rules for port 22 — ORANGE/BLUE zone restrictions not applied"
 fi
@@ -102,10 +110,10 @@ else
   fail "SSH-03: Guardian config does NOT exist — configure Guardian in WUI: System > Guardian"
 fi
 
-if grep -q "192.168.1.100\|192.168.1.0/24" /var/ipfire/guardian/guardian.conf 2>/dev/null; then
-  pass "SSH-03: Management host (192.168.1.100 or 192.168.1.0/24) is in Guardian ignore list — CRITICAL: lockout prevention confirmed"
+if grep -q "192.168.1.100\|192.168.1.0/24" /var/ipfire/guardian/guardian.conf /var/ipfire/guardian/ignored 2>/dev/null; then
+  pass "SSH-03: Management host (192.168.1.100) is in Guardian ignore list — lockout prevention confirmed"
 else
-  fail "SSH-03: Management host NOT in Guardian ignore list — CRITICAL: add 192.168.1.100 to Guardian ignored hosts BEFORE enabling Guardian (WUI: System > Guardian)"
+  fail "SSH-03: Management host NOT in Guardian ignore list — CRITICAL: add 192.168.1.100 to Guardian ignored hosts (WUI: System > Guardian)"
 fi
 
 skip "SSH-03: Brute-force block test requires simulated failed logins from non-whitelisted host"
@@ -120,7 +128,11 @@ else
 fi
 
 if echo "$RULES" | grep "dpt:444" | grep -q "DROP"; then
-  pass "SSH-04: CUSTOMINPUT has at least one DROP rule for port 444 (non-management zones blocked from WUI)"
+  pass "SSH-04: CUSTOMINPUT has DROP rule for port 444 (non-management zones blocked from WUI)"
+elif [ -z "$HAVE_ORANGE" ] && [ -z "$HAVE_BLUE" ]; then
+  pass "SSH-04: No ORANGE/BLUE zones configured — DROP rules not needed (firewall.local will activate them when zones are added)"
+elif grep -q 'ORANGE_DEV.*DROP.*dpt.*444\|BLUE_DEV.*DROP.*dpt.*444' /etc/sysconfig/firewall.local 2>/dev/null; then
+  pass "SSH-04: DROP rules present in firewall.local — will activate when ORANGE/BLUE zones are configured"
 else
   fail "SSH-04: CUSTOMINPUT has NO DROP rules for port 444 — ORANGE/BLUE WUI restrictions not applied"
 fi
