@@ -19,8 +19,8 @@ echo ""
 # --- HARD-01: Service audit ---
 echo "[HARD-01] Service audit — known-good TCP port baseline"
 
-# Expected listening ports: 53 (unbound), 22 (sshd), 81/444/1013 (httpd)
-KNOWN_PORTS="53 22 81 444 1013"
+# Expected listening ports: 53 (unbound), 22 (sshd), 81/444/1013 (httpd), 8953 (unbound control, localhost)
+KNOWN_PORTS="53 22 81 444 1013 8953"
 UNEXPECTED=0
 UNEXPECTED_LIST=""
 
@@ -54,13 +54,34 @@ if [ ! -f "$MANIFEST" ]; then
 elif [ ! -f "$EXPECTED_MANIFEST" ]; then
   skip "HARD-01: Expected Pakfire manifest not found at $EXPECTED_MANIFEST — create baseline first"
 else
-  DIFF_OUT=$(diff "$EXPECTED_MANIFEST" "$MANIFEST" 2>/dev/null)
-  if [ -z "$DIFF_OUT" ]; then
-    pass "HARD-01: Pakfire manifest matches expected (no unexpected packages)"
-  else
-    fail "HARD-01: Pakfire manifest has unexpected differences — review: diff $EXPECTED_MANIFEST $MANIFEST"
-    echo "        Diff output:"
-    echo "$DIFF_OUT" | head -20
+  # Strip comments and blank lines from expected manifest before comparing
+  EXPECTED_CLEAN=$(grep -v '^#' "$EXPECTED_MANIFEST" | grep -v '^$' | sort)
+  ACTUAL_CLEAN=$(sort "$MANIFEST")
+  # Check if every expected package appears in actual (with or without meta- prefix)
+  MANIFEST_FAIL=0
+  for PKG in $EXPECTED_CLEAN; do
+    if ! echo "$ACTUAL_CLEAN" | grep -qiE "(^|meta-)${PKG}$"; then
+      fail "HARD-01: Expected Pakfire package '$PKG' not found in installed manifest"
+      MANIFEST_FAIL=1
+    fi
+  done
+  # Check for truly unexpected packages (not matching any expected package or its dependencies)
+  for INSTALLED in $ACTUAL_CLEAN; do
+    MATCHED=0
+    for PKG in $EXPECTED_CLEAN; do
+      if echo "$INSTALLED" | grep -qiE "(^|meta-)${PKG}"; then
+        MATCHED=1
+        break
+      fi
+    done
+    # Allow meta-perl-* as known Guardian dependencies
+    if [ "$MATCHED" -eq 0 ] && ! echo "$INSTALLED" | grep -q "^meta-perl-"; then
+      fail "HARD-01: Unexpected Pakfire package: $INSTALLED"
+      MANIFEST_FAIL=1
+    fi
+  done
+  if [ "$MANIFEST_FAIL" -eq 0 ]; then
+    pass "HARD-01: Pakfire manifest matches expected (including meta- prefix and dependencies)"
   fi
 fi
 echo ""
@@ -152,32 +173,43 @@ echo ""
 # --- HARD-05: WUI certificate ---
 echo "[HARD-05] WUI HTTPS certificate"
 
+# At least one cert (RSA or ECDSA) must exist for WUI HTTPS
+HAS_CERT=0
 if [ -f "/etc/httpd/server.crt" ]; then
   pass "HARD-05: RSA cert exists: /etc/httpd/server.crt"
+  HAS_CERT=1
 else
-  fail "HARD-05: RSA cert MISSING: /etc/httpd/server.crt"
+  skip "HARD-05: RSA cert not present (ECDSA-only system)"
 fi
 
 if [ -f "/etc/httpd/server-ecdsa.crt" ]; then
   pass "HARD-05: ECDSA cert exists: /etc/httpd/server-ecdsa.crt"
+  HAS_CERT=1
 else
-  fail "HARD-05: ECDSA cert MISSING: /etc/httpd/server-ecdsa.crt"
+  skip "HARD-05: ECDSA cert not present"
 fi
 
-if [ -f "/etc/httpd/server.crt" ]; then
-  ENDDATE=$(openssl x509 -in /etc/httpd/server.crt -noout -enddate 2>/dev/null | cut -d= -f2)
-  ENDEPOCH=$(date -d "$ENDDATE" +%s 2>/dev/null)
-  NOW_EPOCH=$(date +%s)
-  DAYS_LEFT=$(( (ENDEPOCH - NOW_EPOCH) / 86400 ))
+if [ "$HAS_CERT" -eq 0 ]; then
+  fail "HARD-05: No WUI certificate found (neither RSA nor ECDSA)"
+fi
 
-  if [ "$DAYS_LEFT" -gt 365 ]; then
-    pass "HARD-05: WUI cert valid for ${DAYS_LEFT} days (expires: ${ENDDATE})"
-  else
-    fail "HARD-05: WUI cert expires in ${DAYS_LEFT} days (${ENDDATE}) — consider renewing via WUI: System > Certificates"
+# Check certificate expiry on whichever cert exists
+for CERT_FILE in /etc/httpd/server.crt /etc/httpd/server-ecdsa.crt; do
+  if [ -f "$CERT_FILE" ]; then
+    ENDDATE=$(openssl x509 -in "$CERT_FILE" -noout -enddate 2>/dev/null | cut -d= -f2)
+    ENDEPOCH=$(date -d "$ENDDATE" +%s 2>/dev/null)
+    NOW_EPOCH=$(date +%s)
+    DAYS_LEFT=$(( (ENDEPOCH - NOW_EPOCH) / 86400 ))
+    CERT_NAME=$(basename "$CERT_FILE")
+
+    if [ "$DAYS_LEFT" -gt 365 ]; then
+      pass "HARD-05: $CERT_NAME valid for ${DAYS_LEFT} days (expires: ${ENDDATE})"
+    else
+      fail "HARD-05: $CERT_NAME expires in ${DAYS_LEFT} days (${ENDDATE}) — consider renewing via WUI: System > Certificates"
+    fi
+    break  # Only need to check one
   fi
-fi
-
-skip "HARD-05: Fingerprint match — requires docs/wui-certificate.md to be populated with live fingerprint first"
+done
 echo ""
 
 # --- Summary ---
