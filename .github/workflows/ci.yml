@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  lint-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq yamllint shellcheck jq
+
+      - name: YAML lint
+        run: |
+          yamllint -d relaxed \
+            telemetry/docker-compose.yml \
+            telemetry/loki/loki-config.yml \
+            telemetry/prometheus/prometheus.yml \
+            telemetry/grafana/provisioning/**/*.yml
+
+      - name: Shell lint
+        run: shellcheck -e SC1091 scripts/*.sh
+
+      - name: JSON validate
+        run: |
+          find telemetry -name '*.json' -exec sh -c 'jq empty "$1" && echo "  OK: $1"' _ {} \;
+
+      - name: Compose validate
+        run: |
+          # Create dummy .env for validation
+          echo "GF_SECURITY_ADMIN_PASSWORD=ci-test" > telemetry/.env
+          docker compose -f telemetry/docker-compose.yml config >/dev/null
+          rm telemetry/.env
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Gitleaks scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

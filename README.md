@@ -94,7 +94,7 @@ Firewall/
 +-- validation/             # Test artifacts (Phase 6)
 +-- rollback/               # Rollback procedures (Phase 7)
 +-- manifests/              # Pakfire addon manifest (Phase 7)
-+-- decision-log/           # Architecture Decision Records
++-- decisions/              # Architecture Decision Records (ADRs)
 +-- .planning/              # GSD project planning artifacts
 ```
 
