@@ -15,3 +15,10 @@
 # Source: https://www.ipfire.org/docs/configuration/system/backup (April 2024 revision)
 /etc/udev/rules.d/30-persistent-network.rules
 /etc/sysconfig/firewall.local
+
+# Phase 6 additions — system hardening and validation artifacts
+/etc/sysctl.conf
+/etc/syslog.conf
+/etc/ssh/sshd_config
+/root/integrity-baseline.sha256
+/root/firewall-repo/manifests/pakfire-manifest.txt

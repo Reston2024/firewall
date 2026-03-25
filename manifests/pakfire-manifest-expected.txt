@@ -1,0 +1,16 @@
+# Pakfire add-on manifest — expected packages installed on this appliance
+# Purpose: Feeds REPO-03 in Phase 7 for reproducible rebuild validation
+#
+# How to generate the actual installed manifest on IPFire:
+#   ls /opt/pakfire/db/installed/ > /root/firewall-repo/manifests/pakfire-manifest.txt
+#
+# How to diff expected vs actual:
+#   diff /root/firewall-repo/manifests/pakfire-manifest-expected.txt \
+#        /root/firewall-repo/manifests/pakfire-manifest.txt
+#
+# Note: Suricata is bundled in IPFire core (not a Pakfire add-on) and does NOT appear here.
+# Note: collectd and vnstat are also built-in — not listed here.
+#
+# One package per line — no version numbers (Pakfire tracks versions internally).
+
+guardian
