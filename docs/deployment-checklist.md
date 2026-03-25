@@ -42,14 +42,14 @@ Steps performed by the human on IPFire hardware. Complete in order.
 - [ ] Copy ethernet/settings to IPFire (if modified from defaults):
       `scp configs/ethernet/settings root@192.168.1.1:/var/ipfire/ethernet/settings`
 
-- [ ] Reload udev on IPFire (SSH to IPFire, port 222):
+- [ ] Reload udev on IPFire (SSH to IPFire, port 22):
       `udevadm control --reload-rules && udevadm trigger`
 
 - [ ] Apply firewall.local:
       `/etc/init.d/firewall restart`
 
 - [ ] Verify firewall.local rules active (on IPFire):
-      `iptables -L CUSTOMINPUT -n -v | grep -E '(222|444)'`
+      `iptables -L CUSTOMINPUT -n -v | grep -E '(22|444)'`
       Must show ACCEPT rules for both ports.
 
 - [ ] Copy backup include list:
@@ -61,8 +61,8 @@ Steps performed by the human on IPFire hardware. Complete in order.
 
 ## Reboot Persistence Test
 
-- [ ] **Reboot IPFire:** `reboot` (from SSH on port 222)
-- [ ] Wait 60 seconds, then reconnect on SSH port 222
+- [ ] **Reboot IPFire:** `reboot` (from SSH on port 22)
+- [ ] Wait 60 seconds, then reconnect on SSH port 22
 - [ ] Run NIC validation on IPFire:
       `bash /root/firewall-repo/scripts/validate-nics.sh`
       Expected: ALL NICS PASS
@@ -84,7 +84,7 @@ All of the following must be true before declaring Phase 1 complete:
 
 - [ ] `bash scripts/validate-nics.sh` returns ALL NICS PASS
 - [ ] `bash scripts/validate-phase1.sh` returns ALL CHECKS PASS
-- [ ] SSH (port 222) accessible from management host after firewall restart
+- [ ] SSH (port 22) accessible from management host after firewall restart
 - [ ] WUI (port 444) accessible from management host after firewall restart
 - [ ] GREEN host can reach internet (NAT active)
 - [ ] GREEN host CANNOT ping ORANGE zone (zone isolation enforced)

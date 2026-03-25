@@ -7,7 +7,7 @@
 # chain. They ensure SSH (port 22) and WUI (port 444) remain accessible from the
 # GREEN zone regardless of what WUI firewall policy changes are made.
 #
-# Phase 1: Broad GREEN ACCEPT rules (anti-lockout safety net)
+# Phase 1: Original broad GREEN ACCEPT removed (CIS v8 4.7 / NIST AC-17)
 # Phase 3: Management host-specific ACCEPT rules, ORANGE/BLUE DROP rules
 #
 # CUSTOMINPUT is processed BEFORE the rest of the IPFire firewall ruleset.
@@ -41,11 +41,9 @@ case "$1" in
     /sbin/iptables -A CUSTOMINPUT -s 192.168.1.100 -i "${GREEN_DEV}" -p tcp --dport 22 -j ACCEPT
     /sbin/iptables -A CUSTOMINPUT -s 192.168.1.100 -i "${GREEN_DEV}" -p tcp --dport 444 -j ACCEPT
 
-    # === Phase 1: Broad GREEN ACCEPT (anti-lockout fallback — keep as safety net) ===
-    # This allows the full GREEN subnet in case the management host IP changes
-    # Note: IPFire SSH default is port 22, not 22
-    /sbin/iptables -A CUSTOMINPUT -i "${GREEN_DEV}" -p tcp --dport 22 -j ACCEPT
-    /sbin/iptables -A CUSTOMINPUT -i "${GREEN_DEV}" -p tcp --dport 444 -j ACCEPT
+    # === Phase 1 broad GREEN ACCEPT removed (CIS v8 Control 4.7 / NIST AC-17) ===
+    # Management access restricted to MGMT_HOST only. If management IP changes,
+    # recover via physical console or IPMI. Do NOT re-add broad GREEN ACCEPT.
 
     # === Phase 3: DROP SSH from ORANGE (DMZ must not reach management) ===
     # Guard with [ -n ] because ORANGE_DEV is unset if ORANGE zone is not configured
@@ -68,12 +66,7 @@ case "$1" in
     /sbin/iptables -C CUSTOMINPUT -s 192.168.1.100 -i "${GREEN_DEV}" -p tcp --dport 444 -j ACCEPT 2>/dev/null && \
       /sbin/iptables -D CUSTOMINPUT -s 192.168.1.100 -i "${GREEN_DEV}" -p tcp --dport 444 -j ACCEPT
 
-    # Phase 1: Broad GREEN ACCEPT rules
-    /sbin/iptables -C CUSTOMINPUT -i "${GREEN_DEV}" -p tcp --dport 22 -j ACCEPT 2>/dev/null && \
-      /sbin/iptables -D CUSTOMINPUT -i "${GREEN_DEV}" -p tcp --dport 22 -j ACCEPT
-
-    /sbin/iptables -C CUSTOMINPUT -i "${GREEN_DEV}" -p tcp --dport 444 -j ACCEPT 2>/dev/null && \
-      /sbin/iptables -D CUSTOMINPUT -i "${GREEN_DEV}" -p tcp --dport 444 -j ACCEPT
+    # Phase 1 broad GREEN ACCEPT rules removed (CIS v8 Control 4.7 / NIST AC-17)
 
     # Phase 3: ORANGE DROP rules
     [ -n "${ORANGE_DEV}" ] && /sbin/iptables -C CUSTOMINPUT -i "${ORANGE_DEV}" -p tcp --dport 22 -j DROP 2>/dev/null && \

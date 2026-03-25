@@ -5,7 +5,7 @@ All steps performed by the human on the IPFire WUI at https://IPFIRE_IP:444.
 
 **CRITICAL — Read before any WUI changes:**
 firewall.local must be deployed and active before making any changes here.
-Verify first: `iptables -L CUSTOMINPUT -n -v | grep -E '(222|444)'`
+Verify first: `iptables -L CUSTOMINPUT -n -v | grep -E '(22|444)'`
 Both ports must show ACCEPT rules. If not, deploy firewall.local first (Plan 02).
 
 ---
@@ -184,7 +184,7 @@ No explicit configuration needed — persistence is inherent.
 
 Complete in this order:
 
-- [ ] 1. Verify firewall.local is active (CUSTOMINPUT has 222 and 444 ACCEPT rules)
+- [ ] 1. Verify firewall.local is active (CUSTOMINPUT has 22 and 444 ACCEPT rules)
 - [ ] 2. Enable ORANGE masquerade (FW-02)
 - [ ] 3. Enable BLUE masquerade (FW-02)
 - [ ] 4. Block GREEN-to-ORANGE forwarding (FW-03) — **do this before adding ORANGE hosts**
@@ -208,4 +208,4 @@ Complete in this order:
 | FW-04 | `curl http://WAN_IP:8080` | External host | Reaches ORANGE host |
 | FW-05 | `grep FORWARDFW /var/log/messages` | IPFire console | Log entries present |
 | FW-06 | `iptables -L -n` after reboot | IPFire console | Rules identical |
-| FW-07 | `iptables -L CUSTOMINPUT -n -v` | IPFire console | 222 + 444 ACCEPT rules |
+| FW-07 | `iptables -L CUSTOMINPUT -n -v` | IPFire console | 22 + 444 ACCEPT rules |

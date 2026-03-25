@@ -6,7 +6,7 @@ A fully configured, hardened, reproducible firewall/router/security gateway buil
 
 **If the box dies, the repo rebuilds it identically in under 15 minutes.**
 
-Every configuration, script, validation test, and runbook lives in this repository. No manual steps are undocumented.
+Every configuration, script, validation test, and runbook for completed phases lives in this repository. Phases 6-7 are in progress.
 
 ## Architecture
 
@@ -123,12 +123,12 @@ bash /root/firewall-repo/scripts/validate-phase4.sh
 
 ```bash
 cd /opt
-sudo git clone https://github.com/Reston2024/Firewall.git telemetry
+sudo git clone https://github.com/Reston2024/firewall.git telemetry
 cd /opt/telemetry/telemetry
 sudo docker compose up -d
 
 # Access Grafana
-# http://192.168.1.101:3000 (admin/admin)
+# http://192.168.1.101:3000 (login with GF_SECURITY_ADMIN_PASSWORD from .env)
 ```
 
 ## Security Features
