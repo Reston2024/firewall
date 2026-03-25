@@ -72,7 +72,7 @@ echo "[TEL-03] Docker Compose stack running (all 5 containers)"
 if [ ! -f /opt/telemetry/docker-compose.yml ]; then
   skip "TEL-03: /opt/telemetry/docker-compose.yml not found — stack not yet deployed (run Plan 02)"
 else
-  RUNNING_COUNT=$(docker compose -f /opt/telemetry/docker-compose.yml ps --format json 2>/dev/null | grep -c '"State":"running"')
+  RUNNING_COUNT=$(sudo docker compose -f /opt/telemetry/docker-compose.yml ps --format json 2>/dev/null | grep -c '"State":"running"')
   if [ "$RUNNING_COUNT" -ge 5 ]; then
     pass "TEL-03: $RUNNING_COUNT containers running (expected >= 5)"
   else
