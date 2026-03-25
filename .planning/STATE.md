@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 05-02-PLAN.md — stack deployed, syslog live, 112,769 entries in Loki; advancing to Plan 03
-last_updated: "2026-03-24T17:00:00.000Z"
+status: unknown
+stopped_at: Completed 05-03-PLAN.md — EVE JSON pipeline live, DASH-04 PASS, advancing to Plan 04
+last_updated: "2026-03-25T10:11:28.431Z"
 progress:
   total_phases: 7
   completed_phases: 0
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 ## Current Position
 
 Phase: 05 (telemetry-pipeline-and-dashboards) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 
 ## Performance Metrics
 
@@ -55,6 +55,7 @@ Plan: 3 of 4
 | Phase 04-suricata-ids-ips P01 | 4 | 2 tasks | 5 files |
 | Phase 05-telemetry-pipeline-and-dashboards P01 | 10 | 2 tasks | 8 files |
 | Phase 05 P02 | 120 | 2 tasks | 2 files |
+| Phase 05-telemetry-pipeline-and-dashboards P03 | 150 | 1 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,9 @@ Recent decisions affecting current work:
 - [Phase 05-telemetry-pipeline-and-dashboards]: Actual Path A architecture is rsyslog→file→Alloy tailing (not direct UDP receive): rsyslog must be running as relay; original runbook Section 2 disable-rsyslog instruction was incorrect
 - [Phase 05-telemetry-pipeline-and-dashboards]: validate-phase5.sh TEL-02 checks rsyslog IS running (not absent): fixed post-deployment when architecture confirmed
 - [Phase 05-telemetry-pipeline-and-dashboards]: validate-phase5.sh TEL-04 uses query_range not instant query: instant query returns empty for log streams; range query with 5m window required
+- [Phase 05-telemetry-pipeline-and-dashboards]: Plain scp key (no rsync command= restriction) for EVE pull: IPFire lacks rsync binary, rsync-eve.sh uses scp — command= restriction designed for rsync --server would break scp transport
+- [Phase 05-telemetry-pipeline-and-dashboards]: Suricata anomaly logger: Suricata 8.0.3 crashes with duplicate anomaly in both file and reporter socket eve-log blocks — disable anomaly in reporter socket block only
+- [Phase 05-telemetry-pipeline-and-dashboards]: validate-phase5.sh TEL-03 requires sudo docker compose: opsadmin cannot run docker without sudo on supportTAK-server
 
 ### Pending Todos
 
@@ -108,6 +112,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-24T17:00:00.000Z
-Stopped at: Completed 05-02-PLAN.md — stack deployed on supportTAK-server, syslog path live (112,769 Loki entries), advancing to Plan 03
+Last session: 2026-03-25T10:11:28.425Z
+Stopped at: Completed 05-03-PLAN.md — EVE JSON pipeline live, DASH-04 PASS, advancing to Plan 04
 Resume file: None

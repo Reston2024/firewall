@@ -96,7 +96,7 @@ Plans:
 Plans:
 - [x] 05-01-PLAN.md — Docker Compose stack files, Alloy config, Loki config, Grafana provisioning, rsync-eve.sh, validate-phase5.sh
 - [x] 05-02-PLAN.md — Telemetry deployment runbook + human checkpoint: deploy stack, configure IPFire syslog, verify syslog path live (112,769 entries in Loki confirmed)
-- [ ] 05-03-PLAN.md — Human checkpoint: EVE JSON rsync path — SSH key setup, cron install, verify EVE entries in Loki
+- [x] 05-03-PLAN.md — Human checkpoint: EVE JSON rsync path — SSH key setup, cron install, verify EVE entries in Loki
 - [ ] 05-04-PLAN.md — Dashboard import (22247 + custom ipfire-firewall), human verification of threat-trace panels, final validate-phase5.sh
 
 ### Phase 6: System Hardening and Validation Suite
@@ -132,6 +132,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 2. Core Network Services | 2/3 | In Progress|  |
 | 3. SSH Hardening and Management Security | 1/2 | In Progress|  |
 | 4. Suricata IDS/IPS | 1/2 | In Progress|  |
-| 5. Telemetry Pipeline and Dashboards | 2/4 | In Progress | Syslog path live (112,769 entries) |
+| 5. Telemetry Pipeline and Dashboards | 3/4 | In Progress|  |
 | 6. System Hardening and Validation Suite | 0/TBD | Not started | - |
 | 7. Reproducibility and Disaster Recovery | 0/TBD | Not started | - |
