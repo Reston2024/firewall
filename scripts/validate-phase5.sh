@@ -52,11 +52,16 @@ echo "[TEL-02] UDP 514 available for Alloy (no rsyslog conflict)"
 
 TEL02_OUT=$(sudo ss -ulnp 2>/dev/null | grep ':514')
 if [ -z "$TEL02_OUT" ]; then
-  skip "TEL-02: Port 514 not yet bound — deploy stack first (Plan 02). If rsyslog holds port 514: sudo systemctl stop rsyslog && sudo systemctl disable rsyslog"
+  fail "TEL-02: Port 514 not bound — no syslog receiver is running. Deploy stack and ensure rsyslog is enabled with /etc/rsyslog.d/10-ipfire-remote.conf"
 elif echo "$TEL02_OUT" | grep -q "rsyslog"; then
-  fail "TEL-02: rsyslog is holding UDP 514. Run: sudo systemctl stop rsyslog && sudo systemctl disable rsyslog, then restart Alloy container"
+  # Architecture: rsyslog receives UDP syslog → writes /var/log/ipfire/syslog.log → Alloy tails file
+  if [ -f /etc/rsyslog.d/10-ipfire-remote.conf ]; then
+    pass "TEL-02: rsyslog is receiving UDP 514 with IPFire remote config — Alloy tails /var/log/ipfire/syslog.log"
+  else
+    fail "TEL-02: rsyslog is holding UDP 514 but /etc/rsyslog.d/10-ipfire-remote.conf is missing. Deploy config: cp /opt/telemetry/rsyslog/ipfire-remote.conf /etc/rsyslog.d/10-ipfire-remote.conf && systemctl restart rsyslog"
+  fi
 else
-  pass "TEL-02: UDP 514 is bound by docker-proxy/alloy — stack is up and receiving syslog"
+  pass "TEL-02: UDP 514 is bound — syslog receiver is active"
   echo "        Binding: $(echo "$TEL02_OUT" | head -1)"
 fi
 echo ""
@@ -80,16 +85,17 @@ echo ""
 echo "[TEL-04] Alloy receiving syslog and Loki has entries"
 
 TEL04_RESULT=$(curl -s -G 'http://localhost:3100/loki/api/v1/query' \
-  --data-urlencode 'query={job="ipfire-syslog"}' \
-  --data-urlencode 'limit=1' 2>/dev/null)
+  --data-urlencode 'query=count_over_time({job="ipfire-syslog"}[5m])' 2>/dev/null)
 TEL04_EXIT=$?
 
 if [ $TEL04_EXIT -ne 0 ] || echo "$TEL04_RESULT" | grep -q "connection refused"; then
   fail "TEL-04: Cannot reach Loki at http://localhost:3100 — check TEL-03 first"
-elif echo "$TEL04_RESULT" | grep -q '"resultType"'; then
-  pass "TEL-04: Loki is queryable and knows the ipfire-syslog stream"
+elif echo "$TEL04_RESULT" | grep -q '"result":\[\]'; then
+  skip "TEL-04: No syslog entries in Loki yet — configure IPFire syslog forwarding (Plan 02 runbook Section 5) and wait 60 seconds for first events"
+elif echo "$TEL04_RESULT" | grep -q '"result"'; then
+  pass "TEL-04: Loki has ipfire-syslog entries"
 else
-  skip "TEL-04: No syslog entries in Loki yet — configure IPFire syslog forwarding (Plan 02 runbook Section 2) and wait 60 seconds for first events"
+  skip "TEL-04: Unexpected Loki response — check Loki health with TEL-05"
 fi
 echo ""
 
