@@ -10,7 +10,7 @@ Seven phases build a hardened, reproducible IPFire firewall appliance from the h
 - [ ] **Phase 2: Core Network Services** - DHCP, DNS with DNSSEC and DoT, and NTP serving all zones
 - [ ] **Phase 3: SSH Hardening and Management Security** - Key-only SSH, IP allowlist, Guardian brute-force protection, WUI access locked down
 - [ ] **Phase 4: Suricata IDS/IPS** - IPS running in monitor-then-active mode, EVE JSON confirming alert output, N100-tuned memcap
-- [ ] **Phase 5: Telemetry Pipeline and Dashboards** - Off-box Docker stack receiving logs, Loki storing data, Grafana dashboards showing firewall drops and IDS alerts
+- [x] **Phase 5: Telemetry Pipeline and Dashboards** - Off-box Docker stack receiving logs, Loki storing data, Grafana dashboards showing firewall drops and IDS alerts (completed 2026-03-25)
 - [ ] **Phase 6: System Hardening and Validation Suite** - Unused services disabled, hardening applied, full scripted validation suite passing on clean reboot
 - [ ] **Phase 7: Reproducibility and Disaster Recovery** - All configs in git, rebuild script verified on fresh IPFire install, rollback procedures and decision log complete
 
@@ -97,7 +97,7 @@ Plans:
 - [x] 05-01-PLAN.md — Docker Compose stack files, Alloy config, Loki config, Grafana provisioning, rsync-eve.sh, validate-phase5.sh
 - [x] 05-02-PLAN.md — Telemetry deployment runbook + human checkpoint: deploy stack, configure IPFire syslog, verify syslog path live (112,769 entries in Loki confirmed)
 - [x] 05-03-PLAN.md — Human checkpoint: EVE JSON rsync path — SSH key setup, cron install, verify EVE entries in Loki
-- [ ] 05-04-PLAN.md — Dashboard import (22247 + custom ipfire-firewall), human verification of threat-trace panels, final validate-phase5.sh
+- [x] 05-04-PLAN.md — Dashboard import (22247 + custom ipfire-firewall), human verification of threat-trace panels, final validate-phase5.sh
 
 ### Phase 6: System Hardening and Validation Suite
 **Goal**: All unnecessary services are disabled, IPFire hardening recommendations are applied, and a scripted validation suite produces a pass/fail report covering every capability from NIC binding through telemetry ingestion
@@ -132,6 +132,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 2. Core Network Services | 2/3 | In Progress|  |
 | 3. SSH Hardening and Management Security | 1/2 | In Progress|  |
 | 4. Suricata IDS/IPS | 1/2 | In Progress|  |
-| 5. Telemetry Pipeline and Dashboards | 3/4 | In Progress|  |
+| 5. Telemetry Pipeline and Dashboards | 4/4 | Complete   | 2026-03-25 |
 | 6. System Hardening and Validation Suite | 0/TBD | Not started | - |
 | 7. Reproducibility and Disaster Recovery | 0/TBD | Not started | - |

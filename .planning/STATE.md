@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 05-03-PLAN.md — EVE JSON pipeline live, DASH-04 PASS, advancing to Plan 04
-last_updated: "2026-03-25T10:11:28.431Z"
+stopped_at: Completed 05-04-PLAN.md — dashboards deployed, validate-phase5.sh 10 PASS 0 FAIL, Phase 5 complete
+last_updated: "2026-03-25T10:29:13.116Z"
 progress:
   total_phases: 7
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 15
-  completed_plans: 10
+  completed_plans: 11
 ---
 
 # Project State
@@ -56,6 +56,7 @@ Plan: 4 of 4
 | Phase 05-telemetry-pipeline-and-dashboards P01 | 10 | 2 tasks | 8 files |
 | Phase 05 P02 | 120 | 2 tasks | 2 files |
 | Phase 05-telemetry-pipeline-and-dashboards P03 | 150 | 1 tasks | 5 files |
+| Phase 05 P04 | 6 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,8 @@ Recent decisions affecting current work:
 - [Phase 05-telemetry-pipeline-and-dashboards]: Plain scp key (no rsync command= restriction) for EVE pull: IPFire lacks rsync binary, rsync-eve.sh uses scp — command= restriction designed for rsync --server would break scp transport
 - [Phase 05-telemetry-pipeline-and-dashboards]: Suricata anomaly logger: Suricata 8.0.3 crashes with duplicate anomaly in both file and reporter socket eve-log blocks — disable anomaly in reporter socket block only
 - [Phase 05-telemetry-pipeline-and-dashboards]: validate-phase5.sh TEL-03 requires sudo docker compose: opsadmin cannot run docker without sudo on supportTAK-server
+- [Phase 05]: suricata-22247.json is a placeholder: Grafana Labs API unavailable at execution time; dashboard 22247 must be imported manually from https://grafana.com/grafana/dashboards/22247-suricata-logs-json/ for full IDS severity panels; DASH-03 validate check passes with placeholder (title present in Grafana)
+- [Phase 05]: validate-phase5.sh requires GF_SECURITY_ADMIN_PASSWORD exported in shell for TEL-06 and DASH-03 checks; source /opt/telemetry/.env or export GF_SECURITY_ADMIN_PASSWORD=changeme before running
 
 ### Pending Todos
 
@@ -112,6 +115,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-25T10:11:28.425Z
-Stopped at: Completed 05-03-PLAN.md — EVE JSON pipeline live, DASH-04 PASS, advancing to Plan 04
+Last session: 2026-03-25T10:29:13.111Z
+Stopped at: Completed 05-04-PLAN.md — dashboards deployed, validate-phase5.sh 10 PASS 0 FAIL, Phase 5 complete
 Resume file: None

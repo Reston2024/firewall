@@ -74,10 +74,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Threat-Tracing Dashboard
 
-- [ ] **DASH-01**: End-to-end threat trace: source IP → IDS alert → firewall action visible in single pane
-- [ ] **DASH-02**: Time-series visualization of firewall drop events
-- [ ] **DASH-03**: IPS alert severity breakdown dashboard
-- [ ] **DASH-04**: Top blocked IPs / top triggered rules views
+- [x] **DASH-01**: End-to-end threat trace: source IP → IDS alert → firewall action visible in single pane
+- [x] **DASH-02**: Time-series visualization of firewall drop events
+- [x] **DASH-03**: IPS alert severity breakdown dashboard
+- [x] **DASH-04**: Top blocked IPs / top triggered rules views
 
 ### Reproducibility
 
@@ -192,10 +192,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TEL-06 | Phase 5 | Complete |
 | TEL-07 | Phase 5 | Complete |
 | TEL-08 | Phase 5 | Complete |
-| DASH-01 | Phase 5 | Pending |
-| DASH-02 | Phase 5 | Pending |
-| DASH-03 | Phase 5 | Pending |
-| DASH-04 | Phase 5 | Pending |
+| DASH-01 | Phase 5 | Complete |
+| DASH-02 | Phase 5 | Complete |
+| DASH-03 | Phase 5 | Complete |
+| DASH-04 | Phase 5 | Complete |
 | REPO-01 | Phase 7 | Pending |
 | REPO-02 | Phase 7 | Pending |
 | REPO-03 | Phase 7 | Pending |
