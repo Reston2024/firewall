@@ -108,7 +108,13 @@ Plans:
   2. No unnecessary services are running (`ss -tlnp` and Pakfire shows only expected services); audit logging captures configuration changes
   3. Kernel hardening parameters are active (`sysctl -a` shows IP source routing disabled, ICMP redirects disabled, and other hardened values)
   4. The IPFire WUI HTTPS certificate is documented and the backup include list covers all custom configs including udev rules, `firewall.local`, and Suricata customizations
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — Sysctl hardening config, integrity baseline script, reboot snapshot script, WUI cert docs, Pakfire manifest, backup include list
+- [ ] 06-02-PLAN.md — validate-phase6.sh (hardening checks) and validate-all.sh (unified orchestrator)
+- [ ] 06-03-PLAN.md — Hardening deployment runbook + human checkpoint: deploy to IPFire, verify, capture pre-reboot snapshot
+- [ ] 06-04-PLAN.md — Human checkpoint: reboot persistence test + full validate-all.sh acceptance run
 
 ### Phase 7: Reproducibility and Disaster Recovery
 **Goal**: Every configuration artifact lives in the git repo, a rebuild script applies the full configuration idempotently to a fresh IPFire install, and rollback procedures exist for every change category
@@ -133,5 +139,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 3. SSH Hardening and Management Security | 1/2 | In Progress|  |
 | 4. Suricata IDS/IPS | 1/2 | In Progress|  |
 | 5. Telemetry Pipeline and Dashboards | 4/4 | Complete   | 2026-03-25 |
-| 6. System Hardening and Validation Suite | 0/TBD | Not started | - |
+| 6. System Hardening and Validation Suite | 0/4 | Not started | - |
 | 7. Reproducibility and Disaster Recovery | 0/TBD | Not started | - |
