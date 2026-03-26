@@ -151,9 +151,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — Export live suricata.yaml and syslog.conf from IPFire, add forward.conf to backup-include.user
+- [x] 08-01-PLAN.md — Export live suricata.yaml and syslog.conf from IPFire, add forward.conf to backup-include.user
 - [x] 08-02-PLAN.md — Fix validate-all.sh .env path, remove ethernet/settings from check-drift.sh, correct runbook Section 2
-- [ ] 08-03-PLAN.md — Redeploy to IPFire, regenerate file manifest, run validate-all.sh acceptance test
+- [x] 08-03-PLAN.md — Redeploy to IPFire, regenerate file manifest, run validate-all.sh acceptance test
 
 ## Progress
 
