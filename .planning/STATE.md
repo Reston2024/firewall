@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 07-04-PLAN.md
-last_updated: "2026-03-26T06:22:19.490Z"
+stopped_at: Completed 08-02-PLAN.md
+last_updated: "2026-03-26T07:58:28.795Z"
 progress:
-  total_phases: 7
+  total_phases: 8
   completed_phases: 3
-  total_plans: 24
-  completed_plans: 20
+  total_plans: 27
+  completed_plans: 21
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** A secure, observable network perimeter that can be rebuilt from scratch in minutes
-**Current focus:** Phase 07 — reproducibility-and-disaster-recovery
+**Current focus:** Phase 08 — milestone-gap-closure
 
 ## Current Position
 
-Phase: 07
-Plan: Not started
+Phase: 08 (milestone-gap-closure) — EXECUTING
+Plan: 2 of 3
 
 ## Performance Metrics
 
@@ -63,6 +63,7 @@ Plan: Not started
 | Phase 07 P02 | 3 | 2 tasks | 8 files |
 | Phase 07 P03 | 3 | 2 tasks | 9 files |
 | Phase 07 P04 | 4 | 2 tasks | 7 files |
+| Phase 08 P02 | 3 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -121,6 +122,9 @@ Recent decisions affecting current work:
 - [Phase 07]: SSH and Guardian excluded from script-based rollback — both WUI-managed; direct file edits risk being overwritten by sshctrl
 - [Phase 07]: deploy-phase3.sh is documentation-only: sshd_config.hardened is reference only — sshctrl binary owns sshd_config
 - [Phase 07]: rebuild.sh uses grep-before-append in deploy-phase6.sh for idempotent sysctl hardening — no duplicate params on re-run
+- [Phase 08-milestone-gap-closure]: INT-7A closed: validate-all.sh sourced double-path /opt/telemetry/telemetry/.env fixed to /opt/telemetry/.env — TEL-06 and DASH-03 checks now find GF_SECURITY_ADMIN_PASSWORD
+- [Phase 08-milestone-gap-closure]: INT-4A closed: /var/ipfire/ethernet/settings removed from check-drift.sh MANAGED_FILES per D-21 — WUI-managed file excluded to prevent false-positive drift
+- [Phase 08-milestone-gap-closure]: INT-2A closed: telemetry runbook Section 2 rewritten — rsyslog is required relay (receives UDP 514, writes to file, Alloy tails); old instruction to disable rsyslog was incorrect for deployed architecture
 
 ### Pending Todos
 
@@ -135,6 +139,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-26T06:14:52.790Z
-Stopped at: Completed 07-04-PLAN.md
+Last session: 2026-03-26T07:58:28.791Z
+Stopped at: Completed 08-02-PLAN.md
 Resume file: None

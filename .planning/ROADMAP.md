@@ -152,7 +152,7 @@ Plans:
 
 Plans:
 - [ ] 08-01-PLAN.md — Export live suricata.yaml and syslog.conf from IPFire, add forward.conf to backup-include.user
-- [ ] 08-02-PLAN.md — Fix validate-all.sh .env path, remove ethernet/settings from check-drift.sh, correct runbook Section 2
+- [x] 08-02-PLAN.md — Fix validate-all.sh .env path, remove ethernet/settings from check-drift.sh, correct runbook Section 2
 - [ ] 08-03-PLAN.md — Redeploy to IPFire, regenerate file manifest, run validate-all.sh acceptance test
 
 ## Progress
@@ -169,4 +169,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 5. Telemetry Pipeline and Dashboards | 4/4 | Complete   | 2026-03-25 |
 | 6. System Hardening and Validation Suite | 3/4 | In Progress|  |
 | 7. Reproducibility and Disaster Recovery | 4/5 | In Progress|  |
-| 8. Milestone Gap Closure | 0/3 | Not started | - |
+| 8. Milestone Gap Closure | 1/3 | In Progress|  |
