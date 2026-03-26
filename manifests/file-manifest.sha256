@@ -4,7 +4,7 @@
 # Do NOT hash files on the dev machine.
 9ac36361708a9948de5054ffae8b8d6efd89dc26b87e88c664e6730cc1c4ad83  /etc/udev/rules.d/30-persistent-network.rules
 749f8b693787ab1f5cf60f5b02d5d2a8df7269eac46a9679e5d7878fba877d2d  /etc/sysconfig/firewall.local
-afebcb93d2b172b25c02b6b8cafc76254969a43ddd68c73516b37383bb0e07f9  /var/ipfire/backup/include.user
+56eabdf49ec45f34c2ded53ae81849ae6a8fb919ac6f2c496f2cd89ab2a9c737  /var/ipfire/backup/include.user
 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /var/ipfire/dhcp/dhcpd.conf.local
 3b0528d15082b4f96cdf11d6a1cb6ea2a43929d30486a51d29be9ac7ed13d73a  /etc/unbound/forward.conf
 dacb9bcd5af39152c07c3bbf161a8fe4f24ad1fdc76a55ef1be9b63ed68a36d2  /etc/ssh/sshd_config
@@ -13,4 +13,3 @@ dacb9bcd5af39152c07c3bbf161a8fe4f24ad1fdc76a55ef1be9b63ed68a36d2  /etc/ssh/sshd_
 d48b5b75bf648dec033719ccc5a6dc518e5233de9dfade43894f9a02a23bacf6  /etc/sysctl.conf
 a3a03c40ad592268cca4af8b09fa6148cbd9c9fa71e3d87cd165beb971959ae0  /root/integrity-baseline.sha256
 d33712906671f80ddb7de31822d3903b7b0415ad9f65636b0798cebf67ac75e1  /root/firewall-repo/manifests/pakfire-manifest.txt
-95eb27a9564f147f8eae3d5c436ff4ce19677ae0bacd2ab61e5203679e97053d  /var/ipfire/ethernet/settings
