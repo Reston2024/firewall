@@ -13,6 +13,7 @@ Seven phases build a hardened, reproducible IPFire firewall appliance from the h
 - [x] **Phase 5: Telemetry Pipeline and Dashboards** - Off-box Docker stack receiving logs, Loki storing data, Grafana dashboards showing firewall drops and IDS alerts (completed 2026-03-25)
 - [ ] **Phase 6: System Hardening and Validation Suite** - Unused services disabled, hardening applied, full scripted validation suite passing on clean reboot
 - [ ] **Phase 7: Reproducibility and Disaster Recovery** - All configs in git, rebuild script verified on fresh IPFire install, rollback procedures and decision log complete
+- [ ] **Phase 8: Milestone Gap Closure** - Export missing live configs, fix script wiring, update backup coverage, correct documentation
 
 ## Phase Details
 
@@ -134,6 +135,21 @@ Plans:
 - [x] 07-04-PLAN.md — Rebuild script (rebuild.sh) and 6 per-phase deploy scripts
 - [x] 07-05-PLAN.md — Human checkpoint: deploy to IPFire, generate live manifest, verify rebuild, acceptance test
 
+### Phase 8: Milestone Gap Closure
+**Goal**: Close all integration gaps and tech debt identified by milestone audit — export missing live configs to repo, fix script wiring defects, update backup coverage, and correct documentation errors
+**Depends on**: Phase 7
+**Requirements**: IDS-05, REPO-02, TEL-01, TEL-06, DASH-03, SVC-04, PLAT-05, VAL-11
+**Gap Closure**: Closes gaps INT-1A, INT-ORF-1, INT-7A, INT-6A, INT-2A, INT-4A, FLOW-DR-SURICATA, FLOW-DR-SYSLOG from v1.0 audit
+**Success Criteria** (what must be TRUE):
+  1. configs/suricata/suricata.yaml exists in repo with live N100-tuned config (not reference YAML)
+  2. configs/syslog.conf exists in repo with syslog forwarding to 192.168.1.101:514
+  3. validate-all.sh sources correct .env path (/opt/telemetry/.env, not double-telemetry)
+  4. backup-include.user contains /etc/unbound/forward.conf
+  5. check-drift.sh does not include WUI-managed /var/ipfire/ethernet/settings
+  6. Telemetry runbook Section 2 rsyslog instruction corrected
+  7. Re-audit passes with 0 HIGH/MEDIUM gaps
+**Plans**: TBD
+
 ## Progress
 
 **Execution Order:**
@@ -148,3 +164,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 5. Telemetry Pipeline and Dashboards | 4/4 | Complete   | 2026-03-25 |
 | 6. System Hardening and Validation Suite | 3/4 | In Progress|  |
 | 7. Reproducibility and Disaster Recovery | 4/5 | In Progress|  |
+| 8. Milestone Gap Closure | 0/TBD | Not started | - |
