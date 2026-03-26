@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Checkpoint reached at 06-03 Task 2 — awaiting human hardening deployment on IPFire
-last_updated: "2026-03-26T04:51:20.522Z"
+stopped_at: Completed 07-02-PLAN.md
+last_updated: "2026-03-26T06:07:44.870Z"
 progress:
   total_phases: 7
   completed_phases: 2
-  total_plans: 19
-  completed_plans: 15
+  total_plans: 24
+  completed_plans: 18
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** A secure, observable network perimeter that can be rebuilt from scratch in minutes
-**Current focus:** Phase 06 — system-hardening-and-validation-suite
+**Current focus:** Phase 07 — reproducibility-and-disaster-recovery
 
 ## Current Position
 
-Phase: 7
-Plan: Not started
+Phase: 07 (reproducibility-and-disaster-recovery) — EXECUTING
+Plan: 4 of 5
 
 ## Performance Metrics
 
@@ -59,6 +59,9 @@ Plan: Not started
 | Phase 05 P04 | 6 | 2 tasks | 2 files |
 | Phase 06 P01 | 523942 | 2 tasks | 6 files |
 | Phase 06 P02 | 5 | 2 tasks | 2 files |
+| Phase 07 P01 | 7 | 2 tasks | 3 files |
+| Phase 07 P02 | 3 | 2 tasks | 8 files |
+| Phase 07 P03 | 3 | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -108,6 +111,13 @@ Recent decisions affecting current work:
 - [Phase 06-system-hardening-and-validation-suite]: Pakfire manifest lists only guardian — Suricata is bundled in IPFire core (not a Pakfire add-on) since CU131
 - [Phase 06]: validate-phase6.sh HARD-03 maps check-integrity.sh exit 2 to skip() — mismatch may be intentional after Core Update
 - [Phase 06]: validate-all.sh Phase 5 SSH failure is SKIP not FAIL — supportTAK-server is optional off-box infrastructure
+- [Phase 07-reproducibility-and-disaster-recovery]: check-drift.sh manages ALL 12 managed files; check-integrity.sh monitors 8 critical files with on-box baseline — distinct tools for distinct purposes (D-15)
+- [Phase 07-reproducibility-and-disaster-recovery]: WUI-managed files excluded from drift manifest to prevent false-positive drift; backup-include.user updated to 8 entries adding /etc/suricata/suricata.yaml (D-21, D-22)
+- [Phase 07]: ADRs 0005-0012 are retrospective captures (D-17) — all status Accepted, dating 2026-03-25
+- [Phase 07]: 12 total ADRs in decisions/ meets D-19 minimum; git-rebuild HA strategy targets 15-minute RTO
+- [Phase 07]: Zone rollback warns about reboot requirement but does not auto-reboot — user must initiate reboot manually
+- [Phase 07]: Sysctl rollback checks ip_forward value after sysctl -p and exits 1 if 0 (WAN routing would be broken)
+- [Phase 07]: SSH and Guardian excluded from script-based rollback — both WUI-managed; direct file edits risk being overwritten by sshctrl
 
 ### Pending Todos
 
@@ -122,6 +132,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-25T18:32:17.397Z
-Stopped at: Checkpoint reached at 06-03 Task 2 — awaiting human hardening deployment on IPFire
+Last session: 2026-03-26T06:07:37.219Z
+Stopped at: Completed 07-02-PLAN.md
 Resume file: None

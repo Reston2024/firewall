@@ -81,12 +81,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Reproducibility
 
-- [ ] **REPO-01**: All IPFire configs exported to /configs in git repo
+- [x] **REPO-01**: All IPFire configs exported to /configs in git repo
 - [ ] **REPO-02**: Rebuild script that restores a fresh IPFire install from repo
 - [ ] **REPO-03**: Pakfire add-on manifest (list of installed packages)
-- [ ] **REPO-04**: Full file manifest with sizes for drift detection
+- [x] **REPO-04**: Full file manifest with sizes for drift detection
 - [ ] **REPO-05**: Rollback procedures documented per change category (firewall, IDS, DNS, DHCP, zone)
-- [ ] **REPO-06**: Decision log initialized with all architectural choices from project setup
+- [x] **REPO-06**: Decision log initialized with all architectural choices from project setup
 
 ### Validation
 
@@ -196,12 +196,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DASH-02 | Phase 5 | Complete |
 | DASH-03 | Phase 5 | Complete |
 | DASH-04 | Phase 5 | Complete |
-| REPO-01 | Phase 7 | Pending |
+| REPO-01 | Phase 7 | Complete |
 | REPO-02 | Phase 7 | Pending |
 | REPO-03 | Phase 7 | Pending |
-| REPO-04 | Phase 7 | Pending |
+| REPO-04 | Phase 7 | Complete |
 | REPO-05 | Phase 7 | Pending |
-| REPO-06 | Phase 7 | Pending |
+| REPO-06 | Phase 7 | Complete |
 | VAL-01 | Phase 6 | Complete |
 | VAL-02 | Phase 6 | Complete |
 | VAL-03 | Phase 6 | Complete |
