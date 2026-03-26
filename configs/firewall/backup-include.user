@@ -16,6 +16,9 @@
 /etc/udev/rules.d/30-persistent-network.rules
 /etc/sysconfig/firewall.local
 
+# Phase 4 additions — Suricata IDS/IPS configs
+/etc/suricata/suricata.yaml
+
 # Phase 6 additions — system hardening and validation artifacts
 /etc/sysctl.conf
 /etc/syslog.conf
