@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 07-03-PLAN.md
-last_updated: "2026-03-26T06:07:48.566Z"
+stopped_at: Completed 07-04-PLAN.md
+last_updated: "2026-03-26T06:14:52.796Z"
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 24
-  completed_plans: 18
+  completed_plans: 19
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 ## Current Position
 
 Phase: 07 (reproducibility-and-disaster-recovery) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 
 ## Performance Metrics
 
@@ -62,6 +62,7 @@ Plan: 4 of 5
 | Phase 07 P01 | 7 | 2 tasks | 3 files |
 | Phase 07 P02 | 3 | 2 tasks | 8 files |
 | Phase 07 P03 | 3 | 2 tasks | 9 files |
+| Phase 07 P04 | 4 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -118,6 +119,8 @@ Recent decisions affecting current work:
 - [Phase 07]: Zone rollback warns about reboot requirement but does not auto-reboot — user must initiate reboot manually
 - [Phase 07]: Sysctl rollback checks ip_forward value after sysctl -p and exits 1 if 0 (WAN routing would be broken)
 - [Phase 07]: SSH and Guardian excluded from script-based rollback — both WUI-managed; direct file edits risk being overwritten by sshctrl
+- [Phase 07]: deploy-phase3.sh is documentation-only: sshd_config.hardened is reference only — sshctrl binary owns sshd_config
+- [Phase 07]: rebuild.sh uses grep-before-append in deploy-phase6.sh for idempotent sysctl hardening — no duplicate params on re-run
 
 ### Pending Todos
 
@@ -132,6 +135,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-26T06:07:48.560Z
-Stopped at: Completed 07-03-PLAN.md
+Last session: 2026-03-26T06:14:52.790Z
+Stopped at: Completed 07-04-PLAN.md
 Resume file: None

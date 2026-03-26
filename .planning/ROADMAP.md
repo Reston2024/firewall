@@ -131,7 +131,7 @@ Plans:
 - [x] 07-01-PLAN.md — Drift detection script (check-drift.sh), file manifest, backup-include.user sync
 - [x] 07-02-PLAN.md — Decision log: 8 new ADRs capturing all architectural choices (ADR-0005 through ADR-0012)
 - [x] 07-03-PLAN.md — Rollback scripts (7 categories) and rollback/README.md procedures
-- [ ] 07-04-PLAN.md — Rebuild script (rebuild.sh) and 6 per-phase deploy scripts
+- [x] 07-04-PLAN.md — Rebuild script (rebuild.sh) and 6 per-phase deploy scripts
 - [ ] 07-05-PLAN.md — Human checkpoint: deploy to IPFire, generate live manifest, verify rebuild, acceptance test
 
 ## Progress
@@ -147,4 +147,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 4. Suricata IDS/IPS | 1/2 | In Progress|  |
 | 5. Telemetry Pipeline and Dashboards | 4/4 | Complete   | 2026-03-25 |
 | 6. System Hardening and Validation Suite | 3/4 | In Progress|  |
-| 7. Reproducibility and Disaster Recovery | 3/5 | In Progress|  |
+| 7. Reproducibility and Disaster Recovery | 4/5 | In Progress|  |
