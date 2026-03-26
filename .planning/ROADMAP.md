@@ -125,7 +125,14 @@ Plans:
   2. The repo contains a complete Pakfire add-on manifest and a full file manifest with checksums; a diff between the manifest and a live system detects any drift
   3. Rollback procedures exist for every change category (firewall rules, IPS rules, DNS config, DHCP leases, zone config) and each procedure has been tested
   4. The decision log (ADR format) is committed to the repo with entries covering all architectural choices documented in PROJECT.md Key Decisions
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+- [ ] 07-01-PLAN.md — Drift detection script (check-drift.sh), file manifest, backup-include.user sync
+- [ ] 07-02-PLAN.md — Decision log: 8 new ADRs capturing all architectural choices (ADR-0005 through ADR-0012)
+- [ ] 07-03-PLAN.md — Rollback scripts (7 categories) and rollback/README.md procedures
+- [ ] 07-04-PLAN.md — Rebuild script (rebuild.sh) and 6 per-phase deploy scripts
+- [ ] 07-05-PLAN.md — Human checkpoint: deploy to IPFire, generate live manifest, verify rebuild, acceptance test
 
 ## Progress
 
@@ -140,4 +147,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 4. Suricata IDS/IPS | 1/2 | In Progress|  |
 | 5. Telemetry Pipeline and Dashboards | 4/4 | Complete   | 2026-03-25 |
 | 6. System Hardening and Validation Suite | 3/4 | In Progress|  |
-| 7. Reproducibility and Disaster Recovery | 0/TBD | Not started | - |
+| 7. Reproducibility and Disaster Recovery | 0/5 | Not started | - |
