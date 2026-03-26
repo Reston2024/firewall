@@ -85,7 +85,7 @@ run_phase5_remote() {
   # Phase 5 requires sourcing .env for Grafana credentials then sudo -E bash
   ssh -o ConnectTimeout=15 -o BatchMode=yes \
     "$SUPPORTTAK_HOST" \
-    "source /opt/telemetry/telemetry/.env && sudo -E bash /opt/telemetry/scripts/validate-phase5.sh"
+    "source /opt/telemetry/.env && sudo -E bash /opt/telemetry/scripts/validate-phase5.sh"
   local EXIT_CODE=$?
 
   if [ "$EXIT_CODE" -eq 0 ]; then

@@ -35,8 +35,6 @@ MANAGED_FILES=(
   /root/integrity-baseline.sha256
   # Pakfire manifest (Phase 6)
   /root/firewall-repo/manifests/pakfire-manifest.txt
-  # IPFire ethernet settings (WUI-managed but tracked in integrity baseline)
-  /var/ipfire/ethernet/settings
 )
 
 PASS=0
