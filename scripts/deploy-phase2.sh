@@ -39,8 +39,8 @@ fi
 # --- DNS forward.conf ---
 if [ -f "$REPO/configs/dns/forward.conf" ]; then
   backup_and_copy "$REPO/configs/dns/forward.conf" \
-    "/var/ipfire/dns/forward.conf" "dns"
-  pass "DNS forward.conf deployed: /var/ipfire/dns/forward.conf"
+    "/etc/unbound/forward.conf" "dns"
+  pass "DNS forward.conf deployed: /etc/unbound/forward.conf"
 else
   fail "forward.conf not found: $REPO/configs/dns/forward.conf"
 fi

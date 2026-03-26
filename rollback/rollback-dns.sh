@@ -7,7 +7,7 @@
 # Per D-10: full category granularity
 
 ROLLBACK_DIR="/root/rollback"
-CONFIG_FILE="/var/ipfire/dns/forward.conf"
+CONFIG_FILE="/etc/unbound/forward.conf"
 CATEGORY="dns"
 BACKUP_FILE="$1"
 

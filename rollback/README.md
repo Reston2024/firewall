@@ -88,7 +88,7 @@ suricata --build-info | head -1
 
 ### 3. DNS Config
 
-**What it covers:** `/var/ipfire/dns/forward.conf`
+**What it covers:** `/etc/unbound/forward.conf`
 
 **Backup location:** `/root/rollback/dns-YYYYMMDD-HHMMSS.bak`
 
@@ -107,7 +107,7 @@ bash /root/firewall-repo/rollback/rollback-dns.sh /root/rollback/dns-YYYYMMDD-HH
 ls -lt /root/rollback/dns-*.bak
 
 # Step 2: Restore the config
-cp /root/rollback/dns-YYYYMMDD-HHMMSS.bak /var/ipfire/dns/forward.conf
+cp /root/rollback/dns-YYYYMMDD-HHMMSS.bak /etc/unbound/forward.conf
 
 # Step 3: Restart Unbound
 /etc/init.d/unbound restart
@@ -285,7 +285,7 @@ Guardian config is WUI-managed (`/var/ipfire/guardian/guardian.conf`). To rollba
 |----------|-------------|----------------|--------|
 | Firewall | /etc/sysconfig/firewall.local | `/etc/init.d/firewall restart` | `iptables -L CUSTOMINPUT -n` |
 | Suricata | /etc/suricata/suricata.yaml | `/etc/init.d/suricata restart` | `suricata --build-info \| head -1` |
-| DNS | /var/ipfire/dns/forward.conf | `/etc/init.d/unbound restart` | `dig +short example.com @127.0.0.1` |
+| DNS | /etc/unbound/forward.conf | `/etc/init.d/unbound restart` | `dig +short example.com @127.0.0.1` |
 | DHCP | /var/ipfire/dhcp/dhcpd.conf.local | `/etc/init.d/dhcpd restart` | `/etc/init.d/dhcpd status` |
 | Zone/NIC | /etc/udev/rules.d/30-persistent-network.rules | `reboot` | `ip link show` |
 | Sysctl | /etc/sysctl.conf | `sysctl -p` | `sysctl net.ipv4.ip_forward` |
