@@ -132,7 +132,7 @@ Plans:
 - [x] 07-02-PLAN.md — Decision log: 8 new ADRs capturing all architectural choices (ADR-0005 through ADR-0012)
 - [x] 07-03-PLAN.md — Rollback scripts (7 categories) and rollback/README.md procedures
 - [x] 07-04-PLAN.md — Rebuild script (rebuild.sh) and 6 per-phase deploy scripts
-- [ ] 07-05-PLAN.md — Human checkpoint: deploy to IPFire, generate live manifest, verify rebuild, acceptance test
+- [x] 07-05-PLAN.md — Human checkpoint: deploy to IPFire, generate live manifest, verify rebuild, acceptance test
 
 ## Progress
 
