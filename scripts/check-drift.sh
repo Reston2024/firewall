@@ -22,7 +22,7 @@ MANAGED_FILES=(
   /var/ipfire/backup/include.user
   # Phase 2: Core Network Services (repo-deployed configs only)
   /var/ipfire/dhcp/dhcpd.conf.local
-  /var/ipfire/dns/forward.conf
+  /etc/unbound/forward.conf
   # Phase 3: SSH (reference only — sshctrl manages live file)
   /etc/ssh/sshd_config
   # Phase 4: Suricata IDS/IPS
