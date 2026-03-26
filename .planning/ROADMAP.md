@@ -6,14 +6,14 @@ Seven phases build a hardened, reproducible IPFire firewall appliance from the h
 
 ## Phases
 
-- [ ] **Phase 1: Platform Foundation and Firewall** - All 6 NICs persistently mapped, anti-lockout in place, stateful firewall with NAT and zone policies operational
-- [ ] **Phase 2: Core Network Services** - DHCP, DNS with DNSSEC and DoT, and NTP serving all zones
-- [ ] **Phase 3: SSH Hardening and Management Security** - Key-only SSH, IP allowlist, Guardian brute-force protection, WUI access locked down
-- [ ] **Phase 4: Suricata IDS/IPS** - IPS running in monitor-then-active mode, EVE JSON confirming alert output, N100-tuned memcap
+- [x] **Phase 1: Platform Foundation and Firewall** - All 6 NICs persistently mapped, anti-lockout in place, stateful firewall with NAT and zone policies operational (completed 2026-03-26)
+- [x] **Phase 2: Core Network Services** - DHCP, DNS with DNSSEC and DoT, and NTP serving all zones (completed 2026-03-26)
+- [x] **Phase 3: SSH Hardening and Management Security** - Key-only SSH, IP allowlist, Guardian brute-force protection, WUI access locked down (completed 2026-03-26)
+- [x] **Phase 4: Suricata IDS/IPS** - IPS running in monitor-then-active mode, EVE JSON confirming alert output, N100-tuned memcap (completed 2026-03-26)
 - [x] **Phase 5: Telemetry Pipeline and Dashboards** - Off-box Docker stack receiving logs, Loki storing data, Grafana dashboards showing firewall drops and IDS alerts (completed 2026-03-25)
-- [ ] **Phase 6: System Hardening and Validation Suite** - Unused services disabled, hardening applied, full scripted validation suite passing on clean reboot
-- [ ] **Phase 7: Reproducibility and Disaster Recovery** - All configs in git, rebuild script verified on fresh IPFire install, rollback procedures and decision log complete
-- [ ] **Phase 8: Milestone Gap Closure** - Export missing live configs, fix script wiring, update backup coverage, correct documentation
+- [x] **Phase 6: System Hardening and Validation Suite** - Unused services disabled, hardening applied, full scripted validation suite passing on clean reboot (completed 2026-03-26)
+- [x] **Phase 7: Reproducibility and Disaster Recovery** - All configs in git, rebuild script verified on fresh IPFire install, rollback procedures and decision log complete (completed 2026-03-26)
+- [x] **Phase 8: Milestone Gap Closure** - Export missing live configs, fix script wiring, update backup coverage, correct documentation (completed 2026-03-26)
 
 ## Phase Details
 
@@ -33,7 +33,7 @@ Plans:
 - [x] 01-01-PLAN.md — Repository structure, NIC map template, and validation scripts
 - [x] 01-02-PLAN.md — udev NIC persistence rules, ethernet/settings template, firewall.local, backup include list
 - [x] 01-03-PLAN.md — Zone policy runbook and firewall validation script
-- [ ] 01-04-PLAN.md — Human deployment checkpoint: NIC identification, hardware deploy, reboot persistence test, acceptance verification
+- [x] 01-04-PLAN.md — Human deployment checkpoint: NIC identification, hardware deploy, reboot persistence test, acceptance verification
 
 ### Phase 2: Core Network Services
 **Goal**: DHCP, DNS, and NTP are fully configured and serving all internal zones, with DNSSEC validation and DNS-over-TLS to upstream resolvers enforced from the start
@@ -49,7 +49,7 @@ Plans:
 Plans:
 - [x] 02-01-PLAN.md — validate-phase2.sh + DHCP config templates (dhcpd.conf.local, fixleases.template)
 - [x] 02-02-PLAN.md — DNS/NTP config reference templates + services deployment runbook
-- [ ] 02-03-PLAN.md — Human WUI deployment checkpoint + validation run + live config export to git
+- [x] 02-03-PLAN.md — Human WUI deployment checkpoint + validation run + live config export to git
 
 ### Phase 3: SSH Hardening and Management Security
 **Goal**: Remote management is locked down to key authentication from a whitelisted subnet, with Guardian blocking brute-force attempts before any Suricata IPS rules could interfere with management traffic
@@ -64,7 +64,7 @@ Plans:
 
 Plans:
 - [x] 03-01-PLAN.md — validate-phase3.sh, extended firewall.local, ssh-management-runbook.md
-- [ ] 03-02-PLAN.md — Human checkpoint: deploy SSH key, configure WUI, Guardian setup, export live configs
+- [x] 03-02-PLAN.md — Human checkpoint: deploy SSH key, configure WUI, Guardian setup, export live configs
 
 ### Phase 4: Suricata IDS/IPS
 **Goal**: Suricata is running inline on RED and GREEN in monitor-then-active mode with ET Community rulesets, N100-appropriate memcap limits, and EVE JSON output confirmed at `/var/log/suricata/eve.json`
@@ -80,7 +80,7 @@ Plans:
 
 Plans:
 - [x] 04-01-PLAN.md — validate-phase4.sh, check-suricata-integrity.sh, suricata-ids-runbook.md, config reference files
-- [ ] 04-02-PLAN.md — Human deployment checkpoint: WUI enable, memcap apply, EVE verify, sha256 baseline, export configs
+- [x] 04-02-PLAN.md — Human deployment checkpoint: WUI enable, memcap apply, EVE verify, sha256 baseline, export configs
 
 ### Phase 5: Telemetry Pipeline and Dashboards
 **Goal**: An off-box Docker Compose stack on a GREEN-zone monitoring host is ingesting IPFire firewall logs via UDP syslog and Suricata EVE JSON via file-read, storing data in Loki, and displaying threat-tracing dashboards in Grafana
@@ -162,11 +162,11 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Platform Foundation and Firewall | 3/4 | In Progress|  |
-| 2. Core Network Services | 2/3 | In Progress|  |
-| 3. SSH Hardening and Management Security | 1/2 | In Progress|  |
-| 4. Suricata IDS/IPS | 1/2 | In Progress|  |
+| 1. Platform Foundation and Firewall | 4/4 | Complete   | 2026-03-26 |
+| 2. Core Network Services | 3/3 | Complete   | 2026-03-26 |
+| 3. SSH Hardening and Management Security | 2/2 | Complete   | 2026-03-26 |
+| 4. Suricata IDS/IPS | 2/2 | Complete   | 2026-03-26 |
 | 5. Telemetry Pipeline and Dashboards | 4/4 | Complete   | 2026-03-25 |
-| 6. System Hardening and Validation Suite | 3/4 | In Progress|  |
-| 7. Reproducibility and Disaster Recovery | 4/5 | In Progress|  |
-| 8. Milestone Gap Closure | 1/3 | In Progress|  |
+| 6. System Hardening and Validation Suite | 4/4 | Complete   | 2026-03-26 |
+| 7. Reproducibility and Disaster Recovery | 5/5 | Complete   | 2026-03-26 |
+| 8. Milestone Gap Closure | 3/3 | Complete   | 2026-03-26 |

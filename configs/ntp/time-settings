@@ -1,0 +1,9 @@
+ENABLENTP=on
+ENABLESETONBOOT=on
+VALID=yes
+UPDATE_VALUE=1
+ENABLECLNTP=on
+NTP_ADDR_2=1.ipfire.pool.ntp.org
+UPDATE_METHOD=periodically
+NTP_ADDR_1=0.ipfire.pool.ntp.org
+UPDATE_PERIOD=daily
