@@ -13,7 +13,7 @@ Complete sections in ORDER — the sequence below is mandatory for safe deployme
 ## CRITICAL WARNINGS — Read Before Starting
 
 - **Deploy Docker Compose stack BEFORE configuring IPFire syslog forwarding** — Alloy must be listening on UDP port 514 before IPFire starts sending logs. If syslog arrives before Alloy is ready, those logs are lost.
-- **Verify UDP port 514 is NOT held by rsyslog before starting Alloy.** rsyslog binds port 514 by default on Ubuntu. If rsyslog holds 514, the Alloy container will fail to bind the port and syslog will be silently dropped (Section 2).
+- **Verify rsyslog is running and bound to UDP port 514 on supportTAK-server before starting the Alloy container. rsyslog acts as a relay (receives UDP, writes to file); Alloy tails the output file.**
 - **NEVER use `docker-compose` (v1 syntax)** — always use `docker compose` (v2 plugin, with a space) on supportTAK-server. The v1 binary is not installed on this host.
 - **Grafana admin password "changeme" is the default.** Change it on first login. If you change it, update the TEL-06 Grafana API check in validate-phase5.sh accordingly (the script uses HTTP Basic Auth with admin:changeme by default).
 - **EVE JSON path (rsync) is NOT configured in this runbook.** This runbook covers the syslog path (Path A) only. The rsync EVE JSON pipeline (Path B) is configured in Plan 03.
@@ -47,31 +47,27 @@ Expected: Docker 24+ and Docker Compose v2 plugin version lines.
 
 ---
 
-## Section 2: Check for rsyslog Conflict on supportTAK-server (Pre-Flight)
+## Section 2: Verify rsyslog Relay on supportTAK-server (Pre-Flight)
 
-**Purpose:** rsyslog on Ubuntu binds UDP port 514 by default. If rsyslog is running and holding port 514, the Alloy container will fail to bind the port when the stack starts, causing silent syslog delivery failure.
+**Purpose:** rsyslog on supportTAK-server acts as a relay — it receives UDP syslog from IPFire on port 514, writes to a local file (e.g., `/var/log/ipfire/`), and Alloy tails that file for Loki ingestion. rsyslog MUST be running and bound to UDP 514.
 
-### Step 2.1: Check if rsyslog is binding UDP port 514
+### Step 2.1: Check that rsyslog IS running and listening on UDP 514
 ```bash
 ssh opsadmin@192.168.1.101 'sudo ss -ulnp | grep :514'
 ```
 
-### Step 2.2: If rsyslog appears in the output — disable it
+Expected: rsyslog appears bound to UDP 514.
+
+### Step 2.2: If rsyslog is NOT running — start it
 ```bash
-ssh opsadmin@192.168.1.101 'sudo systemctl stop rsyslog && sudo systemctl disable rsyslog'
+ssh opsadmin@192.168.1.101 'sudo systemctl start rsyslog && sudo systemctl enable rsyslog'
 ```
 
-Verify port is now free:
-```bash
-ssh opsadmin@192.168.1.101 'sudo ss -ulnp | grep :514'
-```
-Expected: no output (port is free).
+### Step 2.3: If rsyslog appears — proceed to Section 3
 
-### Step 2.3: If nothing appears — port is free, proceed to Section 3
+**Note:** rsyslog receives IPFire syslog on UDP 514, writes to `/var/log/ipfire/` (or the configured path), and Alloy tails those files for Loki ingestion. rsyslog is a required relay in this architecture — it must remain running.
 
-**Note:** rsyslog.service is optional on monitoring hosts. Alloy will take over as the syslog receiver on this host. Disabling rsyslog does not affect syslog functionality — it is replaced by Alloy's `loki.source.syslog` component.
-
-- [ ] UDP port 514 is free on supportTAK-server (rsyslog disabled if it was running)
+- [ ] rsyslog is running and bound to UDP 514 on supportTAK-server
 
 ---
 
@@ -230,7 +226,7 @@ In the "Remote Logging" section:
 - **Protocol:** UDP (only option — IPFire's native syslog daemon does not support TCP forwarding)
 - Click **Save**
 
-**Note:** Port 514 is hardcoded in IPFire's syslog forwarding. The WUI does not expose port selection. Port 514 must be free on supportTAK-server (confirmed in Section 2).
+**Note:** Port 514 is hardcoded in IPFire's syslog forwarding. The WUI does not expose port selection. rsyslog on supportTAK-server must be running and bound to UDP 514 to receive the IPFire syslog relay (confirmed in Section 2).
 
 ### Step 5.3: Verify syslog.conf was updated on IPFire
 ```bash
@@ -343,7 +339,7 @@ ssh opsadmin@192.168.1.101 'bash /opt/telemetry/scripts/validate-phase5.sh'
 | FAIL | Root Cause | Fix |
 |------|-----------|-----|
 | TEL-01 FAIL | IPFire syslog.conf missing 192.168.1.101 | WUI > Logs > Log Settings — re-enter 192.168.1.101 and Save; restart syslog daemon |
-| TEL-02 FAIL | rsyslog is holding UDP 514 | `sudo systemctl stop rsyslog && sudo systemctl disable rsyslog`; restart alloy container |
+| TEL-02 FAIL | rsyslog not running or not binding UDP 514 | `sudo systemctl start rsyslog && sudo systemctl enable rsyslog`; verify with `sudo ss -ulnp | grep :514` |
 | TEL-03 FAIL | Container not running | `docker compose -f /opt/telemetry/docker-compose.yml logs [service] --tail=50` |
 | TEL-04 FAIL | No entries in ipfire-syslog stream | Check Alloy debug UI; verify port 514 is bound; re-run logger test from Step 6.2 |
 | TEL-05 FAIL | Loki not ready | Check loki container logs; verify loki-config.yml syntax |
@@ -363,9 +359,9 @@ Complete all items before marking Phase 5 Plan 02 done.
 - [ ] /etc/syslog.conf on IPFire contains @192.168.1.101
 - [ ] IPFire syslog daemon restarted after configuration
 
-**TEL-02: UDP port 514 available on supportTAK-server**
-- [ ] rsyslog not binding port 514 (disabled if present)
-- [ ] docker-proxy or alloy visible in ss -ulnp output on port 514
+**TEL-02: rsyslog running and bound to UDP 514 on supportTAK-server**
+- [ ] rsyslog running and binding UDP 514 (relay role confirmed)
+- [ ] rsyslog bound to UDP 514 visible in ss -ulnp output
 
 **TEL-03: All 5 Docker containers running**
 - [ ] loki — running
