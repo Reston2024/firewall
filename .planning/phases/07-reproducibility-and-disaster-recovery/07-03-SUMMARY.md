@@ -116,3 +116,18 @@ None - no external service configuration required. Scripts run on IPFire when ne
 ---
 *Phase: 07-reproducibility-and-disaster-recovery*
 *Completed: 2026-03-26*
+
+## Self-Check: PASSED
+
+- FOUND: rollback/rollback-firewall.sh
+- FOUND: rollback/rollback-suricata.sh
+- FOUND: rollback/rollback-dns.sh
+- FOUND: rollback/rollback-dhcp.sh
+- FOUND: rollback/rollback-zone.sh
+- FOUND: rollback/rollback-sysctl.sh
+- FOUND: rollback/rollback-syslog.sh
+- FOUND: rollback/README.md
+- FOUND: .planning/phases/07-reproducibility-and-disaster-recovery/07-03-SUMMARY.md
+- FOUND commit: b180775 (Task 1)
+- FOUND commit: ea6f4e2 (Task 2)
+- FOUND commit: 599740b (metadata)

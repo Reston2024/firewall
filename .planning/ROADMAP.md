@@ -1,172 +1,34 @@
 # Roadmap: Firewall Appliance
 
-## Overview
+## Milestones
 
-Seven phases build a hardened, reproducible IPFire firewall appliance from the hardware up. Phase order is dictated by hard technical dependencies: NIC persistence before any zone config, core services before IPS, IPS before telemetry (EVE JSON is the pipeline's primary input), and hardening/reproducibility after all services are stable. Each phase delivers a coherent, independently verifiable capability. The project culminates in a git repo that can rebuild the appliance from scratch in under 15 minutes.
+- ✅ **v1.0 Firewall Appliance** — Phases 1-8 (shipped 2026-03-26)
 
 ## Phases
 
-- [x] **Phase 1: Platform Foundation and Firewall** - All 6 NICs persistently mapped, anti-lockout in place, stateful firewall with NAT and zone policies operational (completed 2026-03-26)
-- [x] **Phase 2: Core Network Services** - DHCP, DNS with DNSSEC and DoT, and NTP serving all zones (completed 2026-03-26)
-- [x] **Phase 3: SSH Hardening and Management Security** - Key-only SSH, IP allowlist, Guardian brute-force protection, WUI access locked down (completed 2026-03-26)
-- [x] **Phase 4: Suricata IDS/IPS** - IPS running in monitor-then-active mode, EVE JSON confirming alert output, N100-tuned memcap (completed 2026-03-26)
-- [x] **Phase 5: Telemetry Pipeline and Dashboards** - Off-box Docker stack receiving logs, Loki storing data, Grafana dashboards showing firewall drops and IDS alerts (completed 2026-03-25)
-- [x] **Phase 6: System Hardening and Validation Suite** - Unused services disabled, hardening applied, full scripted validation suite passing on clean reboot (completed 2026-03-26)
-- [x] **Phase 7: Reproducibility and Disaster Recovery** - All configs in git, rebuild script verified on fresh IPFire install, rollback procedures and decision log complete (completed 2026-03-26)
-- [x] **Phase 8: Milestone Gap Closure** - Export missing live configs, fix script wiring, update backup coverage, correct documentation (completed 2026-03-26)
+<details>
+<summary>✅ v1.0 Firewall Appliance (Phases 1-8) — SHIPPED 2026-03-26</summary>
 
-## Phase Details
+- [x] Phase 1: Platform Foundation and Firewall (4/4 plans) — completed 2026-03-26
+- [x] Phase 2: Core Network Services (3/3 plans) — completed 2026-03-26
+- [x] Phase 3: SSH Hardening and Management Security (2/2 plans) — completed 2026-03-26
+- [x] Phase 4: Suricata IDS/IPS (2/2 plans) — completed 2026-03-26
+- [x] Phase 5: Telemetry Pipeline and Dashboards (4/4 plans) — completed 2026-03-25
+- [x] Phase 6: System Hardening and Validation Suite (4/4 plans) — completed 2026-03-26
+- [x] Phase 7: Reproducibility and Disaster Recovery (5/5 plans) — completed 2026-03-26
+- [x] Phase 8: Milestone Gap Closure (3/3 plans) — completed 2026-03-26
 
-### Phase 1: Platform Foundation and Firewall
-**Goal**: All 6 NICs are permanently anchored to their correct IPFire zones and survive any reboot or kernel update, with a stateful firewall enforcing default-deny and NAT from day one
-**Depends on**: Nothing (first phase)
-**Requirements**: PLAT-01, PLAT-02, PLAT-03, PLAT-04, PLAT-05, FW-01, FW-02, FW-03, FW-04, FW-05, FW-06, FW-07
-**Success Criteria** (what must be TRUE):
-  1. Running `ip link show` lists all 6 NICs with their correct zone names (green0, red0, blue0, orange0, and bridge members) and assignments survive a clean reboot
-  2. The WUI and SSH remain accessible from the management host after any firewall rule change, because `firewall.local` management allow rules load before any deny rules
-  3. A host on GREEN can reach the internet (NAT/masquerade on RED is active) and cannot reach a host on ORANGE without an explicit allow rule (zone isolation enforced)
-  4. Dropped packets from blocked inbound traffic appear in `/var/log/messages` firewall log entries (drop logging active)
-  5. The git repo exists at the documented path with the full directory structure (/configs, /scripts, /services, /docs, /validation, /rollback, /manifests, /decision-log) and a backup include list is committed
-**Plans**: 4 plans
-
-Plans:
-- [x] 01-01-PLAN.md — Repository structure, NIC map template, and validation scripts
-- [x] 01-02-PLAN.md — udev NIC persistence rules, ethernet/settings template, firewall.local, backup include list
-- [x] 01-03-PLAN.md — Zone policy runbook and firewall validation script
-- [x] 01-04-PLAN.md — Human deployment checkpoint: NIC identification, hardware deploy, reboot persistence test, acceptance verification
-
-### Phase 2: Core Network Services
-**Goal**: DHCP, DNS, and NTP are fully configured and serving all internal zones, with DNSSEC validation and DNS-over-TLS to upstream resolvers enforced from the start
-**Depends on**: Phase 1
-**Requirements**: SVC-01, SVC-02, SVC-03, SVC-04, SVC-05, SVC-06
-**Success Criteria** (what must be TRUE):
-  1. A new client on GREEN receives a correct IP address, default gateway, DNS server, and NTP server via DHCP, and known hosts receive their static lease addresses
-  2. DNS resolution works from an internal client, DNSSEC validation is active (`dig +dnssec example.com` shows AD flag), and DNS-over-TLS is the upstream transport (confirmed by `tcpdump` on port 853)
-  3. NTP is synchronized to upstream pools and clients receive time service (`ntpq -p` shows sync, client clocks converge within acceptable tolerance)
-  4. All three services (dhcpd, unbound, ntpd) auto-start and are running after a clean reboot
-**Plans**: 3 plans
-
-Plans:
-- [x] 02-01-PLAN.md — validate-phase2.sh + DHCP config templates (dhcpd.conf.local, fixleases.template)
-- [x] 02-02-PLAN.md — DNS/NTP config reference templates + services deployment runbook
-- [x] 02-03-PLAN.md — Human WUI deployment checkpoint + validation run + live config export to git
-
-### Phase 3: SSH Hardening and Management Security
-**Goal**: Remote management is locked down to key authentication from a whitelisted subnet, with Guardian blocking brute-force attempts before any Suricata IPS rules could interfere with management traffic
-**Depends on**: Phase 2
-**Requirements**: SSH-01, SSH-02, SSH-03, SSH-04, SSH-05
-**Success Criteria** (what must be TRUE):
-  1. An SSH connection attempt using a password from any host is rejected; key-based auth from a whitelisted management host succeeds
-  2. An SSH connection attempt from an IP outside the management subnet is refused at the firewall level (packet dropped, not just auth failure)
-  3. Guardian is installed and active; repeated failed SSH attempts from a non-whitelisted IP result in a temporary block visible in Guardian's WUI panel
-  4. The IPFire WUI at port 444 is unreachable from a host on ORANGE or BLUE, but reachable from the management host on GREEN
-**Plans**: 2 plans
-
-Plans:
-- [x] 03-01-PLAN.md — validate-phase3.sh, extended firewall.local, ssh-management-runbook.md
-- [x] 03-02-PLAN.md — Human checkpoint: deploy SSH key, configure WUI, Guardian setup, export live configs
-
-### Phase 4: Suricata IDS/IPS
-**Goal**: Suricata is running inline on RED and GREEN in monitor-then-active mode with ET Community rulesets, N100-appropriate memcap limits, and EVE JSON output confirmed at `/var/log/suricata/eve.json`
-**Depends on**: Phase 3
-**Requirements**: IDS-01, IDS-02, IDS-03, IDS-04, IDS-05, IDS-06, IDS-07, IDS-08
-**Success Criteria** (what must be TRUE):
-  1. Suricata is running and `/var/log/suricata/eve.json` is actively receiving entries — `tail -f` shows new events within 60 seconds of network activity
-  2. Triggering a known test signature (e.g., curl to a test-IDS URL) produces a matching alert entry in `eve.json` with correct source IP, destination, and rule metadata
-  3. Rule updates run daily and complete without error; `suricata-update` log shows successful ruleset fetch and load
-  4. Suricata memory usage stays within defined memcap limits after 30 minutes of normal traffic (no OOM events, CPU headroom confirmed on N100)
-  5. The post-Core-Update validation script detects if `suricata.yaml` has been overwritten and reports the finding
-**Plans**: 2 plans
-
-Plans:
-- [x] 04-01-PLAN.md — validate-phase4.sh, check-suricata-integrity.sh, suricata-ids-runbook.md, config reference files
-- [x] 04-02-PLAN.md — Human deployment checkpoint: WUI enable, memcap apply, EVE verify, sha256 baseline, export configs
-
-### Phase 5: Telemetry Pipeline and Dashboards
-**Goal**: An off-box Docker Compose stack on a GREEN-zone monitoring host is ingesting IPFire firewall logs via UDP syslog and Suricata EVE JSON via file-read, storing data in Loki, and displaying threat-tracing dashboards in Grafana
-**Depends on**: Phase 4
-**Requirements**: TEL-01, TEL-02, TEL-03, TEL-04, TEL-05, TEL-06, TEL-07, TEL-08, DASH-01, DASH-02, DASH-03, DASH-04
-**Success Criteria** (what must be TRUE):
-  1. A firewall drop event on IPFire appears as a labeled log entry in Grafana/Loki within 60 seconds of the packet being dropped
-  2. A Suricata IDS alert appears in Grafana within 60 seconds of the triggering event, with source IP, destination, rule name, and severity visible
-  3. The threat-tracing dashboard shows a single-pane view connecting a source IP to its IDS alert and to the resulting firewall action for the same flow
-  4. The top blocked IPs and top triggered rule names are visible in dedicated dashboard panels
-  5. Log retention policy is configured (defined maximum age or volume) and confirmed in Loki config
-**Plans**: 4 plans
-
-Plans:
-- [x] 05-01-PLAN.md — Docker Compose stack files, Alloy config, Loki config, Grafana provisioning, rsync-eve.sh, validate-phase5.sh
-- [x] 05-02-PLAN.md — Telemetry deployment runbook + human checkpoint: deploy stack, configure IPFire syslog, verify syslog path live (112,769 entries in Loki confirmed)
-- [x] 05-03-PLAN.md — Human checkpoint: EVE JSON rsync path — SSH key setup, cron install, verify EVE entries in Loki
-- [x] 05-04-PLAN.md — Dashboard import (22247 + custom ipfire-firewall), human verification of threat-trace panels, final validate-phase5.sh
-
-### Phase 6: System Hardening and Validation Suite
-**Goal**: All unnecessary services are disabled, IPFire hardening recommendations are applied, and a scripted validation suite produces a pass/fail report covering every capability from NIC binding through telemetry ingestion
-**Depends on**: Phase 5
-**Requirements**: HARD-01, HARD-02, HARD-03, HARD-04, HARD-05, VAL-01, VAL-02, VAL-03, VAL-04, VAL-05, VAL-06, VAL-07, VAL-08, VAL-09, VAL-10, VAL-11
-**Success Criteria** (what must be TRUE):
-  1. Running the validation suite script produces a pass/fail report and all tests pass on a system that has just completed a clean reboot
-  2. No unnecessary services are running (`ss -tlnp` and Pakfire shows only expected services); audit logging captures configuration changes
-  3. Kernel hardening parameters are active (`sysctl -a` shows IP source routing disabled, ICMP redirects disabled, and other hardened values)
-  4. The IPFire WUI HTTPS certificate is documented and the backup include list covers all custom configs including udev rules, `firewall.local`, and Suricata customizations
-**Plans**: 4 plans
-
-Plans:
-- [x] 06-01-PLAN.md — Sysctl hardening config, integrity baseline script, reboot snapshot script, WUI cert docs, Pakfire manifest, backup include list
-- [x] 06-02-PLAN.md — validate-phase6.sh (hardening checks) and validate-all.sh (unified orchestrator)
-- [x] 06-03-PLAN.md — Hardening deployment runbook + human checkpoint: deploy to IPFire, verify, capture pre-reboot snapshot
-- [x] 06-04-PLAN.md — Human checkpoint: reboot persistence test + full validate-all.sh acceptance run
-
-### Phase 7: Reproducibility and Disaster Recovery
-**Goal**: Every configuration artifact lives in the git repo, a rebuild script applies the full configuration idempotently to a fresh IPFire install, and rollback procedures exist for every change category
-**Depends on**: Phase 6
-**Requirements**: REPO-01, REPO-02, REPO-03, REPO-04, REPO-05, REPO-06
-**Success Criteria** (what must be TRUE):
-  1. Running the rebuild script against a fresh IPFire install produces a fully configured appliance that passes the full validation suite without manual intervention
-  2. The repo contains a complete Pakfire add-on manifest and a full file manifest with checksums; a diff between the manifest and a live system detects any drift
-  3. Rollback procedures exist for every change category (firewall rules, IPS rules, DNS config, DHCP leases, zone config) and each procedure has been tested
-  4. The decision log (ADR format) is committed to the repo with entries covering all architectural choices documented in PROJECT.md Key Decisions
-**Plans**: 5 plans
-
-Plans:
-- [x] 07-01-PLAN.md — Drift detection script (check-drift.sh), file manifest, backup-include.user sync
-- [x] 07-02-PLAN.md — Decision log: 8 new ADRs capturing all architectural choices (ADR-0005 through ADR-0012)
-- [x] 07-03-PLAN.md — Rollback scripts (7 categories) and rollback/README.md procedures
-- [x] 07-04-PLAN.md — Rebuild script (rebuild.sh) and 6 per-phase deploy scripts
-- [x] 07-05-PLAN.md — Human checkpoint: deploy to IPFire, generate live manifest, verify rebuild, acceptance test
-
-### Phase 8: Milestone Gap Closure
-**Goal**: Close all integration gaps and tech debt identified by milestone audit — export missing live configs to repo, fix script wiring defects, update backup coverage, and correct documentation errors
-**Depends on**: Phase 7
-**Requirements**: IDS-05, REPO-02, TEL-01, TEL-06, DASH-03, SVC-04, PLAT-05, VAL-11
-**Gap Closure**: Closes gaps INT-1A, INT-ORF-1, INT-7A, INT-6A, INT-2A, INT-4A, FLOW-DR-SURICATA, FLOW-DR-SYSLOG from v1.0 audit
-**Success Criteria** (what must be TRUE):
-  1. configs/suricata/suricata.yaml exists in repo with live N100-tuned config (not reference YAML)
-  2. configs/syslog.conf exists in repo with syslog forwarding to 192.168.1.101:514
-  3. validate-all.sh sources correct .env path (/opt/telemetry/.env, not double-telemetry)
-  4. backup-include.user contains /etc/unbound/forward.conf
-  5. check-drift.sh does not include WUI-managed /var/ipfire/ethernet/settings
-  6. Telemetry runbook Section 2 rsyslog instruction corrected
-  7. Re-audit passes with 0 HIGH/MEDIUM gaps
-**Plans**: 3 plans
-
-Plans:
-- [x] 08-01-PLAN.md — Export live suricata.yaml and syslog.conf from IPFire, add forward.conf to backup-include.user
-- [x] 08-02-PLAN.md — Fix validate-all.sh .env path, remove ethernet/settings from check-drift.sh, correct runbook Section 2
-- [x] 08-03-PLAN.md — Redeploy to IPFire, regenerate file manifest, run validate-all.sh acceptance test
+</details>
 
 ## Progress
 
-**Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
-
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Platform Foundation and Firewall | 4/4 | Complete   | 2026-03-26 |
-| 2. Core Network Services | 3/3 | Complete   | 2026-03-26 |
-| 3. SSH Hardening and Management Security | 2/2 | Complete   | 2026-03-26 |
-| 4. Suricata IDS/IPS | 2/2 | Complete   | 2026-03-26 |
-| 5. Telemetry Pipeline and Dashboards | 4/4 | Complete   | 2026-03-25 |
-| 6. System Hardening and Validation Suite | 4/4 | Complete   | 2026-03-26 |
-| 7. Reproducibility and Disaster Recovery | 5/5 | Complete   | 2026-03-26 |
-| 8. Milestone Gap Closure | 3/3 | Complete   | 2026-03-26 |
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 1. Platform Foundation and Firewall | v1.0 | 4/4 | Complete | 2026-03-26 |
+| 2. Core Network Services | v1.0 | 3/3 | Complete | 2026-03-26 |
+| 3. SSH Hardening and Management Security | v1.0 | 2/2 | Complete | 2026-03-26 |
+| 4. Suricata IDS/IPS | v1.0 | 2/2 | Complete | 2026-03-26 |
+| 5. Telemetry Pipeline and Dashboards | v1.0 | 4/4 | Complete | 2026-03-25 |
+| 6. System Hardening and Validation Suite | v1.0 | 4/4 | Complete | 2026-03-26 |
+| 7. Reproducibility and Disaster Recovery | v1.0 | 5/5 | Complete | 2026-03-26 |
+| 8. Milestone Gap Closure | v1.0 | 3/3 | Complete | 2026-03-26 |

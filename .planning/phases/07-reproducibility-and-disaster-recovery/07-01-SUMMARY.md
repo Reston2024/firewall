@@ -105,6 +105,16 @@ This populates file-manifest.sha256 with real hashes. Without this step, --verif
 - backup-include.user in sync with full managed file set
 - No blockers for remaining 07-xx plans
 
+## Self-Check: PASSED
+
+- FOUND: scripts/check-drift.sh
+- FOUND: manifests/file-manifest.sha256
+- FOUND: configs/firewall/backup-include.user
+- FOUND: .planning/phases/07-reproducibility-and-disaster-recovery/07-01-SUMMARY.md
+- FOUND commit: 48f7fce (Task 1)
+- FOUND commit: df5424b (Task 2)
+- FOUND commit: 038adcd (docs)
+
 ---
 *Phase: 07-reproducibility-and-disaster-recovery*
 *Completed: 2026-03-26*
