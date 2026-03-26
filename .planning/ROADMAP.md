@@ -114,7 +114,7 @@ Plans:
 - [x] 06-01-PLAN.md — Sysctl hardening config, integrity baseline script, reboot snapshot script, WUI cert docs, Pakfire manifest, backup include list
 - [x] 06-02-PLAN.md — validate-phase6.sh (hardening checks) and validate-all.sh (unified orchestrator)
 - [x] 06-03-PLAN.md — Hardening deployment runbook + human checkpoint: deploy to IPFire, verify, capture pre-reboot snapshot
-- [ ] 06-04-PLAN.md — Human checkpoint: reboot persistence test + full validate-all.sh acceptance run
+- [x] 06-04-PLAN.md — Human checkpoint: reboot persistence test + full validate-all.sh acceptance run
 
 ### Phase 7: Reproducibility and Disaster Recovery
 **Goal**: Every configuration artifact lives in the git repo, a rebuild script applies the full configuration idempotently to a fresh IPFire install, and rollback procedures exist for every change category
