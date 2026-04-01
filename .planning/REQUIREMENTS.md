@@ -98,43 +98,43 @@ Deferred to future release. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MAL-01 | — | Pending |
-| MAL-02 | — | Pending |
-| MAL-03 | — | Pending |
-| MAL-04 | — | Pending |
-| MAL-05 | — | Pending |
-| MAL-06 | — | Pending |
-| MIG-01 | — | Pending |
-| MIG-02 | — | Pending |
-| MIG-03 | — | Pending |
-| MIG-04 | — | Pending |
-| AI-01 | — | Pending |
-| AI-02 | — | Pending |
-| AI-03 | — | Pending |
-| AI-04 | — | Pending |
-| RAG-01 | — | Pending |
-| RAG-02 | — | Pending |
-| RAG-03 | — | Pending |
-| RAG-04 | — | Pending |
-| TRI-01 | — | Pending |
-| TRI-02 | — | Pending |
-| TRI-03 | — | Pending |
-| TRI-04 | — | Pending |
-| SCA-01 | — | Pending |
-| SCA-02 | — | Pending |
-| SCA-03 | — | Pending |
-| SCA-04 | — | Pending |
-| SCA-05 | — | Pending |
-| PCAP-01 | — | Pending |
-| PCAP-02 | — | Pending |
-| PCAP-03 | — | Pending |
-| PCAP-04 | — | Pending |
+| MAL-01 | Phase 9 | Pending |
+| MAL-04 | Phase 9 | Pending |
+| MAL-05 | Phase 9 | Pending |
+| MAL-06 | Phase 9 | Pending |
+| MAL-02 | Phase 10 | Pending |
+| MAL-03 | Phase 10 | Pending |
+| MIG-01 | Phase 10 | Pending |
+| MIG-02 | Phase 10 | Pending |
+| MIG-03 | Phase 10 | Pending |
+| MIG-04 | Phase 10 | Pending |
+| AI-01 | Phase 11 | Pending |
+| AI-02 | Phase 11 | Pending |
+| AI-03 | Phase 11 | Pending |
+| AI-04 | Phase 11 | Pending |
+| RAG-01 | Phase 12 | Pending |
+| RAG-02 | Phase 12 | Pending |
+| RAG-03 | Phase 12 | Pending |
+| RAG-04 | Phase 12 | Pending |
+| TRI-01 | Phase 13 | Pending |
+| TRI-02 | Phase 13 | Pending |
+| TRI-03 | Phase 13 | Pending |
+| TRI-04 | Phase 13 | Pending |
+| PCAP-01 | Phase 14 | Pending |
+| PCAP-02 | Phase 14 | Pending |
+| PCAP-03 | Phase 14 | Pending |
+| PCAP-04 | Phase 14 | Pending |
+| SCA-01 | Phase 14 | Pending |
+| SCA-02 | Phase 14 | Pending |
+| SCA-03 | Phase 14 | Pending |
+| SCA-04 | Phase 14 | Pending |
+| SCA-05 | Phase 14 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 31 total
-- Mapped to phases: 0
-- Unmapped: 31 ⚠️
+- Mapped to phases: 31
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-31*
-*Last updated: 2026-03-31 after initial definition*
+*Last updated: 2026-03-31 — traceability populated after v2.0 roadmap creation*
