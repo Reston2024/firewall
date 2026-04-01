@@ -42,7 +42,10 @@
   3. `free -m` on supportTAK-server shows OpenSearch JVM resident within 6GB heap boundary with Malcolm at steady state
   4. OpenSearch ISM policy is active and confirmed via Dashboards Index Management — 30-day max age rule applied to network-* indices
   5. Arkime container is present in Compose but not consuming RAM (disabled/commented) confirmed by `docker stats`
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 09-01-PLAN.md — Install Malcolm with heap tuning, kernel params, swap, Arkime capture disabled, and start the stack
+- [ ] 09-02-PLAN.md — Configure ISM retention policy, verify dashboards, run full validation suite
 
 ### Phase 10: Telemetry Migration to Malcolm
 **Goal**: IPFire Suricata EVE JSON and syslog flow exclusively into Malcolm/OpenSearch, the Loki stack is decommissioned, and validation scripts reflect the new architecture
@@ -113,7 +116,7 @@
 | 6. System Hardening and Validation Suite | v1.0 | 4/4 | Complete | 2026-03-26 |
 | 7. Reproducibility and Disaster Recovery | v1.0 | 5/5 | Complete | 2026-03-26 |
 | 8. Milestone Gap Closure | v1.0 | 3/3 | Complete | 2026-03-26 |
-| 9. Malcolm NSM Deployment | v2.0 | 0/- | Not started | - |
+| 9. Malcolm NSM Deployment | v2.0 | 0/2 | Planning complete | - |
 | 10. Telemetry Migration to Malcolm | v2.0 | 0/- | Not started | - |
 | 11. Foundation-Sec-8B AI Analyst | v2.0 | 0/- | Not started | - |
 | 12. RAG Knowledge Pipeline | v2.0 | 0/- | Not started | - |
