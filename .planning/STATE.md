@@ -1,30 +1,32 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: Firewall Appliance
-status: complete
-stopped_at: Milestone v1.0 shipped
-last_updated: "2026-03-26T23:55:05.450Z"
+milestone: v2.0
+milestone_name: Local AI SOC
+status: active
+stopped_at: Defining requirements
+last_updated: "2026-03-31T00:00:00.000Z"
 progress:
-  total_phases: 8
-  completed_phases: 8
-  total_plans: 27
-  completed_plans: 27
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-21)
+See: .planning/PROJECT.md (updated 2026-03-31)
 
-**Core value:** A secure, observable network perimeter that can be rebuilt from scratch in minutes
-**Current focus:** Phase 08 — milestone-gap-closure
+**Core value:** A secure, observable, AI-augmented network perimeter where threats are detected, triaged, and investigated locally
+**Current focus:** Defining requirements for v2.0
 
 ## Current Position
 
-Phase: 08
-Plan: Not started
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-31 — Milestone v2.0 started
 
 ## Performance Metrics
 

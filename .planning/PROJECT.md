@@ -2,11 +2,23 @@
 
 ## What This Is
 
-A fully configured, hardened, reproducible firewall appliance built on an Intel N100-class 6-NIC mini-PC running IPFire 2.29 (CU200). It serves as the primary network gateway with IDS/IPS (Suricata), network telemetry (Alloy+Loki+Grafana), threat-tracing dashboards, and automated rebuild capability. All configs, scripts, and validation artifacts live in a Git repo — rebuild from scratch in under 15 minutes.
+A local-first AI SOC platform built on an IPFire perimeter appliance (Intel N100, 6-NIC) with Malcolm-based network security monitoring (Zeek + Suricata + PCAP + OpenSearch), a local AI security analyst (Foundation-Sec-8B), and RAG-augmented investigation workflows. The firewall appliance is reproducible from Git; the SOC platform provides deep network visibility, AI-assisted alert triage, and case-level investigation capability.
 
 ## Core Value
 
-A secure, observable network perimeter that can be rebuilt from scratch in minutes — if the box dies, the repo rebuilds it identically.
+A secure, observable, AI-augmented network perimeter where threats are detected, triaged, and investigated locally — no cloud dependencies, no vendor lock-in.
+
+## Current Milestone: v2.0 Local AI SOC
+
+**Goal:** Evolve from firewall + telemetry platform into a local-first AI SOC with deep network visibility and AI-assisted analyst workflows.
+
+**Target features:**
+- Malcolm NSM deployment (Zeek + PCAP + OpenSearch replacing Loki/Alloy/Grafana)
+- Local AI security analyst (Foundation-Sec-8B GGUF on supportTAK-server)
+- RAG over operating corpus (ADRs, runbooks, validation results, control docs)
+- Alert triage and case management workflow
+- SBOM generation and signed release artifacts
+- Broader telemetry ingestion (endpoint, auth, asset inventory)
 
 ## Requirements
 
@@ -32,7 +44,7 @@ A secure, observable network perimeter that can be rebuilt from scratch in minut
 
 ### Active
 
-(None — next milestone requirements defined via `/gsd:new-milestone`)
+(Defined in REQUIREMENTS.md for v2.0)
 
 ### Out of Scope
 
@@ -43,7 +55,7 @@ A secure, observable network perimeter that can be rebuilt from scratch in minut
 - GUI tools beyond IPFire WUI — native tools only
 - Docker on IPFire host — officially rejected by IPFire developers
 - High-availability clustering — git-based rebuild is the HA strategy (15 min RTO)
-- AI/ML threat detection — N100 not dimensioned for real-time ML inference
+- AI/ML threat detection on IPFire box — N100 not dimensioned; AI runs off-box on supportTAK-server
 
 ## Context
 
@@ -51,10 +63,11 @@ A secure, observable network perimeter that can be rebuilt from scratch in minut
 - **OS:** IPFire 2.29 Core Update 200, kernel 6.18.7 LTS, Suricata 8.0.3
 - **Shipped:** v1.0 on 2026-03-26 (6-day build, 124 commits, 192 files, ~31K lines)
 - **Codebase:** ~3,045 LOC shell scripts, ~2,357 LOC config/yaml, ~3,515 LOC markdown docs
-- **Architecture:** IPFire on-box (firewall, routing, IDS) + Docker Compose off-box on supportTAK-server (Grafana, Loki, Alloy, Prometheus)
+- **Architecture:** IPFire on-box (firewall, routing, IDS) + Docker Compose off-box on supportTAK-server (Grafana, Loki, Alloy, Prometheus) — v2.0 pivots to Malcolm + AI analyst
+- **supportTAK-server:** Intel N150, 4 cores, 16GB RAM, 912GB NVMe, Ubuntu, IP 192.168.1.22 on GREEN
 - **Management:** SSH key-only (ed25519) on port 22 from 192.168.1.100, WUI at :444
-- **Telemetry:** 112,769+ syslog entries in Loki, EVE JSON pulling every 60s via SCP cron
-- **Known tech debt:** Suricata dashboard 22247 is placeholder (manual import needed), collectd→Prometheus bridge not wired
+- **Telemetry:** 112,769+ syslog entries in Loki, EVE JSON pulling every 60s via SCP cron — v2.0 migrates to Malcolm/OpenSearch
+- **Known tech debt:** Suricata dashboard 22247 is placeholder (manual import needed), collectd→Prometheus bridge not wired — both resolved by Malcolm migration
 
 ## Constraints
 
@@ -102,4 +115,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-26 after v1.0 milestone*
+*Last updated: 2026-03-31 after v2.0 milestone start*
