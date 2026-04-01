@@ -1,242 +1,267 @@
 # Feature Research
 
-**Domain:** Hardened firewall appliance — IPFire on Intel N100 6-NIC mini-PC, production home/small-office
-**Researched:** 2026-03-21
-**Confidence:** HIGH (IPFire-specific claims verified against official docs; comparative claims verified against multiple sources)
+**Domain:** Local-first AI SOC — Malcolm NSM + Foundation-Sec-8B + RAG + alert triage + SBOM (v2.0 milestone)
+**Researched:** 2026-03-31
+**Confidence:** MEDIUM-HIGH (Malcolm and Foundation-Sec-8B verified via official docs and Hugging Face; RAG/triage patterns verified via multiple sources; SBOM toolchain HIGH confidence via OWASP/official docs)
+
+> **Scope note:** v1.0 features (IPFire firewall, Suricata IDS/IPS, Grafana+Loki telemetry pipeline, Git reproducibility) are already built and validated. This document covers ONLY new v2.0 features. The existing `.planning/research/FEATURES.md` from 2026-03-21 covers the v1.0 feature landscape; this supersedes it for v2.0 planning.
 
 ---
 
-## Feature Landscape
+## v2.0 Feature Landscape
 
-### Table Stakes (Users Expect These)
+### Table Stakes (v2 Cannot Ship Without These)
 
-Features whose absence makes the appliance not production-ready. No credit for having them; immediate failure for missing them.
+Features whose absence means the v2 milestone has not been completed. No credit for having them; immediate failure for missing.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| **Stateful firewall with default-deny inbound** | The entire purpose of a firewall gateway; any packet filter without stateful inspection is not a firewall | LOW | IPFire native: Netfilter/SPI engine, default policy drops unsolicited inbound. Configured via WUI Firewall Rules. |
-| **NAT / IP masquerade on WAN (RED)** | Required to share a single ISP-assigned IP across all internal hosts | LOW | IPFire native: masquerade enabled per zone. All GREEN/BLUE/ORANGE clients NAT through RED automatically. Config at `wiki.ipfire.org/configuration/firewall/masquerading`. |
-| **Port forwarding (DNAT)** | Any hosted service (remote desktop, game server, NAS) requires inbound DNAT | LOW | IPFire native: Firewall Rules → New Rule → NAT → DNAT. External port optionally differs from internal. |
-| **Zone-based network segmentation** | Physical multi-NIC hardware only has value if zones are isolated by policy | MEDIUM | IPFire native: GREEN (LAN), RED (WAN), ORANGE (DMZ), BLUE (WiFi/IoT). Default inter-zone policy is deny; pinholes must be explicitly created. |
-| **DHCP server per zone** | Hosts on each zone need automatic IP assignment | LOW | IPFire native: DHCP server per interface (GREEN, BLUE). Supports static leases, PXE, NTP injection. Config stored at `/var/ipfire/dhcp/dhcpd.conf`. |
-| **Recursive DNS resolver with DNSSEC** | All internal clients resolve through the firewall; DNSSEC mandatory for integrity | LOW | IPFire native: Unbound replaces dnsmasq. DNSSEC validation is mandatory and cannot be disabled. Multi-threaded as of Core Update 200 (one thread per CPU core). |
-| **NTP service** | All hosts need synchronized time; mismatched clocks break TLS, auth, and log correlation | LOW | IPFire native: NTP server built in, syncs to upstream pools and serves clients via DHCP NTP option. |
-| **SSH management access** | Remote configuration and scripting require SSH | LOW | IPFire native: OpenSSH 10.2p1 (CU199). Best practice: use 15-minute expiry button, key-only auth, whitelist management IP. |
-| **IDS/IPS (Suricata)** | Without active threat detection the appliance is just a packet filter | MEDIUM | IPFire native: Suricata 8.0.3 (CU200). Multi-threaded, multi-ruleset (ET Community, ET Pro, Abuse.ch ThreatFox). Zone-selectable. Monitor-only mode for tuning. |
-| **Automatic rule/signature updates** | Threat signatures go stale in hours; manual updates are operationally unsafe | LOW | IPFire native: per-provider auto-update toggle in IPS configuration. Daily updates for ET Pro. |
-| **System log viewer** | Operators need to inspect firewall, IPS, DHCP, DNS, and system events | LOW | IPFire native: WUI → Logs section covers firewall, IPS, system, proxy logs. Remote syslog forwarding via UDP to external collectors. |
-| **Reboot-persistent configuration** | Configs that vanish on reboot are not production | LOW | IPFire native: all WUI configuration writes to persistent storage under `/var/ipfire/`. |
-| **SSH brute-force protection** | Exposed SSH is the most common initial access vector | LOW | IPFire via Pakfire: Guardian or fail2ban. Fail2ban jail config, key-only auth, IP allowlist in `ignoreip`. |
-| **Management anti-lockout** | Misconfigured rules must not cut off management access | LOW | IPFire design: GREEN interface always reaches WUI. SSH 15-minute auto-disable. Rule changes apply immediately — no confirmation window; operator discipline required. |
-| **WAN connectivity validation** | Appliance must prove internet reachability before being considered functional | LOW | Validation script responsibility: ping external IP, DNS resolution, NTP sync, reachable from GREEN. |
+| **Malcolm NSM deployed and ingesting traffic** | The entire pivot of v2 is replacing Loki with Malcolm/OpenSearch as the telemetry backend; Malcolm is the core deliverable | HIGH | Malcolm requires minimum 8 CPU cores, 24 GB RAM. supportTAK-server (N150, 16 GB) is **below minimum RAM**. Must confirm whether Malcolm runs on 16 GB. Likely requires tuning OpenSearch heap aggressively. Runs as Docker Compose stack — all containers on supportTAK-server. |
+| **Suricata EVE JSON flowing into Malcolm** | Malcolm must replace Loki as EVE consumer; existing Suricata alerts must be visible in OpenSearch Dashboards | HIGH | Malcolm accepts EVE JSON via Filebeat forwarding over TLS to Logstash port 5044. The existing SCP-pull pipeline to Loki must be replaced or supplemented. Malcolm's internal Suricata container runs its own Suricata instance — **the existing on-box Suricata must forward to Malcolm, not be replaced**. Custom Filebeat config on supportTAK-server (or on IPFire if Filebeat can be installed via Pakfire) tails `/var/log/suricata/eve.json` and ships to Malcolm's Logstash. |
+| **Zeek network metadata layer** | Zeek provides protocol-level session metadata (DNS, HTTP, TLS, conn logs) that Suricata alone does not provide; Malcolm expects both | HIGH | Zeek runs inside Malcolm's containers, capturing traffic on a mirrored interface. Requires a network tap or SPAN port from IPFire to deliver raw packets to the Malcolm host. IPFire must mirror GREEN/RED traffic to supportTAK-server — not trivially configured on IPFire without hardware support. |
+| **OpenSearch Dashboards accessible** | Malcolm's visualization layer replaces Grafana for network security data | MEDIUM | Malcolm ships dozens of prebuilt dashboards for Zeek log types and Suricata alerts. Out-of-the-box after deploy. Accessible on Malcolm HTTPS port. Arkime also available for session-level PCAP investigation. |
+| **Foundation-Sec-8B running locally via Ollama** | The AI analyst must be deployable and reachable; no value if the model cannot run | MEDIUM | Q4_K_M GGUF (~4.92 GB) runs on N150 16 GB via Ollama. Expected throughput: 2–8 tokens/sec on N150 (low-power CPU, no discrete GPU). Q8_0 (~8.54 GB) is tight on 16 GB with OS overhead — Q4_K_M is the safe choice. Model is cybersecurity-fine-tuned on Llama-3.1-8B; outperforms Llama-3.1-70B on security benchmarks. Apache 2.0 license. |
+| **AI analyst can receive alert context and return analysis** | The analyst must accept structured alert input and produce actionable output | MEDIUM | Foundation-Sec-8B-Instruct variant is needed (not just the base model). Instruct model supports chat/instruction format. Integration pattern: pipe alert JSON → prompt template → Ollama API → structured analysis output. No GUI required; CLI or API calls sufficient for v2. |
+| **RAG corpus indexed and queryable** | The AI analyst needs access to project-specific knowledge (ADRs, runbooks, validation results, control docs) to give context-aware answers | HIGH | Requires: embedding model (e.g., nomic-embed-text via Ollama), vector DB (ChromaDB for MVP, Qdrant for production), document ingestion pipeline for `.planning/` docs and runbooks. LangChain or LlamaIndex as orchestration layer. All runs on supportTAK-server. |
+| **Alert triage mechanism** | Alerts must flow from Malcolm/OpenSearch to a triage queue where the AI can act on them | HIGH | Options: OpenSearch alerting webhooks → triage script → AI analyst; or DFIR-IRIS with API integration. A minimal triage queue can be a structured queue (file/SQLite) with a daemon that pulls new alerts, sends to AI, and writes enriched output. Full case management (DFIR-IRIS) is a differentiator, not table stakes. |
+| **SBOM generated for release artifacts** | v2.0 adds signed releases; SBOM is mandatory for supply chain transparency | MEDIUM | Syft generates SBOM from the repo/Docker image. Output format: CycloneDX JSON (preferred for security use cases). Cosign signs the SBOM artifact. Git tag triggers SBOM generation. Syft supports shell scripts, Docker images, and filesystem scanning. |
+| **Signed release artifacts** | Git tags must produce signed artifacts proving provenance | MEDIUM | Cosign + Sigstore. Git-tag-triggered shell script runs Syft, signs output with Cosign. Keys stored securely (age-encrypted or hardware key). The release artifact is the tarball of the repo at the tag + the SBOM + the cosign signature. |
 
 ---
 
-### Differentiators (Competitive Advantage Over Stock IPFire)
+### Differentiators (What Separates This from Basic Malcolm + LLM)
 
-These features are not present out of the box in a fresh IPFire install. They are what separates this project from "default IPFire install" and deliver the stated core value: observable, reproducible, rebuild-from-repo appliance.
+Features that go beyond the minimum, providing real analyst workflow value.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| **Git-based reproducibility (config-as-code)** | Box dies → repo rebuilds it identically; enables audit trail, diffing, rollback | MEDIUM | No IPFire native equivalent. Requires exporting all `/var/ipfire/` configs and Pakfire add-on lists to a repo. Rebuild script applies configs to fresh install idempotently. This is the project's primary differentiator vs. stock IPFire. |
-| **Persistent NIC-to-zone mapping** | 6-NIC hardware has no guaranteed interface ordering across reboots/kernel updates | MEDIUM | IPFire uses `udev` rules by MAC address. Must be deliberately engineered; not automatic. Prevents zone-swap security failures after hardware changes. |
-| **Network telemetry pipeline (firewall logs → processing → visualization)** | Transforms raw syslog into queryable, graphable, searchable event store | HIGH | Not in IPFire stock. IPFire sends UDP syslog (port 514). Collector (Promtail/Alloy/Filebeat) + Loki + Grafana is the lightweight path for N100. OpenSearch is viable but resource-heavy. Pipeline must be dockerized, kept off the core firewall data plane. |
-| **Threat-tracing dashboard** | End-to-end: source IP → IPS alert → action taken → geolocation, visible in a single pane | HIGH | Differentiates from IPFire's built-in WUI log viewer (paginated tables, no time-series, no correlation). Grafana dashboards with Loki-backed IPS alert logs and firewall drop logs. Requires log enrichment (DNS hostname, GeoIP). |
-| **IPS alert email + PDF reporting** | Scheduled summaries and threshold-based alerts without requiring dashboard access | MEDIUM | IPFire CU199/CU200 native (new in 2026): IPS reporter sends alert emails and PDF reports (daily/weekly/monthly). Requires SMTP configuration. This is now semi-table-stakes but not configured on fresh install. |
-| **DNS-over-TLS enforcement** | Prevents ISP/on-path observation of DNS queries from all internal clients | LOW | IPFire native capability but not enabled by default. Must configure DoT upstream resolvers (Cloudflare 1.1.1.1, Quad9, etc.) with TLS hostname and enforce via WUI toggle. |
-| **Domain blocklist (IPFire DBL)** | Blocks ads, malware C2, and adult content at DNS layer before browser load | LOW | IPFire CU200 native (beta as of March 2026): IPFire DBL integrated into URL Filter and Suricata. Replaces deprecated Shalla list. Requires explicit activation. |
-| **Full validation suite** | Proves every capability works after build or rebuild; not a manual checklist | HIGH | Not in any stock firewall distro. Custom shell scripts: NIC binding, zone routing, NAT, DNS, DHCP, IPS rule load, firewall hit/drop, reboot persistence, SSH lockout test. |
-| **Rollback procedures per change category** | Every class of change (firewall rules, IPS rules, DNS, DHCP, zone config) has a documented undo path | MEDIUM | IPFire docs acknowledge rollback procedures are "yet to be written" for some areas. Must be engineered from scratch and stored in repo. |
-| **Decision log (ADR format)** | Every architectural choice is documented with rationale and outcome | LOW | Git repo artifact. Prevents revisiting settled decisions. Feeds future operators. |
-| **Docker-based supporting services** | Keeps non-core workloads (telemetry, dashboards) isolated from the firewall data plane | MEDIUM | IPFire native: Docker available via Pakfire. Core firewall/routing/NAT must remain native; Docker only for telemetry stack. Resource budget matters on N100 (6W TDP). |
-| **OPT zone activation (3 optional segments)** | 6 NICs allow WAN + LAN + MGMT + 3 additional security segments beyond stock GREEN+RED | MEDIUM | IPFire supports ORANGE (DMZ) and BLUE (IoT/WiFi) natively. A dedicated management zone (MGMT) on a physical NIC with strict access rules is an additional hardening step not in stock IPFire. Uses remaining OPT ports. |
-| **Source NAT (SNAT) for multi-IP scenarios** | When RED has multiple IPs, specific internal hosts or servers can exit on designated IPs | LOW | IPFire native capability (Firewall Rules → Source NAT), but rarely configured on stock installs. Value for servers behind the firewall needing known egress IPs. |
+| **DFIR-IRIS case management** | Formal case tracking, evidence attachment, task assignment, immutable audit trail per incident | HIGH | DFIR-IRIS is fully open-source, Docker-deployable, supports alert ingestion via API. Connects to Malcolm/OpenSearch alerts via webhook or polling. Creates structured case records with analyst notes. The fully-automated pipeline (alert → enrich → AI triage → DFIR-IRIS case) is the v2 gold standard. |
+| **AI-enriched alert summaries in triage queue** | Instead of raw JSON alerts, analyst sees: "This alert indicates [X] technique (ATT&CK TID), seen from [IP], correlated with [prior events], confidence [H/M/L]" | HIGH | Requires: alert ingestion from OpenSearch, context lookup via RAG (matching alert to ADRs/runbooks), Foundation-Sec-8B synthesis, structured output writer. High analyst time-savings when working. |
+| **MITRE ATT&CK mapping on alerts** | Foundation-Sec-8B maps Suricata alert signatures to ATT&CK techniques automatically | MEDIUM | Foundation-Sec-8B is fine-tuned on ATT&CK data. Prompt template: "Given this Suricata alert: [alert], what ATT&CK technique(s) does this map to? Provide TID and confidence." Output appended to enriched alert record. |
+| **RAG over ADRs and runbooks** | Analyst can ask "What is the runbook for this alert type?" and get a project-specific answer, not a generic one | MEDIUM | Indexes `.planning/` directory, all runbooks, validation results, control documentation. Retrieval uses vector similarity over embedded chunks. Embedding model: nomic-embed-text (free, runs via Ollama, 137M params, efficient on CPU). |
+| **Broader telemetry ingestion (endpoint, auth, asset inventory)** | Malcolm via Filebeat beats pipeline can accept host logs, auth logs, and other third-party sources beyond IPFire | MEDIUM | Malcolm supports Fluent Bit and Beats for third-party logs (indexed under `malcolm_beats_*`). Endpoint logs from internal hosts, auth logs (SSH, sudo), asset inventory enrichment all ingestible. NetBox in Malcolm supports asset modeling — auto-populates from observed network traffic. |
+| **Community-id correlation between Zeek and Suricata** | Zeek conn logs and Suricata alerts share a common community_id field, enabling join queries in OpenSearch | LOW | Suricata `community-id` option must be enabled in `suricata.yaml`. Malcolm normalizes both into the same OpenSearch index. Out-of-the-box correlation becomes possible in Discover/Dashboards. Requires `community-id: true` in existing IPFire Suricata config. |
+| **File extraction and malware scanning** | Zeek extracts files from network traffic; Malcolm scans with ClamAV, YARA, and capa | MEDIUM | Built into Malcolm (ClamAV, YARA, capa containers). Out-of-the-box once Malcolm is deployed with live capture. No custom integration required. Alerts surface in OpenSearch when malware is detected in transiting files. |
+| **Arkime PCAP investigation interface** | Full packet capture retrieval for incident investigation; session-level drill-down | MEDIUM | Built into Malcolm. Arkime captures PCAP on the live capture interface. Requires sufficient disk (SSD preferred, as much as available). Analyst can pivot from OpenSearch alert → Arkime session → raw packet in one workflow. |
 
 ---
 
 ### Anti-Features (Deliberately NOT Building)
 
-Features that sound useful but create scope creep, complexity, or conflict with the project constraints.
+Features that are tempting but create problems for a local-first, constrained-hardware SOC.
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| **VPN server (IPsec/OpenVPN/WireGuard)** | Remote access to internal network from outside | Separate concern; adds key management, certificate lifecycle, split-tunneling policy complexity. PROJECT.md explicitly out-of-scope. | Separate project after firewall is validated. IPFire supports all three protocols natively when needed. |
-| **WiFi AP management** | Convenient to manage APs from the firewall | Dedicated AP hardware runs its own controller (OpenWRT, Ubiquiti, etc.). Mixing AP management into the firewall creates coupling. PROJECT.md explicitly out-of-scope. | Dedicated APs with their own management plane; BLUE zone provides segmentation. |
-| **Full ELK/OpenSearch stack on-box** | Most tutorials use ELK; familiar to operators | OpenSearch is resource-heavy — JVM heap alone consumes 1-4GB RAM on an N100 with 16GB. Competes with Suricata and Docker daemon for CPU. | Grafana + Loki stack (columnar, label-indexed) is 5-10x more efficient on constrained hardware. Off-box OpenSearch is viable if a second host exists. |
-| **AI/ML threat detection (Zenarmor, etc.)** | Emerging standard in commercial NGFWs | Requires subscription, additional agent, and significant CPU for inference. N100 is not dimensioned for real-time ML inference on wire-speed traffic. | Curated Suricata rulesets (ET Pro, Abuse.ch) provide signature-based detection appropriate for this hardware class. |
-| **Web filtering / Squid proxy** | URL-level content blocking, bandwidth caching | Adds TLS inspection complexity (MITM CA), breaks certificate pinning, increases RAM use significantly. DNS-layer blocking via IPFire DBL covers the primary use case without man-in-the-middle. | IPFire DBL (CU200) for DNS-layer blocking; Suricata for encrypted-traffic behavioral analysis. |
-| **GUI-based configuration tools beyond IPFire WUI** | Web GUI wrappers, Ansible Galaxy roles, etc. are tempting for automation | IPFire's architecture assumes WUI writes configs to `/var/ipfire/`. External tools that bypass WUI can corrupt config state. PROJECT.md explicitly: native tools only. | Git-backed shell scripts that write canonical IPFire config files directly and reload services via `ipfire` init scripts. |
-| **High-availability / cluster failover** | Two-node HA prevents single point of failure | Complexity doubles: CARP/VRRP, config sync, shared state tables. N100 mini-PC is a single appliance. Git-based rebuild from repo is the HA strategy: rebuild in minutes, not seconds. | Fast rebuild from repo + documented manual failover procedure. Accept RTO of ~15 minutes rather than sub-second. |
-| **Certificate authority (internal PKI)** | mTLS between internal services, internal HTTPS | CA lifecycle (rotation, revocation) is a separate discipline. Scope creep from firewall into PKI management. | Use Let's Encrypt for externally-facing services; self-signed for internal management endpoints. Defer internal PKI to a separate project. |
-| **Intrusion deception / honeypots** | Detect lateral movement via fake credentials | Honeypot management is operationally complex; false positive risk on home/SOHO networks is high. Out of scope for v1 firewall. | IPS alert thresholds + network flow logging provide adequate lateral movement visibility for this network scale. |
+| **Real-time LLM alert analysis on every event** | Automatic AI triage on every Suricata alert sounds powerful | N150 at 2–8 tokens/sec cannot process a burst of 100 alerts in real time without queue saturation. Creates backpressure, drops alerts, or exhausts RAM. At 5 tokens/sec and ~200 tokens per analysis, one alert takes ~40 seconds. | Batch triage: run AI analysis on queued alerts every N minutes or on analyst request. Prioritize by severity (critical first). Rate-limit AI calls. |
+| **Cloud LLM APIs as fallback** | OpenAI/Anthropic API is faster and more capable | Defeats the entire "local-first, no cloud dependencies" core value. Sends potentially sensitive alert data (internal IPs, hostnames, network topology) to third parties. | Accept the performance limitations of local inference. Foundation-Sec-8B Q4_K_M is fit for purpose on batch security tasks. |
+| **Malcolm on IPFire host** | Co-locating NSM with the firewall seems efficient | Malcolm minimum is 8 cores/24 GB RAM. IPFire N100 has 4 cores, 16 GB. Docker is rejected by IPFire developers. Running Malcolm on the firewall would destabilize the data plane. | Malcolm runs on supportTAK-server (N150, 16 GB). IPFire forwards EVE JSON via Filebeat. |
+| **Replacing on-box Suricata with Malcolm's internal Suricata** | Malcolm ships its own Suricata container; redundancy seems wasteful | On-box Suricata in IPS mode can DROP packets (inline mode). Malcolm's Suricata runs off-box on mirrored traffic — it is detection-only, cannot block. The on-box Suricata must stay for prevention capability. | Keep IPFire's on-box Suricata for IPS. Use Malcolm's Suricata for NSM visibility on mirrored traffic. Accept the redundancy — they serve different functions. |
+| **OpenSearch with default JVM heap** | Simpler to deploy with defaults | Default OpenSearch heap is 1 GB minimum, often set to 50% of RAM = 8 GB on a 16 GB host. This leaves 8 GB for everything else (Zeek, Arkime, Logstash, Filebeat, OS). Malcolm will OOM or swap. | Tune OpenSearch heap to 4–6 GB on a 16 GB host. Set explicit `OPENSEARCH_JAVA_OPTS=-Xms4g -Xmx4g` in Malcolm's environment. Accept reduced indexing throughput. |
+| **Full DFIR-IRIS in v2 MVP** | Case management is the right end state | DFIR-IRIS adds another Docker service, integration complexity, and requires workflow discipline to use correctly. If not used consistently, it becomes stale data. | Build the minimal triage queue first (alert → AI enrichment → structured output file). Add DFIR-IRIS as a differentiator once the AI enrichment pipeline is proven. |
+| **LLM-generated automated response actions** | AI could automatically block IPs, adjust firewall rules | LLM hallucinations in an automated response pipeline can block legitimate traffic, create outages, or be exploited via prompt injection. No human-in-the-loop = catastrophic failure mode. | AI analyst produces recommendations only. Human approves and executes. Alert triage queue shows AI recommendation + confidence; analyst clicks "accept" or "reject." |
+| **Agentic multi-LLM orchestration** | Five-agent SOC (Triage, Detect, Hunt, Respond, Coordinate) is the research state-of-the-art | Each additional agent multiplies: RAM usage, inference time, prompt complexity, hallucination surface, and debugging difficulty. N150 cannot sustain multiple concurrent LLM inference processes. | Single Foundation-Sec-8B instance handling triage queries sequentially. Multi-agent is v3+ if hardware improves. |
+| **SBOM vulnerability scanning pipeline (Grype/Dependency-Track)** | Full SBOM workflow includes CVE enrichment | Grype + Dependency-Track adds significant operational complexity (another Docker service, vulnerability database sync, ticket integration). The project has no software dependencies in the traditional sense — it is shell scripts and config files. | Generate SBOM with Syft, sign with Cosign, store in repo. CVE scanning of the SBOM is out of scope for v2; the SBOM itself is the deliverable. |
+
+---
+
+## What Malcolm Provides Out-of-the-Box vs. What Needs Custom Integration
+
+This distinction is critical for phase planning. Malcolm does a lot automatically — do not rebuild what it provides.
+
+### Malcolm Out-of-the-Box (Zero Custom Code)
+
+| Capability | Malcolm Component | Notes |
+|------------|-------------------|-------|
+| Network protocol metadata (DNS, HTTP, TLS, SSH, conn, etc.) | Zeek (containerized) | 40+ Zeek log types, all indexed into OpenSearch |
+| Suricata IDS alerts with rule updates | Suricata (containerized) | Suricata rule updates enabled by default; supports ET Community, OISF, etc. |
+| PCAP storage and retrieval | Arkime (containerized) | Full packet capture on live interfaces; session search UI |
+| OpenSearch indexing and querying | OpenSearch + Logstash | Logstash enrichment pipeline normalizes all log types |
+| Visualization dashboards (dozens prebuilt) | OpenSearch Dashboards | Protocol-specific dashboards for all Zeek log types + Suricata |
+| GeoIP enrichment | Logstash pipeline | Auto-enriches source/dest IPs with country, org, coordinates |
+| MAC OUI manufacturer lookup | Logstash pipeline | Hardware vendor from MAC address, auto-populated |
+| JA4/JA3 TLS fingerprinting | Zeek/Logstash | Identifies TLS client/server fingerprints for threat hunting |
+| File extraction and scanning | ClamAV + YARA + capa containers | Triggered automatically on Zeek-extracted file transfers |
+| Asset inventory (NetBox) | NetBox container | Auto-populates from observed traffic; manual enrichment supported |
+| MITRE ATT&CK mapping for ICS (BZAR/ACID) | Zeek scripts | Primarily for OT/ICS environments; enabled by default |
+| Filebeat forwarder support | Logstash pipeline | Remote sensors ship logs via Filebeat over TLS to port 5044 |
+| Email/webhook alerting | OpenSearch alerting plugin | Threshold-based alerts configurable in Dashboards UI |
+| REST API | Malcolm API + OpenSearch API | Programmatic access to all data; needed for AI analyst integration |
+
+### Requires Custom Integration
+
+| Capability | What Needs Building | Complexity |
+|------------|---------------------|------------|
+| IPFire EVE JSON → Malcolm | Filebeat config on supportTAK-server (or remote forwarder on IPFire) tailing `/var/log/suricata/eve.json`, shipping to Malcolm Logstash:5044 with TLS certs | MEDIUM |
+| Network tap / SPAN for live Zeek capture | IPFire must mirror traffic to a second NIC on supportTAK-server. Requires either: hardware tap, managed switch SPAN port, or IPFire `tc` mirror rule. None are trivial on the current hardware setup. | HIGH |
+| Foundation-Sec-8B Ollama install | Install Ollama on supportTAK-server, pull `fdtn-ai/Foundation-Sec-8B-Instruct-Q4_K_M-GGUF`, configure as service | LOW |
+| Prompt template for alert triage | Shell or Python wrapper: ingest alert JSON → format prompt → call Ollama API → parse response | MEDIUM |
+| RAG corpus ingestion pipeline | Python script using LangChain/LlamaIndex: chunk `.planning/` docs → embed with nomic-embed-text → store in ChromaDB | MEDIUM |
+| RAG retrieval integration | At query time: embed query → retrieve top-K chunks from ChromaDB → inject into Foundation-Sec-8B context | MEDIUM |
+| Alert queue daemon | Polling loop: query OpenSearch for new critical alerts → deduplicate → queue for AI analysis → write enriched output | MEDIUM |
+| SBOM generation script | `syft dir:. -o cyclonedx-json > sbom.json` triggered on git tag; part of release script | LOW |
+| Cosign signing | `cosign sign-blob sbom.json --key cosign.key` integrated into release process | LOW |
+| community-id in IPFire Suricata | Add `community-id: true` to IPFire's `suricata.yaml` (via backup-included config) | LOW |
 
 ---
 
 ## Feature Dependencies
 
 ```
-[Zone NIC Mapping]
-    └──required-by──> [Zone Segmentation Policy]
-                           └──required-by──> [DHCP per Zone]
-                           └──required-by──> [IDS/IPS Zone Selection]
-                           └──required-by──> [OPT Zone Activation]
+[Malcolm NSM deployed]
+    └──requires──> [supportTAK-server Docker Compose]
+    └──requires──> [EVE JSON forwarding from IPFire]
+                       └──requires──> [Filebeat config with Malcolm TLS certs]
+                       └──requires──> [Existing on-box Suricata EVE JSON output]
+    └──requires──> [Network tap/SPAN for Zeek live capture] (differentiator, not MVP)
+    └──provides──> [OpenSearch Dashboards]
+    └──provides──> [Arkime PCAP investigation]
+    └──provides──> [REST API for AI analyst integration]
 
-[Stateful Firewall + NAT]
-    └──required-by──> [Port Forwarding (DNAT)]
-    └──required-by──> [Source NAT (SNAT)]
-    └──required-by──> [Anti-Lockout Policy]
+[Foundation-Sec-8B (Ollama)]
+    └──requires──> [Ollama installed on supportTAK-server]
+    └──requires──> [Q4_K_M GGUF model pulled]
+    └──provides──> [AI analyst inference endpoint]
 
-[DNS Resolver (Unbound)]
-    └──required-by──> [DNS-over-TLS Enforcement]
-    └──required-by──> [DNSSEC Validation]
-    └──required-by──> [Domain Blocklist (IPFire DBL)]
-    └──required-by──> [DHCP-DNS Integration] (hostname from DHCP remark field)
+[RAG corpus]
+    └──requires──> [Foundation-Sec-8B (Ollama)] (embedding model: nomic-embed-text)
+    └──requires──> [ChromaDB or Qdrant running locally]
+    └──requires──> [Document ingestion pipeline (.planning/ + runbooks)]
+    └──enhances──> [Alert triage] (provides project-specific context)
 
-[Remote Syslog (UDP 514)]
-    └──required-by──> [Telemetry Pipeline]
-                           └──required-by──> [Threat-Tracing Dashboard]
+[Alert triage queue]
+    └──requires──> [Malcolm NSM deployed] (OpenSearch as alert source)
+    └──requires──> [Foundation-Sec-8B (Ollama)] (AI enrichment)
+    └──enhances──> [RAG corpus] (better answers with retrieval)
+    └──feeds──> [DFIR-IRIS] (optional; case management differentiator)
 
-[IDS/IPS (Suricata)]
-    └──required-by──> [IPS Alert Email / PDF Reports]
-    └──required-by──> [IPS Alert Forwarding to Remote Syslog]
-    └──enhances──> [Threat-Tracing Dashboard] (alert events in log stream)
-    └──enhances──> [Domain Blocklist] (DBL feeds Suricata rule engine in CU200)
+[DFIR-IRIS case management]
+    └──requires──> [Alert triage queue]
+    └──requires──> [Docker Compose on supportTAK-server]
 
-[Docker (Pakfire)]
-    └──required-by──> [Telemetry Pipeline Containers]
-    └──required-by──> [Threat-Tracing Dashboard Containers]
+[SBOM + signed releases]
+    └──requires──> [Syft installed]
+    └──requires──> [Cosign installed + key generated]
+    └──independent-of──> [Malcolm NSM] (supply chain feature, not SOC feature)
+    └──independent-of──> [Foundation-Sec-8B]
 
-[Git Repo + Rebuild Scripts]
-    └──required-by──> [Validation Suite] (scripts live in repo)
-    └──required-by──> [Rollback Procedures] (documented in repo)
-    └──enhances──> [Decision Log] (ADRs committed to repo)
-
-[SSH Hardening]
-    └──enhances──> [Anti-Lockout Policy] (key-only auth + IP whitelist)
-    └──requires──> [SSH Brute-Force Protection] (fail2ban/Guardian)
+[community-id correlation]
+    └──requires──> [On-box Suricata config update]
+    └──enhances──> [Malcolm NSM] (enables Zeek+Suricata join queries)
 ```
 
 ### Dependency Notes
 
-- **Zone NIC mapping must precede all zone-dependent features:** If interfaces are not persistently mapped to zones via MAC-based udev rules, zone policy, DHCP scopes, and IPS zone selection are all unreliable after reboots or kernel updates.
-- **Remote syslog is prerequisite for telemetry pipeline:** IPFire sends logs via UDP syslog only (TCP not natively supported). The collector must listen on UDP 514 on the same network segment IPFire can reach.
-- **Docker requires core firewall stability first:** Containers on the same host as the firewall share the kernel network stack. Deploying containers before the firewall ruleset is validated introduces noise into troubleshooting.
-- **IPS rules conflict with management access:** The `emerging-policy.rules` Suricata category is known to block Linux package manager traffic, potentially blocking Pakfire updates. Enable IPS rule categories incrementally, one per day, while monitoring IPS logs.
-- **DBL (CU200) requires Suricata and/or URL Filter enabled:** The domain blocklist feature feeds into two enforcement points — proxy-based URL Filter (requires Squid) and Suricata IPS. Since Squid is an anti-feature here, DBL value comes through the Suricata path only.
+- **Network tap is the hardest Malcolm dependency:** Malcolm's Zeek live capture needs raw packets mirrored from IPFire's interfaces. Without a SPAN port or hardware tap, Zeek can only analyze traffic already on the supportTAK-server's own NIC (management traffic only — not the firewall data plane). If no SPAN is available, Malcolm operates in "upload mode" only (PCAP file upload, Filebeat log forwarding) without live Zeek metadata. This is a significant capability gap.
+- **16 GB RAM is below Malcolm's minimum:** Malcolm recommends 32+ GB, minimum 24 GB. supportTAK-server has 16 GB. This is the single biggest risk to the Malcolm deployment. Mitigation: aggressive OpenSearch heap tuning (4–6 GB), disable unused Malcolm containers, reduce Arkime PCAP threads.
+- **Foundation-Sec-8B + Malcolm on the same 16 GB host:** Malcolm under memory pressure + Ollama loading a 4.92 GB model = likely OOM without careful resource allocation. The LLM should be loaded on-demand (not persistent daemon) or given a strict memory ceiling via Docker/systemd resource limits.
+- **SBOM is independent:** Syft + Cosign does not depend on Malcolm or Foundation-Sec-8B. It can be implemented in any phase without blocking SOC features.
+- **Loki decommission must be planned:** The existing Loki/Alloy/Grafana stack on supportTAK-server must be kept running until Malcolm is confirmed stable as a replacement. RAM on the 16 GB host cannot support both stacks simultaneously at full capacity.
 
 ---
 
-## MVP Definition
+## MVP Definition for v2.0
 
-For this project, "MVP" means: the appliance is production-ready and the core value ("can be rebuilt from repo in minutes") is validated. It does not mean feature-complete.
+### Launch With (v2.0 — Local AI SOC)
 
-### Launch With (v1 — Production-Ready Baseline)
+The v2.0 milestone is complete when the telemetry backend has migrated to Malcolm and an AI analyst can triage alerts using project knowledge.
 
-- [ ] **All 6 NICs persistently mapped** — Zone assignments survive reboots; udev rules in repo. Foundation for everything else.
-- [ ] **Stateful firewall, default-deny inbound, NAT/masquerade** — Base security posture. Validated by automated test.
-- [ ] **Zone segmentation: GREEN/RED/ORANGE/BLUE + MGMT** — All physical ports assigned; inter-zone policies locked down.
-- [ ] **DHCP server on GREEN (and optionally BLUE)** — Clients receive addresses, gateway, DNS, NTP.
-- [ ] **DNS resolver: Unbound + DNSSEC + DNS-over-TLS** — Mandatory DNSSEC, DoT upstream configured and enforced.
-- [ ] **NTP service** — Synchronized clocks; accurate log timestamps.
-- [ ] **SSH hardened + brute-force protection** — Key-only auth, IP whitelist, fail2ban jail, 15-minute auto-disable.
-- [ ] **IDS/IPS (Suricata) with auto-updating rules** — ET Community minimum; zone selection configured; monitor-only tuning period completed.
-- [ ] **System hardening** — Unused services disabled, permissions locked, audit logging active.
-- [ ] **Remote syslog forwarding to telemetry collector** — Firewall and IPS logs reaching collector container.
-- [ ] **Telemetry pipeline (Loki + Grafana in Docker)** — Firewall drops and IPS alerts searchable and graphable.
-- [ ] **Threat-tracing dashboard** — Source IP → alert → action visible end-to-end.
-- [ ] **Full validation suite** — All capabilities tested by scripts; outputs pass/fail.
-- [ ] **Git repo with rebuild scripts + rollback procedures** — Fresh install can be reproduced from repo. Rebuild tested.
-- [ ] **Decision log** — All architectural choices recorded.
+- [ ] **Malcolm deployed on supportTAK-server** — Docker Compose stack running with OpenSearch heap tuned for 16 GB host
+- [ ] **IPFire EVE JSON flowing into Malcolm via Filebeat** — Suricata alerts visible in Malcolm OpenSearch Dashboards
+- [ ] **Foundation-Sec-8B-Instruct Q4_K_M running via Ollama** — Model responds to security-domain queries via API
+- [ ] **RAG corpus indexed** — ADRs, runbooks, validation results embedded and stored in ChromaDB
+- [ ] **Alert triage script operational** — New critical Suricata alerts enriched by AI analyst with ATT&CK mapping and summary
+- [ ] **SBOM generated and signed on git tag** — Syft + Cosign producing CycloneDX SBOM as part of release process
+- [ ] **Loki stack decommissioned or confirmed redundant** — Clean handoff; no duplicate pipelines consuming RAM
 
-### Add After Validation (v1.x)
+### Add After Validation (v2.x)
 
-- [ ] **IPS alert emails + PDF reports** — Requires SMTP config; value is clear but not needed to validate core appliance. Trigger: IPS tuning period complete (false positive rate acceptable).
-- [ ] **Domain blocklist (IPFire DBL)** — Currently beta in CU200. Trigger: DBL exits beta and stabilizes.
-- [ ] **SNAT for additional WAN IPs** — Only relevant if ISP provides multiple IPs or a /29 block. Trigger: when needed.
-- [ ] **Additional OPT zone policies** — Refined DMZ pinholes for specific services (e.g., a home NAS in ORANGE). Trigger: when services are deployed behind the firewall.
-- [ ] **GeoIP dashboards** — IPS alert and firewall drop heatmaps by country. Trigger: telemetry pipeline stable.
+- [ ] **Network tap / SPAN for Zeek live capture** — Requires hardware investigation; adds protocol-level visibility. Trigger: managed switch available or hardware tap sourced.
+- [ ] **DFIR-IRIS case management** — Formal case tracking. Trigger: alert triage pipeline proven stable and producing quality output.
+- [ ] **community-id correlation** — Enables Zeek+Suricata join queries in OpenSearch. Trigger: both Zeek and Suricata data flowing into Malcolm.
+- [ ] **Broader telemetry ingestion** — Endpoint logs, auth logs, asset inventory via NetBox. Trigger: Malcolm stable with core IPFire telemetry.
+- [ ] **Foundation-sec-8b-reasoning model** — Enhanced reasoning capabilities. Trigger: hardware upgrade (32+ GB RAM) or GPU acceleration added.
 
-### Future Consideration (v2+)
+### Future Consideration (v3+)
 
-- [ ] **VPN server** — Separate project. Trigger: appliance validated, VPN use case emerges.
-- [ ] **Internal PKI** — Deferred. Trigger: internal services requiring mTLS.
-- [ ] **Off-box telemetry** — Moving the Loki/Grafana stack to a secondary host frees N100 resources. Trigger: N100 shows sustained high CPU under telemetry load.
+- [ ] **Dedicated GPU acceleration for LLM inference** — Moves from 2–8 tok/sec to 40–80+ tok/sec. Trigger: budget and hardware upgrade.
+- [ ] **DFIR-IRIS + n8n SOAR automation** — Full automated pipeline with human approval gates. Trigger: v2 alert triage proven reliable.
+- [ ] **Qdrant replacing ChromaDB** — Production-grade vector DB with RBAC and hybrid search. Trigger: RAG corpus exceeds 100K vectors or access control becomes needed.
+- [ ] **Multi-source threat intelligence RAG** — Ingest MITRE ATT&CK STIX data, NVD CVE feeds, ThreatFox IOC feeds into RAG corpus. Trigger: v2 RAG operational and valuable.
 
 ---
 
 ## Feature Prioritization Matrix
 
-| Feature | User Value | Implementation Cost | Priority |
-|---------|------------|---------------------|----------|
-| Stateful firewall + NAT | HIGH | LOW | P1 |
-| Zone NIC mapping (persistent) | HIGH | MEDIUM | P1 |
-| Zone segmentation policy | HIGH | LOW | P1 |
-| DHCP server per zone | HIGH | LOW | P1 |
-| DNS resolver (Unbound + DNSSEC + DoT) | HIGH | LOW | P1 |
-| SSH hardening + brute-force protection | HIGH | LOW | P1 |
-| IDS/IPS (Suricata) + auto-updates | HIGH | MEDIUM | P1 |
-| Remote syslog forwarding | HIGH | LOW | P1 |
-| Telemetry pipeline (Loki + Grafana) | HIGH | HIGH | P1 |
-| Threat-tracing dashboard | HIGH | HIGH | P1 |
-| Git repo + rebuild scripts | HIGH | MEDIUM | P1 |
-| Validation suite | HIGH | HIGH | P1 |
-| Rollback procedures | MEDIUM | MEDIUM | P1 |
-| System hardening | HIGH | MEDIUM | P1 |
-| IPS alert email + PDF reports | MEDIUM | LOW | P2 |
-| Domain blocklist (IPFire DBL) | MEDIUM | LOW | P2 |
-| Anti-lockout policy (explicit rule) | HIGH | LOW | P1 |
-| Port forwarding (DNAT) | MEDIUM | LOW | P2 |
-| Source NAT (SNAT) | LOW | LOW | P3 |
-| OPT zone additional policies | MEDIUM | MEDIUM | P2 |
-| Decision log | MEDIUM | LOW | P1 |
-| GeoIP dashboards | LOW | MEDIUM | P3 |
-| VPN server | LOW (v1) | HIGH | P3 |
+| Feature | Analyst Value | Implementation Cost | Priority |
+|---------|--------------|---------------------|----------|
+| Malcolm deployed + EVE JSON ingest | HIGH | HIGH | P1 |
+| Foundation-Sec-8B via Ollama | HIGH | MEDIUM | P1 |
+| Alert triage script (AI enrichment) | HIGH | MEDIUM | P1 |
+| RAG corpus (ADRs + runbooks) | HIGH | MEDIUM | P1 |
+| SBOM + signed releases | MEDIUM | LOW | P1 |
+| OpenSearch Dashboards (Malcolm built-in) | HIGH | LOW (out-of-box) | P1 |
+| Arkime PCAP investigation (Malcolm built-in) | HIGH | LOW (out-of-box) | P1 |
+| Loki decommission | MEDIUM | MEDIUM | P1 |
+| community-id correlation | MEDIUM | LOW | P2 |
+| Network tap / Zeek live capture | HIGH | HIGH | P2 |
+| DFIR-IRIS case management | MEDIUM | HIGH | P2 |
+| File extraction + malware scan (Malcolm built-in) | MEDIUM | LOW (out-of-box) | P2 |
+| Broader endpoint telemetry ingest | MEDIUM | MEDIUM | P2 |
+| ATT&CK mapping on all alerts | HIGH | MEDIUM | P2 |
+| Asset inventory via NetBox (Malcolm built-in) | LOW | LOW (out-of-box) | P3 |
+| Foundation-sec-8b-reasoning model | MEDIUM | MEDIUM | P3 |
+| Qdrant production vector DB | LOW | MEDIUM | P3 |
+| Multi-source threat intel RAG | MEDIUM | HIGH | P3 |
 
 ---
 
 ## Competitor Feature Analysis
 
-| Feature | Stock IPFire (fresh install) | pfSense/OPNsense | This Project |
-|---------|------------------------------|------------------|--------------|
-| Stateful firewall | Native, configured | Native, configured | Native, validated by script |
-| NAT / masquerade | Native, default on | Native, default on | Native, documented |
-| IDS/IPS | Suricata installed, NOT configured | Add-on or built-in, not auto-updating | Configured, zone-selected, auto-updating rulesets |
-| DNS (Unbound + DNSSEC) | Enabled by default | Via add-on (Unbound) | Enabled + DoT enforced + DBL activated |
-| DHCP | Configured via WUI | Configured via WUI | Configured, static leases in repo |
-| Remote syslog | UDP 514 configurable | Configurable | Configured, feeding pipeline |
-| Network telemetry pipeline | Not present | Via pfSense/OPNsense plugins (Netflow) | Loki + Grafana in Docker |
-| Threat-tracing dashboard | Not present | Limited (Netflow graphs) | Custom Grafana dashboards |
-| Git-based reproducibility | Not present | Not present | Core project deliverable |
-| Automated validation suite | Not present | Not present | Full scripted test suite |
-| Rollback procedures | Docs say "FIXME" | Partial documentation | Documented per change category |
-| NIC-to-zone persistent mapping | Not documented | Partially via MAC rules | Explicit udev rules in repo |
-| System hardening guide | Exists in wiki | Exists in docs | Applied + validated |
+| Feature | Basic Malcolm (no AI) | Security Onion | This Project (v2) |
+|---------|-----------------------|----------------|-------------------|
+| Zeek NSM | Native | Native | Native (via Malcolm) |
+| Suricata IDS | Native (containerized) | Native | On-box IPFire + Malcolm mirror |
+| OpenSearch dashboards | Native (dozens prebuilt) | Native (Kibana) | Native (via Malcolm) |
+| PCAP investigation | Arkime (native) | Zeek + Stenographer | Arkime (via Malcolm) |
+| File extraction + malware scan | Native | Native | Native (via Malcolm) |
+| AI alert triage | Not present | Not present | Foundation-Sec-8B (custom) |
+| RAG over org knowledge | Not present | Not present | ChromaDB + LlamaIndex (custom) |
+| ATT&CK auto-mapping | Not present | Not present | Foundation-Sec-8B (custom) |
+| Case management | Not present | TheHive integration | DFIR-IRIS (v2.x) |
+| Git-based reproducibility | Not present | Not present | Core project value |
+| SBOM + signed releases | Not present | Not present | Syft + Cosign (custom) |
+| Hardware requirement | 8C/24GB min | 4C/8GB min | N150 16GB (below Malcolm min) |
 
 ---
 
 ## Sources
 
-- [IPFire Official Documentation](https://www.ipfire.org/docs/) — HIGH confidence
-- [IPFire IPS Configuration](https://www.ipfire.org/docs/configuration/firewall/ips) — HIGH confidence
-- [IPFire Suricata Rulesets](https://www.ipfire.org/docs/configuration/firewall/ips/rulesets) — HIGH confidence
-- [IPFire DNS Server](https://www.ipfire.org/docs/configuration/network/dns-server) — HIGH confidence
-- [IPFire DHCP Server](https://www.ipfire.org/docs/configuration/network/dhcp) — HIGH confidence
-- [IPFire Zone Configuration](https://www.ipfire.org/docs/configuration/network/zoneconf) — HIGH confidence
-- [IPFire Firewall Rules Reference](https://wiki.ipfire.org/configuration/firewall/rules) — HIGH confidence
-- [IPFire NAT Reference](https://wiki.ipfire.org/configuration/firewall/nat) — HIGH confidence
-- [IPFire Port Forwarding](https://www.ipfire.org/docs/configuration/firewall/rules/port-forwarding) — HIGH confidence
-- [IPFire Security Hardening Guide](https://wiki.ipfire.org/optimization/start/security_hardening) — HIGH confidence
-- [IPFire Core Update 199 Release Notes](https://www.ipfire.org/blog/ipfire-2-29-core-update-199-released) — HIGH confidence
-- [IPFire Core Update 200 Release Notes](https://www.ipfire.org/blog/ipfire-2-29-core-update-200-released) — HIGH confidence
-- [IPFire Log Settings](https://wiki.ipfire.org/configuration/logs/logsettings) — HIGH confidence
-- [IPFire IPS Configuration Recommendations](https://www.ipfire.org/blog/ips-configuration-recommendations-for-ipfire-users) — HIGH confidence
-- [IPFire DNS Configuration Recommendations](https://www.ipfire.org/blog/dns-configuration-recommendations-for-ipfire-users) — HIGH confidence
-- [IPFire vs pfSense Comparison — Tolu Michael](https://tolumichael.com/ipfire-vs-pfsense/) — MEDIUM confidence
-- [Best Hardware Firewalls for Home/SMB — Zenarmor](https://www.zenarmor.com/docs/network-security-tutorials/best-hardware-firewalls-for-home-and-small-business-networks) — MEDIUM confidence
-- [Firewall Observability Best Practices — Homelab Guide](https://excalibursheath.com/guide/2025/09/07/homelab-security-automation-monitoring.html) — MEDIUM confidence
-- [IPFire + Graylog community integration](https://forum.ipfire.org/viewtopic.php?t=18193) — MEDIUM confidence (community thread)
+- [Malcolm NSM Official Documentation](https://malcolm.fyi/docs/) — HIGH confidence
+- [Malcolm System Requirements](https://malcolm.fyi/docs/system-requirements.html) — HIGH confidence (minimum 8C/24GB verified)
+- [Malcolm Third-Party Logs / Filebeat Forwarding](https://malcolm.fyi/docs/third-party-logs.html) — HIGH confidence
+- [Malcolm Live Analysis Documentation](https://malcolm.fyi/docs/live-analysis.html) — HIGH confidence
+- [Malcolm Capabilities and Limitations](https://malcolm.fyi/docs/capabilities-and-limitations.html) — HIGH confidence
+- [Malcolm GitHub (cisagov/Malcolm)](https://github.com/cisagov/Malcolm) — HIGH confidence
+- [Foundation-Sec-8B Cisco Blog](https://blogs.cisco.com/security/foundation-sec-cisco-foundation-ai-first-open-source-security-model) — HIGH confidence
+- [Foundation-Sec-8B-Instruct: Out-of-the-Box Security Copilot](https://blogs.cisco.com/security/foundation-sec-8b-instruct-out-of-the-box-security-copilot) — HIGH confidence
+- [Foundation-Sec-8B Q4_K_M GGUF (Hugging Face)](https://huggingface.co/fdtn-ai/Foundation-Sec-8B-Q4_K_M-GGUF) — HIGH confidence (~4.92 GB)
+- [Foundation-Sec-8B Q8_0 GGUF (Hugging Face)](https://huggingface.co/fdtn-ai/Foundation-Sec-8B-Instruct-Q8_0-GGUF) — HIGH confidence (~8.54 GB)
+- [Foundation-sec-8b-reasoning (Cisco Blog)](https://blogs.cisco.com/security/foundation-sec-8b-reasoning-worlds-first-security-reasoning-model) — HIGH confidence
+- [How to Run Foundation-Sec-8B-Reasoning in Ollama (Feb 2026)](https://ai.plainenglish.io/how-to-run-ciscos-foundation-sec-8b-reasoning-in-ollama-diy-guide-c073c441dc06) — MEDIUM confidence
+- [DFIR-IRIS Official Site](https://www.dfir-iris.org/) — HIGH confidence
+- [SOC Automation Lab: DFIR-IRIS + n8n + LLM](https://github.com/chalithah/SOC-Automation-Lab) — MEDIUM confidence
+- [Syft SBOM Generation Guide (Jan 2026)](https://oneuptime.com/blog/post/2026-01-25-sbom-generation-syft/view) — HIGH confidence
+- [Creating SBOM Attestations Using Syft and Sigstore (Anchore)](https://anchore.com/sbom/creating-sbom-attestations-using-syft-and-sigstore/) — HIGH confidence
+- [OWASP Dependency Graph SBOM Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Dependency_Graph_SBOM_Cheat_Sheet.html) — HIGH confidence
+- [SPDX vs CycloneDX Comparison (CSO Online)](https://www.csoonline.com/article/573291/sbom-formats-spdx-and-cyclonedx-compared.html) — MEDIUM confidence
+- [RAG and Agentic AI in Cybersecurity (OpenText)](https://blogs.opentext.com/rag-and-agentic-ai-revolutionizing-cybersecurity-analysis/) — MEDIUM confidence
+- [LLM Hallucinations in 2026 (Lakera)](https://www.lakera.ai/blog/guide-to-hallucinations-in-large-language-models) — MEDIUM confidence
+- [Context Window Failures in LLMs](https://pr-peri.github.io/llm/2026/02/13/why-hallucination-happens.html) — MEDIUM confidence
+- [Chroma DB vs Qdrant Comparison (Airbyte)](https://airbyte.com/data-engineering-resources/chroma-db-vs-qdrant) — MEDIUM confidence
+- [Malcolm Network Traffic Analysis (INL PDF)](https://inl.gov/content/uploads/2023/07/Network-Traffic-Analysis-with-Malcolm.pdf) — MEDIUM confidence (2023, architecture still valid)
+- [Autonomous AI SOC for Alert Triage (Scribd)](https://www.scribd.com/document/889887906/Design-and-Implementation-of-an-Autonomous-AI-Agent-Security-Operations-Center-SOC-for-Alert-Triag) — MEDIUM confidence
 
 ---
 
-*Feature research for: IPFire-based hardened firewall appliance, Intel N100 6-NIC*
-*Researched: 2026-03-21*
+*Feature research for: Local-first AI SOC — v2.0 milestone (Malcolm NSM + Foundation-Sec-8B + RAG + triage + SBOM)*
+*Researched: 2026-03-31*

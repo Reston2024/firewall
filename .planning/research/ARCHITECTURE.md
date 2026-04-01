@@ -1,507 +1,558 @@
 # Architecture Research
 
-**Domain:** IPFire-based hardened firewall appliance with IDS and telemetry
-**Researched:** 2026-03-21
-**Confidence:** HIGH (zone model, NIC mapping, Suricata integration); MEDIUM (telemetry placement, Docker boundary)
+**Domain:** Local AI SOC — IPFire + Malcolm NSM + Foundation-Sec-8B + RAG on constrained hardware
+**Researched:** 2026-03-31
+**Confidence:** HIGH (Malcolm data flows, RAM budget math); MEDIUM (RAG pipeline integration, AI triage workflow); LOW (Malcolm 16GB viability without degradation — untested at this exact hardware)
 
 ---
 
-## Standard Architecture
+## Executive Summary
 
-### System Overview
+v2.0 pivots from a lightweight telemetry stack (Loki + Alloy + Grafana, ~500MB RAM) to a full NSM platform (Malcolm + OpenSearch, 16GB+ recommended) on the same 16GB supportTAK-server. This is the primary architectural constraint for the entire milestone.
 
-```
-                        ┌─────────────────────────────────────────────────┐
-                        │              INTERNET / ISP (RED)                │
-                        │                  NIC 1 (red0)                   │
-                        └────────────────────┬────────────────────────────┘
-                                             │
-                        ┌────────────────────▼────────────────────────────┐
-                        │                 IPFire HOST                      │
-                        │          Intel N100 — 6 NICs                    │
-                        │                                                  │
-                        │  ┌──────────────────────────────────────────┐   │
-                        │  │           PACKET PROCESSING PIPELINE      │   │
-                        │  │                                           │   │
-                        │  │  [NIC] → [nfqueue] → [Suricata IPS]      │   │
-                        │  │             ↓ (inline)                    │   │
-                        │  │        [iptables / netfilter]             │   │
-                        │  │             ↓                             │   │
-                        │  │         [Routing]                         │   │
-                        │  └──────────────────────────────────────────┘   │
-                        │                                                  │
-                        │  Native Services (Pakfire managed):              │
-                        │  ┌───────────┐ ┌─────────┐ ┌───────────────┐   │
-                        │  │  DHCP     │ │   DNS   │ │  NTP          │   │
-                        │  │  (dnsmasq)│ │(unbound)│ │  (ntpd)       │   │
-                        │  └───────────┘ └─────────┘ └───────────────┘   │
-                        │  ┌───────────┐ ┌─────────┐ ┌───────────────┐   │
-                        │  │  SSH      │ │  WUI    │ │  Suricata     │   │
-                        │  │(sshd+f2b) │ │ (:444)  │ │  (IDS/IPS)    │   │
-                        │  └───────────┘ └─────────┘ └───────────────┘   │
-                        │                                                  │
-                        │  Log files (native, on-box):                    │
-                        │  /var/log/messages  (iptables, syslog)          │
-                        │  /var/log/suricata/eve.json  (Suricata EVE)     │
-                        └──┬──────────┬───────────┬──────────┬───────────┘
-                           │          │           │          │
-            ┌──────────────▼──┐  ┌───▼───────┐ ┌▼────────┐ ┌▼──────────┐
-            │  GREEN (LAN)    │  │  BLUE     │ │ ORANGE  │ │  MGMT     │
-            │  NIC 2 (green0) │  │  (Guest)  │ │  (DMZ)  │ │  (green0  │
-            │  192.168.1.0/24 │  │  NIC 3    │ │  NIC 4  │ │  bridge / │
-            │                 │  │  blue0    │ │ orange0 │ │  NIC 5)   │
-            │  Trusted LAN    │  │  10.x/24  │ │ 172.x/24│ │  isolated │
-            │  clients + srvr │  │  Wireless │ │ Pub-fcg │ │  access   │
-            └─────────────────┘  └───────────┘ └─────────┘ └───────────┘
-                           │
-            ┌──────────────▼─────────────────────────────────────────────┐
-            │         TELEMETRY HOST (Docker, separate machine or VM)     │
-            │         On GREEN zone — firewall-controlled access          │
-            │                                                             │
-            │  ┌──────────┐  ┌────────┐  ┌────────┐  ┌──────────────┐  │
-            │  │ Promtail │→ │  Loki  │  │Grafana │  │  Prometheus  │  │
-            │  │(log ship)│  │ :3100  │  │ :3000  │  │  + node_exp  │  │
-            │  └──────────┘  └────────┘  └────────┘  └──────────────┘  │
-            └────────────────────────────────────────────────────────────┘
-```
+**The RAM budget does not support running Malcolm and Foundation-Sec-8B simultaneously at full recommended specs.**
 
-### Component Responsibilities
+The viable path is a tiered memory strategy: Malcolm's OpenSearch heap is reduced to 6-8GB (below Malcolm's own "pleasant" 10GB floor), leaving ~5-6GB for the OS, other Malcolm containers, and on-demand AI inference. Foundation-Sec-8B must use Q4_K_M quantization (~4.9GB model weight + ~1GB context = ~6GB peak) and run as a dormant service that wakes on analyst request, not as a persistent always-on daemon. This trades peak performance for operational viability on existing hardware.
 
-| Component | Responsibility | Implementation |
-|-----------|----------------|----------------|
-| IPFire kernel / netfilter | Packet filtering, NAT/masquerade, stateful tracking, zone enforcement | iptables (native, managed by IPFire WUI) |
-| Suricata IPS | Inline deep-packet inspection; drop/alert before firewall pass | Native Pakfire package; nfqueue inline mode |
-| dnsmasq / unbound | DHCP for GREEN/BLUE zones; recursive DNS resolver | Native IPFire service |
-| ntpd | Network time — required for log correlation | Native IPFire service |
-| sshd + fail2ban | Hardened SSH management; brute-force blocking | Native + Pakfire addon |
-| IPFire WUI | Web management at :444 on GREEN; zone config, IPS rules, logs | Native lighttpd-based interface |
-| udev rules | Persistent NIC-to-zone name binding by MAC address | /etc/udev/rules.d/30-persistent-network.rules |
-| /var/log/messages | iptables kernel firewall logs (syslog format, FORWARDFW prefix) | Linux syslog, on-box |
-| /var/log/suricata/eve.json | Suricata EVE JSON — all alert, flow, DNS, HTTP events | Suricata output module, on-box |
-| Promtail (telemetry host) | Ship log files to Loki; parse EVE JSON labels | Docker container, off-box |
-| Loki (telemetry host) | Label-indexed log storage; LogQL query engine | Docker container, off-box |
-| Grafana (telemetry host) | Dashboard visualization, alerting, threat tracing | Docker container, off-box |
-| Prometheus + node_exporter | System metrics: CPU, RAM, NIC throughput, connection counts | Docker container, off-box |
+**IPFire on-box remains completely unchanged.** The only changes are on supportTAK-server (192.168.1.22) and the data path from IPFire to that server.
 
 ---
 
-## Zone Model and NIC Mapping
+## System Overview
 
-### IPFire Zone Constraints (Authoritative)
-
-IPFire supports exactly **four named zones**: RED, GREEN, BLUE, ORANGE. This is a hard limit in IPFire 2.x. There is no fifth zone, no "PURPLE", no custom zone names. Each zone has its own trust level and default inter-zone policy.
-
-| Zone | Color | Trust Level | Default Inter-Zone Policy |
-|------|-------|-------------|---------------------------|
-| RED | External / WAN | Untrusted | Blocked inbound by default; NAT outbound from GREEN/BLUE |
-| GREEN | Internal LAN | Fully trusted | Access to RED allowed; can reach ORANGE with rules |
-| BLUE | Wireless / Guest | Semi-trusted | Isolated from GREEN by default; access to RED allowed |
-| ORANGE | DMZ | Untrusted / public-facing | Blocked from GREEN by default; reachable from RED via rules |
-
-### 6-NIC Mapping Strategy
-
-With 6 physical NICs and only 4 named zones, two NICs must either be assigned to a zone via **bridge mode** (same zone, IPFire acts as switch) or left unassigned. The recommended mapping:
+### v1.0 Architecture (Being Replaced)
 
 ```
-NIC 1  →  RED    (red0)      — WAN / ISP uplink
-NIC 2  →  GREEN  (green0)    — Primary trusted LAN (clients, servers, telemetry host)
-NIC 3  →  BLUE   (blue0)     — Wireless / guest network (connect to AP uplink)
-NIC 4  →  ORANGE (orange0)   — DMZ (public-facing services if needed; default unused)
-NIC 5  →  GREEN  (bridge)    — Second trusted LAN port (bridge to green0 in Bridge mode)
-NIC 6  →  GREEN  (bridge)    — Third trusted LAN port (bridge to green0 in Bridge mode)
-       OR
-NIC 5  →  Unassigned         — Reserve for dedicated management VLAN (future)
-NIC 6  →  Unassigned         — Reserve for second WAN / failover (future)
+┌──────────────────────────────────────────────────────────────────┐
+│  IPFire Host (N100, 192.168.1.1)                                  │
+│                                                                    │
+│  /var/log/suricata/eve.json  ──── SCP cron (60s) ────────────►   │
+│  /var/log/messages           ──── rsyslog UDP :514 ──────────►   │
+└────────────────────────────────────────────────────────────────┬─┘
+                                                                  │
+                                                                  ▼
+┌──────────────────────────────────────────────────────────────────┐
+│  supportTAK-server (N150, 192.168.1.22, 16GB RAM)                │
+│  Docker Compose                                                    │
+│                                                                    │
+│  [Alloy] → [Loki :3100]                                          │
+│  [Grafana :3000]                                                   │
+│  [Prometheus :9090] + [node-exporter]                            │
+│                                                                    │
+│  RAM used: ~500MB                                                 │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
-Decision rationale: GREEN bridge mode is the simplest valid use of extra NICs within IPFire's constraints. Assigning NICs 5-6 to GREEN via Bridge mode gives additional physical LAN ports without VLAN complexity. ORANGE is provisioned but can remain empty until needed.
-
-**Anti-lockout rule:** GREEN NIC (NIC 2) must always be the dedicated management NIC. Never reconfigure NIC 2 without a local console fallback plan.
-
-### Persistent NIC Naming
-
-IPFire stores NIC assignments in `/var/ipfire/ethernet/settings`. The underlying device names are stabilized by udev rules at `/etc/udev/rules.d/30-persistent-network.rules`, which bind zone interface names (green0, red0, blue0, orange0) to NIC MAC addresses.
-
-Without persistent naming, kernel init order can scramble NIC-to-zone assignments across reboots on multi-NIC hosts. This is a critical initialization step and must be done before any zone configuration.
+### v2.0 Target Architecture
 
 ```
-# Example udev rule (modern ATTR syntax)
-ACTION=="add", SUBSYSTEM=="net", ATTR{type}=="1", ATTR{address}=="aa:bb:cc:dd:ee:01", NAME="red0"
-ACTION=="add", SUBSYSTEM=="net", ATTR{type}=="1", ATTR{address}=="aa:bb:cc:dd:ee:02", NAME="green0"
-ACTION=="add", SUBSYSTEM=="net", ATTR{type}=="1", ATTR{address}=="aa:bb:cc:dd:ee:03", NAME="blue0"
-ACTION=="add", SUBSYSTEM=="net", ATTR{type}=="1", ATTR{address}=="aa:bb:cc:dd:ee:04", NAME="orange0"
+┌──────────────────────────────────────────────────────────────────┐
+│  IPFire Host (N100, 192.168.1.1) — UNCHANGED                     │
+│                                                                    │
+│  Suricata → /var/log/suricata/eve.json                           │
+│  iptables → /var/log/messages                                    │
+│                                                                    │
+│  Data delivery to Malcolm (two paths — see below):               │
+│  Path A: SCP pull by Filebeat on supportTAK (replaces cron)      │
+│  Path B: rsyslog UDP :514 syslog (unchanged, for iptables logs)  │
+│                                                                    │
+│  NO PCAP MIRROR REQUIRED for basic deployment                    │
+│  (PCAP mirror via SPAN is optional; adds full packet fidelity)   │
+└────────────────────────────────────────────────────────────────┬─┘
+                                                                  │
+                                                                  ▼
+┌──────────────────────────────────────────────────────────────────┐
+│  supportTAK-server (N150, 4 cores, 16GB RAM, 912GB NVMe)         │
+│  Docker Compose — Malcolm + AI Stack                              │
+│                                                                    │
+│  ┌────────────────────────────────────────────────────────────┐  │
+│  │  MALCOLM NSM (Docker Compose)                               │  │
+│  │                                                             │  │
+│  │  [Filebeat] → [Logstash :5044] → [OpenSearch :9200]        │  │
+│  │  [Zeek]  ─────────────────────────────────────────┘        │  │
+│  │  [Arkime session store]                                     │  │
+│  │  [OpenSearch Dashboards :5601]                              │  │
+│  │  [Malcolm upload UI :443]                                   │  │
+│  │                                                             │  │
+│  │  Heap tuning: OpenSearch -Xms6g -Xmx6g                     │  │
+│  │              Logstash    -Xms1g -Xmx1g                     │  │
+│  └────────────────────────────────────────────────────────────┘  │
+│                                                                    │
+│  ┌────────────────────────────────────────────────────────────┐  │
+│  │  AI ANALYST STACK (systemd-managed, NOT Docker)             │  │
+│  │                                                             │  │
+│  │  [llama-server] ← Foundation-Sec-8B-Q4_K_M.gguf            │  │
+│  │      Port :8080, OpenAI-compatible REST API                 │  │
+│  │      Loaded ON DEMAND; unloaded when idle                   │  │
+│  │                                                             │  │
+│  │  [ChromaDB] ← persistent vector store                      │  │
+│  │      Indexes: ADRs, runbooks, validation results            │  │
+│  │      Port :8000 (local only)                                │  │
+│  │                                                             │  │
+│  │  [RAG service] ← Python app (LangChain/LlamaIndex)         │  │
+│  │      Queries ChromaDB, calls llama-server                   │  │
+│  │      Port :8001 (local only)                                │  │
+│  │                                                             │  │
+│  │  [Triage worker] ← cron / event-driven Python              │  │
+│  │      Polls OpenSearch for new high-severity alerts          │  │
+│  │      Formats context + calls RAG service                    │  │
+│  │      Writes findings to OpenSearch (custom index)           │  │
+│  └────────────────────────────────────────────────────────────┘  │
+│                                                                    │
+│  RAM budget (tight but viable):                                   │
+│  OpenSearch JVM heap:     6 GB                                    │
+│  Logstash JVM heap:       1 GB                                    │
+│  Malcolm other containers:~1 GB (Zeek, Arkime, Filebeat, nginx)  │
+│  OS + Docker overhead:    1.5 GB                                  │
+│  llama-server (on demand):~6 GB (Q4_K_M + 4K context)           │
+│  ChromaDB + RAG service:  ~0.5 GB                                 │
+│  ─────────────────────────────────────────────────────────────   │
+│  Malcolm-only peak:       ~9.5 GB  (within 16GB)                 │
+│  Malcolm + AI peak:      ~15.5 GB  (fits, 0.5 GB headroom)      │
+│  NOTE: AI must be dormant during heavy Malcolm indexing           │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Native vs Docker Service Boundaries
+## Component Responsibilities
 
-### The IPFire Team's Official Position on Docker
+### New and Modified Components
 
-**Docker is explicitly rejected by IPFire developers** (HIGH confidence — confirmed by lead developer statement in IPFire community forums). Reasons:
+| Component | Responsibility | Status | Implementation |
+|-----------|----------------|--------|----------------|
+| Malcolm (Docker Compose) | NSM platform — replaces Loki/Alloy/Grafana | NEW | CISA cisagov/Malcolm on Docker |
+| OpenSearch (in Malcolm) | Index and store Zeek/Suricata/Arkime data | NEW | Malcolm-managed container |
+| OpenSearch Dashboards (in Malcolm) | Network traffic visualization, alert dashboards | NEW | Malcolm-managed container, port :5601 |
+| Zeek (in Malcolm) | Live PCAP analysis or log enrichment | NEW | Malcolm-managed container |
+| Arkime (in Malcolm) | Full-session finder and PCAP playback | NEW | Malcolm-managed container |
+| Logstash (in Malcolm) | Ingest pipeline — Filebeat beats input | NEW | Malcolm-managed container, port :5044 |
+| Filebeat (on supportTAK) | Replace SCP cron — pull EVE JSON from IPFire, ship to Logstash | REPLACES cron | Native Filebeat .deb on supportTAK-server |
+| llama-server (llama.cpp) | Local AI inference endpoint — Foundation-Sec-8B Q4_K_M | NEW | Compiled llama.cpp binary, systemd oneshot |
+| ChromaDB | Vector store for RAG over ADRs/runbooks/docs | NEW | Python package or Docker (local only) |
+| RAG service | Orchestrate retrieval + generation for analyst queries | NEW | Python (LangChain), local REST API |
+| Triage worker | Poll OpenSearch for alerts, trigger AI triage, write findings | NEW | Python script, cron or systemd timer |
+| Document indexer | Chunk and embed repo docs into ChromaDB | NEW | Python script, run on doc change |
 
-1. Container kernel sharing with the host is a security risk on a hardened firewall OS
-2. Docker's NAT model conflicts with IPFire's zone-based network isolation
-3. IPFire's sealed kernel hardening is incompatible with Docker's user namespace requirements
-4. Container breakouts could compromise the entire firewall host
+### Unchanged Components
 
-**The IPFire team's recommendation:** Run Docker services on a dedicated host in the GREEN (or ORANGE) zone, not on the IPFire box itself.
-
-### Service Boundary Decision Table
-
-| Service | Where | Why |
-|---------|-------|-----|
-| Firewall / NAT / iptables | Native (IPFire host) | Core packet path; must not depend on container runtime |
-| Suricata IPS | Native (IPFire host, Pakfire) | Inline in packet path; nfqueue integration requires kernel access |
-| DHCP (dnsmasq) | Native (IPFire host) | Core infrastructure; must function before Docker host has IP |
-| DNS (unbound) | Native (IPFire host) | Core infrastructure; must function at boot |
-| NTP | Native (IPFire host) | Needed for log timestamp correlation |
-| SSH | Native (IPFire host) | Management access independent of other services |
-| IPFire WUI | Native (IPFire host) | Zone/firewall management |
-| Promtail | Docker (telemetry host on GREEN) | Log shipping agent; reads from IPFire via syslog or file share |
-| Loki | Docker (telemetry host on GREEN) | Log storage; fine in container, no packet path involvement |
-| Grafana | Docker (telemetry host on GREEN) | Dashboard only; no firewall path involvement |
-| Prometheus | Docker (telemetry host on GREEN) | Metrics collection; scrapes node_exporter and remote endpoints |
-| node_exporter | Docker or native (IPFire host) | System metrics; low-risk native install acceptable on IPFire |
-| Reverse proxy (for telemetry) | Docker (telemetry host on GREEN) | TLS termination for dashboard access |
-
-**Practical constraint:** If no separate physical host is available in the short term, the telemetry stack can temporarily run on the IPFire box using a carefully contained installation (non-Docker, native binaries). The architecture goal is off-box, but on-box as a transitional state is acceptable if resource-monitored.
+| Component | Status | Notes |
+|-----------|--------|-------|
+| IPFire firewall/routing/NAT | UNCHANGED | All native services untouched |
+| Suricata IDS/IPS | UNCHANGED | EVE JSON at /var/log/suricata/eve.json — same file path |
+| rsyslog UDP syslog forward | UNCHANGED | Still forwards /var/log/messages to supportTAK :514 |
+| SSH management (192.168.1.100 only) | UNCHANGED | Access control unchanged |
+| IPFire WUI (:444) | UNCHANGED | Management interface unchanged |
+| Grafana + Loki + Alloy + Prometheus | REMOVED | Replaced by Malcolm |
 
 ---
 
-## Log Flow Architecture
+## Data Flow Changes (v1.0 → v2.0)
 
-### Log Sources
+### EVE JSON Delivery Path
 
-| Source | Log Format | Location | What It Contains |
-|--------|-----------|----------|-----------------|
-| iptables / netfilter | Syslog (FORWARDFW prefix) | /var/log/messages | Dropped/accepted packets: IN/OUT interface, SRC/DST IP, protocol, ports, MAC |
-| Suricata IDS/IPS | EVE JSON | /var/log/suricata/eve.json | Alerts, flows, DNS queries, HTTP, anomalies — full structured event stream |
-| Suricata | Plain text | /var/log/suricata/suricata.log | Engine start/stop, errors — not alert data |
-| IPFire syslog | Syslog | /var/log/messages | System events, daemon messages |
-| SSH / fail2ban | Syslog | /var/log/messages | Auth attempts, bans |
-
-### Log Delivery Paths
-
-Two patterns are available; this project uses Pattern A for Suricata (EVE fidelity) and Pattern B for syslog:
-
-**Pattern A: File-read shipping (recommended for EVE JSON)**
+**v1.0:**
 ```
-Suricata → /var/log/suricata/eve.json
-                  ↓
-           Promtail (on telemetry host, reads via NFS mount or direct if on-box)
-                  ↓
-           Loki (label-indexed storage)
-                  ↓
-           Grafana (LogQL queries, dashboards, alerts)
+IPFire: Suricata → /var/log/suricata/eve.json
+                          ↓
+        cron (60s): scp eve.json → supportTAK:/tmp/eve.json
+                          ↓
+        Alloy (file tail) → Loki → Grafana
 ```
 
-**Pattern B: UDP syslog forwarding (for iptables / system logs)**
+**v2.0:**
 ```
-IPFire syslog daemon (/var/log/messages)
-        ↓  (UDP only — TCP not currently supported by IPFire's syslog daemon)
-Remote syslog receiver on telemetry host
-        ↓
-Promtail (scrapes received syslog)
-        ↓
-Loki
-        ↓
-Grafana
+IPFire: Suricata → /var/log/suricata/eve.json
+                          ↓
+        Filebeat (on supportTAK): SSH/SCP pull OR direct file tail via mount
+                          ↓
+        Logstash :5044 (Malcolm) → OpenSearch
+                          ↓
+        OpenSearch Dashboards (Malcolm) + Triage Worker
 ```
 
-**Critical note on EVE JSON and syslog:** IPFire's Suricata only writes meta-information (start/stop events) to syslog — not EVE alerts. EVE alerts only appear in `/var/log/suricata/eve.json`. Pattern A (file read) is mandatory for full IDS telemetry.
+The SCP cron job is retired. Filebeat handles continuous log shipping with the Suricata module (native EVE JSON parser). Filebeat runs as a native systemd service on supportTAK-server, outside Malcolm's Docker network, so it can authenticate to IPFire via SSH key and pull the file (same key already exists from v1.0).
 
-### Log Volume Management
+Alternative: If IPFire EVE JSON can be NFS-mounted or SFTP-accessible from supportTAK, Filebeat tails the remote file directly without the SCP intermediary. The SCP pull pattern is already proven from v1.0; keep it initially.
 
-On an N100 with a home/SOHO network:
-- EVE JSON can generate 10-100 MB/day depending on traffic and ruleset scope
-- iptables logs are lower volume but continuous
-- File transfer and TLS session logging in Suricata should be selectively disabled to control volume
-- Logrotate on IPFire handles daily rotation with compression; 1 year retention by default
+### Syslog Delivery Path
 
----
+**v1.0 and v2.0 (unchanged):**
+```
+IPFire rsyslog → UDP :514 → supportTAK
+```
 
-## Data Paths
+In v2.0, Malcolm must be configured to accept rsyslog input (enabled during `./scripts/configure` by answering Y to "accept logs from forwarder"). Malcolm's Logstash listens on UDP :514 (or a configurable port). The iptables/firewall syslog data flows into OpenSearch alongside EVE JSON.
 
-### Packet Ingress Path (inbound, IPS mode)
+### PCAP Mirror (Optional Enhancement)
+
+Malcolm's full power comes from live PCAP capture feeding Zeek + Arkime. Without a PCAP mirror, Malcolm operates in log-forwarding mode only (no Zeek enrichment of live traffic, no Arkime session replay). For v2.0 initial deployment, log-forwarding mode is sufficient and avoids hardware changes. PCAP mirror via SPAN port is documented as a Phase 4+ enhancement.
+
+**If PCAP mirror is added later:**
+```
+Network switch SPAN port → dedicated NIC on supportTAK-server
+                                    ↓
+              Malcolm Zeek (live capture on that NIC)
+                                    ↓
+              Malcolm Arkime (session indexing)
+                                    ↓
+              OpenSearch (enriched sessions with protocol metadata)
+```
+
+This requires supportTAK-server to have a spare NIC available for passive tap use, or requires a managed switch with SPAN capability. The N150 hardware may have this capacity — validate during Phase 1.
+
+### AI Triage Data Flow
 
 ```
-[External host] → [NIC red0 / WAN]
-    → [nfqueue] → [Suricata IPS inline inspection]
-         ↓ (pass or DROP)
-    → [iptables PREROUTING] → [Routing decision]
+OpenSearch (Malcolm) — new high-severity alerts
+         ↓ (poll every N minutes via opensearch-py REST API)
+Triage Worker (Python)
+         ↓ (format alert context: src_ip, dst_ip, signature, category, protocol, timestamp)
+RAG Service
+         ├── ChromaDB query (semantic search over ADRs/runbooks/docs)
+         │         returns: relevant context chunks (runbook references, known IOCs, ADR rationale)
+         └── llama-server (Foundation-Sec-8B Q4_K_M)
+                   prompt: alert context + retrieved runbook chunks
+                   response: triage recommendation (investigate / likely FP / escalate)
          ↓
-    → [iptables FORWARD] → [zone policy rules]
-         ↓ (if allowed)
-    → [NIC green0 / destination zone]
-    → [Internal host]
+Write triage result to OpenSearch custom index (e.g., arkime_triage)
+         ↓
+OpenSearch Dashboards annotation or separate Triage panel
 ```
 
-Suricata sits **before** the firewall engine in IPFire's inline IPS mode. A malicious packet is dropped by Suricata before iptables ever processes it.
+The AI model is called synchronously by the triage worker. llama-server is started on systemd oneshot before triage runs, then stopped after (to reclaim RAM for Malcolm). Alternatively, llama-server runs as a persistent low-priority service if the RAM budget proves stable in practice.
 
-### Management Access Path
+---
 
-```
-[Admin workstation] → [NIC green0, port 444 HTTPS]
-    → [IPFire WUI (lighttpd)]
-    → [Zone config, firewall rules, IPS config, log viewer]
-```
+## RAM Budget Analysis
 
-SSH path:
-```
-[Admin workstation] → [NIC green0, port 22 (or custom)]
-    → [sshd] (fail2ban monitors auth log)
-```
+This is the critical constraint. All numbers are measured/documented values from official sources and community reports.
 
-### Telemetry Data Path
+| Component | RAM Allocation | Source |
+|-----------|---------------|--------|
+| OpenSearch JVM heap (-Xmx6g) | 6.0 GB | Malcolm config, tuned below 10GB recommended |
+| OpenSearch OS file cache (50% of JVM) | 3.0 GB | OpenSearch JVM sizing principle |
+| Logstash JVM heap (-Xmx1g) | 1.0 GB | Malcolm config, reduced from 3-4GB default |
+| Malcolm other containers (Zeek, Arkime, Filebeat, nginx, dashboards) | ~1.0 GB | Estimated from Malcolm container manifest |
+| Ubuntu OS + Docker daemon | ~1.5 GB | Typical Ubuntu Server at rest |
+| **Malcolm steady-state subtotal** | **~12.5 GB** | |
+| Available for AI stack | **~3.5 GB** | |
 
-```
-[IPFire /var/log/suricata/eve.json]  ──── (NFS mount or SSH tunnel) ────►
-[IPFire /var/log/messages]           ──── (UDP syslog, port 514)     ────►
-                                                                          │
-                                                         [Telemetry host on GREEN]
-                                                         Promtail → Loki → Grafana
-```
+**Problem:** Foundation-Sec-8B Q4_K_M needs ~6GB at inference time (4.9GB model + 1GB context + 0.1GB overhead). This exceeds the 3.5GB available.
 
-Prometheus node_exporter path:
-```
-[IPFire host — node_exporter :9100]  ◄── scrape (HTTP, Prometheus pull model) ──
-                                                         [Prometheus on telemetry host]
-                                                                ↓
-                                                         Grafana (metrics dashboards)
-```
+**Resolution strategy (two options):**
 
-### Suricata Zone Coverage Decision
+**Option A — Scheduled AI (recommended for v2.0):**
+Run triage analysis on a schedule (e.g., every 4 hours, overnight). Before triage: reduce OpenSearch heap to 4GB, pause Logstash. After triage: restore heap, restart Logstash. Complex to implement but stays on existing hardware.
 
-Suricata requires selecting which zones to inspect. Performance consideration: inspecting ALL interfaces doubles processing load. Recommended targeting:
+**Option B — Trim Malcolm containers:**
+Disable Arkime (PCAP session replay) if PCAP mirror is not in use. Arkime without a PCAP source consumes RAM but provides no value. With Arkime disabled: Malcolm steady-state drops to ~10GB, leaving 6GB for AI — workable.
 
-| Zone | Inspect? | Reason |
-|------|----------|--------|
-| RED (red0) | Yes | All external traffic; primary threat surface |
-| GREEN (green0) | Yes | Detect lateral movement and exfiltration from LAN |
-| BLUE (blue0) | Optional | Guest network; enable if wireless clients are untrusted |
-| ORANGE (orange0) | Yes if populated | DMZ servers; detect inbound exploitation attempts |
+**Option B is recommended for v2.0 initial deployment.** Arkime is only enabled once a PCAP mirror is configured. With Arkime disabled:
+
+| Component | RAM |
+|-----------|-----|
+| OpenSearch JVM heap (-Xmx6g) | 6.0 GB |
+| OpenSearch OS file cache | 3.0 GB |
+| Logstash JVM heap (-Xmx1g) | 1.0 GB |
+| Malcolm containers (no Arkime) | ~0.5 GB |
+| Ubuntu OS + Docker | ~1.5 GB |
+| **Malcolm steady-state (no Arkime)** | **~12.0 GB** |
+| llama-server Q4_K_M (on demand) | ~6.0 GB |
+| ChromaDB + RAG service | ~0.5 GB |
+| **Peak (Malcolm + AI active)** | **~18.5 GB** | ← EXCEEDS 16GB |
+
+Even with Arkime disabled, simultaneous operation exceeds 16GB. The only viable resolution without new hardware is to not run Malcolm and the AI stack simultaneously at peak:
+
+**Final recommendation — Temporal separation:**
+- Malcolm runs continuously, indexing all traffic (heap at 6GB)
+- llama-server starts on-demand (systemd oneshot triggered by triage worker)
+- Before llama-server starts: drop OpenSearch to 4GB heap (hot reload via API)
+- After llama-server finishes: restore OpenSearch heap to 6GB
+- Total simultaneous peak: 4 + 1 + 0.5 + 1.5 + 6 + 0.5 = ~13.5GB (fits in 16GB)
+
+This requires tooling to hot-resize the OpenSearch heap or requires a service restart sequence. Document this as a known operational procedure, not a transparent background task.
+
+**Confidence: LOW — real-world validation required.** Malcolm + reduced heap on 16GB is documented as "possible" by community reports but Malcolm's own docs warn against heaps below 10GB. Actual performance with this SOHO traffic volume (home network, not enterprise) may be acceptable.
 
 ---
 
 ## Architectural Patterns
 
-### Pattern 1: Zone-First Design
+### Pattern 1: Log-Forward Mode Before PCAP Mode
 
-**What:** Define all zone assignments and firewall policies before configuring any services. NIC-to-zone binding happens at the OS level (udev); zone policies are set in IPFire WUI.
+**What:** Deploy Malcolm accepting only forwarded logs (EVE JSON + syslog) before acquiring PCAP capability. Malcolm works in this mode and provides OpenSearch + Dashboards value without live packet capture.
 
-**When to use:** Always — this is the foundational step. Changing zones after services are configured risks losing management access (anti-lockout failure).
+**When to use:** v2.0 initial deployment — avoids SPAN port/switch configuration complexity and keeps the scope achievable.
 
-**Trade-offs:** Requires knowing final NIC-to-zone assignments upfront. Getting this wrong early causes rework.
+**Trade-offs:** No Zeek enrichment of live traffic (Zeek only sees logs already parsed by Suricata), no Arkime session replay. OpenSearch Dashboards still provides alert visualization and threat hunting over indexed data.
 
-**Sequence:**
-```
-1. Identify physical NIC MAC addresses (ip link show / ethtool)
-2. Write udev rules mapping MACs to zone interface names
-3. Update /var/ipfire/ethernet/settings
-4. Reboot and verify zone assignments
-5. THEN configure services on top
-```
+### Pattern 2: On-Demand AI with Memory Guard
 
-### Pattern 2: Native-First, Docker-After
+**What:** llama-server is a systemd oneshot service, not a persistent daemon. The triage worker script: (1) signals Malcolm to reduce OpenSearch heap, (2) starts llama-server, (3) runs triage, (4) stops llama-server, (5) signals Malcolm to restore heap.
 
-**What:** All core firewall services (iptables, Suricata, DHCP, DNS) are operational natively before any Docker infrastructure is introduced. Docker services are additive, not dependencies.
+**When to use:** Required given 16GB RAM constraint. This pattern allows both stacks to coexist on the same host without OOM risk.
 
-**When to use:** Always on an IPFire host. The firewall must function completely without the telemetry stack.
+**Trade-offs:** Latency: AI triage runs in batches (e.g., every 2-4 hours) rather than in real-time. Real-time triage requires hardware upgrade (32GB RAM) or a dedicated second host.
 
-**Trade-offs:** Requires two stages of deployment (native core, then telemetry). Reduces operational risk — losing the telemetry host doesn't affect network operation.
+### Pattern 3: RAG Over Static Corpus
 
-### Pattern 3: Incremental Log Ingest
+**What:** The RAG corpus (ADRs, runbooks, validation results, control docs) is indexed once at setup and re-indexed on document change (git commit hook or cron). ChromaDB persists embeddings to NVMe. The RAG service queries ChromaDB at triage time.
 
-**What:** Add log sources to the telemetry pipeline one at a time, validating data quality before adding the next source. Start with Suricata EVE JSON (highest value), then iptables syslog, then system logs.
+**When to use:** Always — the operating corpus is small (dozens of documents), changes infrequently, and benefits enormously from semantic retrieval rather than keyword search.
 
-**When to use:** N100 has limited RAM; telemetry stack should be proven lightweight before ingesting all sources simultaneously. Prevents resource exhaustion during initial setup.
+**Trade-offs:** Embeddings must be re-generated when documents change. Use a lightweight embedding model (all-MiniLM-L6-v2 at ~90MB) rather than the AI model itself for embedding, to keep the indexing pipeline fast and RAM-cheap.
 
-**Trade-offs:** Slightly longer time to full observability. Avoids scenario where all logs flood Loki on day one and overwhelm the stack.
+### Pattern 4: OpenSearch as Integration Backbone
 
----
+**What:** OpenSearch (within Malcolm) serves as the single source of truth for all security events AND triage outputs. The triage worker writes AI findings back to OpenSearch. Dashboards display both raw alerts and AI annotations in the same interface.
 
-## Recommended Project Structure (Repo Layout)
+**When to use:** Preferred over a separate database for triage results — keeps the toolchain minimal and allows OpenSearch Dashboards to show correlated views of alerts + triage.
 
-```
-/
-├── docs/                         # Architecture decisions, runbooks
-│   ├── decisions/                # ADR (Architecture Decision Records)
-│   └── zones.md                  # Zone definitions and NIC map
-│
-├── firewall/                     # Native IPFire configuration
-│   ├── udev/                     # NIC persistence rules
-│   │   └── 30-persistent-network.rules
-│   ├── zones/                    # Zone settings exports
-│   │   └── ethernet_settings
-│   ├── firewall-rules/           # Exported IPFire firewall rule configs
-│   └── suricata/                 # Suricata configuration overlays
-│       ├── suricata.yaml         # EVE JSON output config
-│       └── rules/                # Custom local rules
-│
-├── telemetry/                    # Off-box Docker telemetry stack
-│   ├── docker-compose.yml        # Loki + Promtail + Grafana + Prometheus
-│   ├── loki/
-│   │   └── loki-config.yaml
-│   ├── promtail/
-│   │   └── promtail-config.yaml  # Scrape eve.json + syslog
-│   ├── grafana/
-│   │   ├── provisioning/         # Dashboard and datasource provisioning
-│   │   └── dashboards/           # Pre-built dashboard JSON exports
-│   └── prometheus/
-│       └── prometheus.yml        # Scrape configs (node_exporter, etc.)
-│
-├── scripts/                      # Automation and validation
-│   ├── validate-nics.sh          # Verify NIC-to-zone mapping
-│   ├── validate-firewall.sh      # Test connectivity matrix
-│   ├── deploy-telemetry.sh       # Bootstrap Docker stack
-│   └── rebuild.sh                # Full rebuild from scratch
-│
-└── validation/                   # Test artifacts
-    └── test-results/             # Timestamped validation outputs
-```
-
----
-
-## Anti-Patterns
-
-### Anti-Pattern 1: Running Docker Directly on IPFire
-
-**What people do:** Install Docker on the IPFire host to co-locate the telemetry stack.
-
-**Why it's wrong:** IPFire developers explicitly reject Docker due to kernel sharing risks, NAT conflicts with zone isolation, and incompatibility with sealed kernel hardening. Docker's iptables manipulation can corrupt IPFire's firewall rules silently.
-
-**Do this instead:** Run Docker on a dedicated host in the GREEN zone. If hardware is limited, use native binaries (non-Docker Promtail/Loki) or accept on-box native install as a transitional state.
-
-### Anti-Pattern 2: Configuring Services Before Verifying NIC Persistence
-
-**What people do:** Configure DHCP, DNS, and firewall rules immediately after install without first verifying that NIC-to-zone assignments survive reboot.
-
-**Why it's wrong:** On a 6-NIC host, boot order can scramble interface names. After a reboot, green0 might become the WAN interface, exposing the trusted LAN to the internet.
-
-**Do this instead:** Complete a full reboot cycle and verify all zone assignments before any service configuration. Test with: `ip link show && cat /var/ipfire/ethernet/settings`.
-
-### Anti-Pattern 3: Enabling IPS on All Zones Without Ruleset Tuning
-
-**What people do:** Enable Suricata on all 6 interfaces with the largest available ruleset immediately.
-
-**Why it's wrong:** IPS is CPU-and-memory-intensive. On an N100, inspecting all zones with an untuned ruleset can saturate the processor and degrade throughput. On a home network, many enterprise rules generate false positives that mask real alerts.
-
-**Do this instead:** Enable Suricata on RED only initially. Validate rule performance and alert quality before expanding to GREEN. Tune (suppress/disable) high-volume false-positive rule categories before full deployment.
-
-### Anti-Pattern 4: Relying on UDP Syslog for Suricata EVE Alerts
-
-**What people do:** Configure Suricata to forward EVE JSON to syslog, then ship syslog to Loki.
-
-**Why it's wrong:** IPFire's Suricata only sends meta-information (engine start/stop) to syslog — not EVE alert data. EVE JSON stays in `/var/log/suricata/eve.json` regardless of syslog config. All alert data is silently lost.
-
-**Do this instead:** Use Promtail to read `/var/log/suricata/eve.json` directly via file mount. Never rely on syslog for EVE data on IPFire.
-
-### Anti-Pattern 5: Using eth0-Style Interface Names
-
-**What people do:** Reference network interfaces by kernel-assigned names (eth0, eth1, ...) in scripts and configs.
-
-**Why it's wrong:** Kernel interface naming is non-deterministic on multi-NIC hosts. After any hardware change or kernel update, eth0 may point to a different physical port.
-
-**Do this instead:** Always reference interfaces by udev-assigned zone names (green0, red0, blue0, orange0) or by MAC address in udev rules.
+**Trade-offs:** Requires custom index mapping in OpenSearch for triage results. Risk: if triage worker writes malformed data, it could affect Malcolm's OpenSearch performance. Mitigate by writing to a separate index (e.g., `triage-results-*`) not shared with network data.
 
 ---
 
 ## Integration Points
 
-### External Services
+### IPFire → Malcolm (Data Ingestion)
 
-| Service | Integration Pattern | Notes |
-|---------|---------------------|-------|
-| ISP / WAN | DHCP client on red0 | Typical home/SOHO; static IP assignment also supported |
-| Suricata rule feeds | Pakfire-managed auto-update (daily/weekly) | Abuse.ch, ET rules, etc.; managed via IPFire WUI |
-| NTP upstream | ntpd polls pool.ntp.org | Required for log timestamp accuracy across all components |
-| Remote syslog receiver | UDP port 514 from IPFire syslog daemon | TCP not supported in current IPFire syslog daemon |
+| Path | Method | What Flows | Notes |
+|------|--------|------------|-------|
+| EVE JSON | Filebeat SSH pull → Logstash :5044 | Suricata alerts, flows, DNS, HTTP | Replaces SCP cron; Filebeat Suricata module parses EVE natively |
+| Syslog | rsyslog UDP :514 → Malcolm Logstash | iptables drop/accept events, system logs | Unchanged from v1.0; Malcolm must expose :514 during configure |
+| PCAP (future) | SPAN port → passive NIC → Malcolm Zeek/Arkime | Full packet capture | Requires managed switch + spare NIC on supportTAK-server |
 
-### Internal Boundaries
+### Malcolm OpenSearch → AI Triage
 
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| IPFire host ↔ Telemetry host | UDP syslog (:514) + HTTP (node_exporter :9100) | Firewall rule must allow telemetry host IP to reach IPFire :9100 |
-| Telemetry host → eve.json | NFS mount or rsync (pull) | If off-box: mount /var/log/suricata from IPFire via NFS over GREEN; restrict to telemetry host IP |
-| Promtail → Loki | HTTP POST :3100 (on telemetry host, localhost) | If same Docker Compose network: service discovery by container name |
-| Grafana → Loki | HTTP :3100 | Data source configured in Grafana provisioning |
-| Grafana → Prometheus | HTTP :9090 | Data source configured in Grafana provisioning |
-| Admin workstation → IPFire WUI | HTTPS :444 via GREEN | Must remain accessible; this is the anti-lockout path |
-| Admin workstation → Grafana | HTTPS :3000 (or via reverse proxy) | Port should be restricted to management VLAN / specific IP |
+| Interface | Method | Notes |
+|-----------|--------|-------|
+| Alert polling | opensearch-py REST API | Query arkime_sessions3-* index for high-severity events since last run |
+| Triage write-back | opensearch-py PUT | Write to triage-results-YYYY.MM.DD index |
+| Dashboard integration | OpenSearch Dashboards index pattern | Create index pattern for triage-results-* in dashboards |
+
+### AI Analyst Stack Internal
+
+| Boundary | Protocol | Notes |
+|----------|----------|-------|
+| Triage worker → llama-server | HTTP POST /completion (OpenAI-compatible) | localhost :8080; no auth needed (local only) |
+| Triage worker → RAG service | HTTP POST (local) | localhost :8001 |
+| RAG service → ChromaDB | Python SDK (in-process or HTTP) | localhost :8000 if separate service; in-process if embedded |
+| RAG service → llama-server | HTTP POST /completion | Same llama-server endpoint |
+| Document indexer → ChromaDB | Python SDK | Runs on git commit hook or manual trigger |
+
+### Management Access (Unchanged)
+
+| Boundary | Protocol | Notes |
+|----------|----------|-------|
+| Admin (192.168.1.100) → IPFire WUI | HTTPS :444 | Unchanged |
+| Admin (192.168.1.100) → supportTAK SSH | SSH :22 | Unchanged |
+| Admin → Malcolm Dashboards | HTTPS :443 (Malcolm nginx) | New — Malcolm exposes its own nginx reverse proxy |
+| Admin → OpenSearch Dashboards | HTTPS :5601 (via Malcolm) | Malcolm manages auth |
 
 ---
 
-## Build Order (Dependencies)
+## Build Order
 
-The architecture has hard dependencies that dictate phase sequencing:
+Dependencies dictate this sequence. Do not reorder phases without re-validating prerequisites.
 
 ```
-Phase 1: Platform + NIC Persistence
-    ↳ Required before: everything else
-    ↳ Deliverable: All 6 NICs mapped, assignments survive reboot
+Phase 1: Malcolm Deployment
+    Prerequisites: supportTAK-server accessible, Docker Compose v2 installed
+    Deliverables:
+      - Malcolm Docker Compose running (all containers healthy)
+      - OpenSearch heap configured to 6GB (not default)
+      - Logstash heap configured to 1GB
+      - Malcolm configured to accept rsyslog :514 and Beats :5044
+      - OpenSearch Dashboards accessible at :5601
+    Why first: All subsequent components depend on OpenSearch being available.
+               Malcolm's Logstash must be running before Filebeat can ship logs.
 
-Phase 2: Zone Policies + Core Services
-    ↳ Requires: Phase 1 (stable NIC names)
-    ↳ Required before: IDS (needs correct interfaces), Telemetry (needs routing)
-    ↳ Deliverable: DHCP/DNS/NTP working, default-deny inbound, NAT masquerade
+Phase 2: EVE JSON + Syslog Ingestion
+    Prerequisites: Phase 1 complete, Filebeat installed on supportTAK-server
+    Deliverables:
+      - Filebeat Suricata module reading IPFire eve.json via SCP/SSH pull
+      - EVE JSON events appearing in Malcolm OpenSearch
+      - rsyslog UDP :514 syslog flowing into Malcolm
+      - Malcolm dashboard showing alerts from IPFire Suricata
+    Why second: Validates the core data flow before adding AI complexity.
+                Confirms Malcolm is correctly receiving and indexing IPFire data.
+    Decommission: After validation, remove old Loki/Alloy/Grafana stack
 
-Phase 3: SSH Hardening + Anti-lockout
-    ↳ Requires: Phase 2 (GREEN zone functional)
-    ↳ Can run in parallel with Phase 4 prep
-    ↳ Deliverable: Hardened management access, fail2ban active
+Phase 3: Foundation-Sec-8B Setup
+    Prerequisites: Phase 2 complete, ~6GB headroom confirmed after Malcolm steady-state
+    Deliverables:
+      - llama.cpp compiled (or Ollama installed) on supportTAK-server
+      - Foundation-Sec-8B-Q4_K_M.gguf downloaded and verified
+      - llama-server starts, accepts /completion requests, returns valid JSON
+      - RAM usage validated: Malcolm + llama-server fits within 16GB
+    Why third: Validates the AI inference component before building the integration
+               pipeline. Isolates any RAM/performance issues to a single variable.
 
-Phase 4: Suricata IDS/IPS
-    ↳ Requires: Phase 2 (zone interfaces exist and are stable)
-    ↳ Required before: Telemetry (IDS alerts are primary telemetry source)
-    ↳ Deliverable: Inline IPS on RED, EVE JSON emitting alerts
+Phase 4: RAG Pipeline
+    Prerequisites: Phase 3 complete
+    Deliverables:
+      - ChromaDB installed and persistent (NVMe-backed)
+      - Embedding model (all-MiniLM-L6-v2) available locally
+      - Document indexer script ingesting ADRs, runbooks, docs/decisions/
+      - RAG service querying ChromaDB and calling llama-server
+      - End-to-end test: analyst question → retrieved context + AI answer
+    Why fourth: RAG pipeline is independent of Malcolm; can be built and tested
+                against synthetic security questions before wiring to live alerts.
 
-Phase 5: Telemetry Pipeline
-    ↳ Requires: Phase 4 (eve.json populated), Phase 2 (routing to telemetry host)
-    ↳ Deliverable: Promtail → Loki → Grafana, threat dashboard visible
+Phase 5: Alert Triage Integration
+    Prerequisites: Phase 4 complete, Phase 2 complete
+    Deliverables:
+      - Triage worker polling OpenSearch for new high-severity alerts
+      - Triage worker formatting alert context and calling RAG service
+      - Triage results written back to OpenSearch triage-results-* index
+      - OpenSearch Dashboards index pattern for triage results visible
+      - On-demand memory management: Malcolm heap reduction before AI start
+    Why fifth: Requires both OpenSearch (Phase 2) and RAG service (Phase 4)
+               to be independently validated before integration.
 
-Phase 6: System Hardening + Validation
-    ↳ Requires: All prior phases stable
-    ↳ Deliverable: Audit log, unused services off, full test suite passing
+Phase 6: SBOM + Signed Releases
+    Prerequisites: Phase 5 stable
+    Deliverables:
+      - SBOM generation (syft or trivy) for Malcolm Docker images
+      - SBOM generation for llama.cpp binary and Python dependencies
+      - Signed release artifacts (cosign or GPG) committed to repo
+      - Release pipeline documented in docs/decisions/ as ADR
+    Why last: Non-blocking for functionality. Can be done independently
+              but is gated on all components being known and stable.
 
-Phase 7: Reproducibility
-    ↳ Requires: All configs known and stable
-    ↳ Deliverable: Rebuild-from-repo scripts, rollback procedures
+Phase 7: Broader Telemetry + Case Management (deferred)
+    Prerequisites: Phase 5 stable, operational experience gathered
+    Deliverables:
+      - Endpoint telemetry (logs from GREEN zone hosts into Malcolm)
+      - Auth log ingestion (SSH auth events from network devices)
+      - Asset inventory integration (NetBox or simple YAML)
+      - Alert-to-case workflow (manual or lightweight ticketing)
+    Why deferred: Scope creep risk. Core SOC capability (Phases 1-5) must
+                  be proven before expanding telemetry surface.
 ```
+
+---
+
+## Anti-Patterns to Avoid
+
+### Anti-Pattern 1: Running Malcolm and AI Simultaneously Without Memory Guard
+
+**What goes wrong:** Both OpenSearch (6GB heap + 3GB OS cache) and llama-server (~6GB) are resident simultaneously. System swaps to disk. Malcolm becomes unresponsive. OOM killer terminates containers. Data loss risk.
+
+**Do this instead:** Implement the on-demand AI pattern (Pattern 2). Explicitly manage llama-server as a start/stop service. Never leave llama-server running unless triage is actively executing.
+
+### Anti-Pattern 2: Using Q8_0 Quantization on 16GB Hardware
+
+**What goes wrong:** Foundation-Sec-8B Q8_0 requires ~10.4GB at 8K context. Combined with even a reduced Malcolm stack, this consistently exceeds 16GB.
+
+**Do this instead:** Use Q4_K_M (~4.9GB weights). Accuracy difference is measurable but acceptable for alert triage on an 8B model. Q4_K_M is the official recommendation from fdtn-ai for resource-constrained deployments.
+
+### Anti-Pattern 3: Building the RAG Pipeline Before Malcolm Is Stable
+
+**What goes wrong:** If OpenSearch is misconfigured or Malcolm containers are restarting, the triage worker cannot poll alerts, making the RAG integration impossible to test end-to-end.
+
+**Do this instead:** Follow the build order strictly. Malcolm stable with live IPFire data (Phase 2) is the prerequisite gating Phase 5.
+
+### Anti-Pattern 4: Running Malcolm in Full Default Configuration on 16GB
+
+**What goes wrong:** Malcolm's default OpenSearch heap is set to half of system RAM (8GB), plus Logstash at 3-4GB, plus other containers. On 16GB, this exhausts available memory before any AI workload is added.
+
+**Do this instead:** Edit `docker-compose.yml` before first start. Set `OPENSEARCH_JAVA_OPTS=-Xms6g -Xmx6g` and `LS_JAVA_OPTS=-Xms1g -Xmx1g`. Set `vm.max_map_count=262144` in sysctl. Monitor `free -h` during first 24 hours of operation.
+
+### Anti-Pattern 5: Enabling PCAP Capture Without a SPAN Port
+
+**What goes wrong:** If Zeek or Arkime are configured for live capture on an interface without mirrored traffic (e.g., the green0 management interface), they see only traffic to/from supportTAK-server itself, not the full GREEN zone traffic. This wastes CPU/RAM and produces misleading data.
+
+**Do this instead:** Either deploy in log-forward mode only (Phase 2 baseline), or configure a proper SPAN port on the network switch before enabling live capture. Document which physical interface is the SPAN tap target.
+
+### Anti-Pattern 6: Embedding with Foundation-Sec-8B
+
+**What goes wrong:** Using the main AI model to generate RAG embeddings is RAM-prohibitive (model must be loaded twice — once for embedding, once for generation) and slow (8B model is far larger than needed for embedding).
+
+**Do this instead:** Use a dedicated lightweight embedding model: `sentence-transformers/all-MiniLM-L6-v2` (~90MB). It runs on CPU in ~50-100ms per chunk, needs no GPU, and produces 384-dimensional vectors sufficient for semantic search over a corpus of dozens of documents.
 
 ---
 
 ## Scaling Considerations
 
-This is a home/SOHO appliance — scaling concerns are about resource saturation, not horizontal scale.
+This architecture is explicitly scoped to a single-server 16GB constraint. Scaling paths exist but require hardware.
 
-| Concern | N100 baseline | If saturated |
-|---------|---------------|--------------|
-| IPS throughput | ~130 Mbps (mini appliance benchmark) with full ruleset; likely higher with tuned rules | Reduce monitored zones; disable expensive rule categories (TLS, file detection) |
-| Telemetry storage | eve.json + syslog: 30-100 MB/day at SOHO scale | Loki retention policy (7-30 days); disable file/TLS logging in Suricata |
-| RAM (Suricata) | Rules compiled at startup; larger rulesets use more RAM; 16 GB gives headroom | Reduce enabled rule categories; prioritize IP reputation rules over deep-inspect |
-| RAM (telemetry on-box) | Loki + Grafana + Promtail: ~300-500 MB at minimal config | Move telemetry off-box; use remote Loki instance |
-| CPU under load | N100 handles 1-2.5 Gbps routing without IPS; IPS adds meaningful load | Enable only RED-facing IPS; defer GREEN inspection |
+| Concern | Current (16GB) | With 32GB RAM | With Dedicated AI Host |
+|---------|----------------|---------------|------------------------|
+| Malcolm + AI simultaneous | Not viable | Fully viable | Fully viable |
+| Real-time alert triage | Not viable | Viable (streaming) | Viable (streaming) |
+| PCAP mirror + Zeek enrichment | Adds ~1GB RAM load | Viable | Viable |
+| Q8_0 model accuracy | Not viable | Viable | Viable |
+| Concurrent analyst queries | 1 at a time | 2-4 with batching | Multiple |
+| Full packet retention | Storage-limited (912GB NVMe) | Same | Same |
+
+**Recommended upgrade path** if 16GB proves insufficient: Add a second DDR5 stick to the N150 (verify max RAM spec for N150 platform before purchase). The N150 SoC supports up to 32GB in most configurations. This doubles available RAM, makes Malcolm + AI simultaneous operation viable, and unlocks PCAP capture.
+
+---
+
+## Repo Structure Changes (v2.0)
+
+```
+/
+├── docs/
+│   ├── decisions/              # ADRs — new ADRs for Malcolm, AI stack, RAM budget decisions
+│   ├── runbooks/               # NEW: operational runbooks (triage procedures, Malcolm restart)
+│   └── zones.md                # Unchanged
+│
+├── firewall/                   # Unchanged (IPFire native configs)
+│
+├── telemetry/                  # REPLACES old Loki/Alloy/Grafana stack
+│   ├── malcolm/
+│   │   ├── docker-compose.yml  # Malcolm compose with tuned heap values
+│   │   ├── env/                # Malcolm environment files (malcolm.env, etc.)
+│   │   └── dashboards/         # Custom dashboard exports
+│   └── filebeat/
+│       └── filebeat.yml        # Suricata module config, IPFire SSH pull
+│
+├── ai/                         # NEW: AI analyst stack
+│   ├── llama/
+│   │   ├── setup.sh            # Download model, compile llama.cpp, create systemd unit
+│   │   └── triage.service      # systemd oneshot unit for llama-server
+│   ├── rag/
+│   │   ├── indexer.py          # Document chunker and ChromaDB ingester
+│   │   ├── rag_service.py      # Retrieval + generation service
+│   │   └── requirements.txt    # langchain, chromadb, sentence-transformers, opensearch-py
+│   └── triage/
+│       ├── worker.py           # OpenSearch alert poller + triage orchestrator
+│       └── triage.timer        # systemd timer for scheduled triage runs
+│
+├── scripts/
+│   ├── validate-malcolm.sh     # NEW: verify Malcolm containers healthy, data flowing
+│   ├── validate-ai.sh          # NEW: verify llama-server responds, RAG returns results
+│   ├── memory-check.sh         # NEW: validate RAM budget before starting AI stack
+│   └── rebuild.sh              # Updated for v2.0 component set
+│
+└── validation/
+    └── test-results/           # Timestamped outputs from validate-*.sh
+```
 
 ---
 
 ## Sources
 
-- [IPFire Zone Configuration](https://www.ipfire.org/docs/configuration/network/zoneconf) — zone modes, NIC assignment, VLAN limits
-- [IPFire Step 5: Network Setup](https://www.ipfire.org/docs/installation/step5) — zone assignment during installation
-- [IPFire IPS Documentation](https://www.ipfire.org/docs/configuration/firewall/ips) — Suricata inline mode, zone selection
-- [IPFire IPS Performance Considerations](https://www.ipfire.org/docs/configuration/firewall/ips/performance-considerations) — CPU/memory tradeoffs
-- [IPFire Suricata 7 Roadmap](https://www.ipfire.org/docs/roadmap/suricata7) — HTTP/2 support, performance improvements
-- [IPFire Log Settings](https://www.ipfire.org/docs/configuration/logs/logsettings) — remote syslog (UDP only), retention
-- [IPFire Firewall Logs](https://www.ipfire.org/docs/configuration/logs/firewall) — log fields and format
-- [IPFire Docker Feature Request — developer rejection](https://community.ipfire.org/t/feature-request-docker-support/3527) — official position on Docker
-- [IPFire IPS Syslog limitation](https://community.ipfire.org/t/ips-suricata-does-not-log-into-syslog/9302) — EVE JSON not in syslog
-- [Suricata EVE JSON Output](https://docs.suricata.io/en/latest/output/eve/eve-json-output.html) — eve.json format, output types
-- [Suricata-Loki-Grafana homelab reference](https://github.com/justynlarry/suricata-loki-grafana) — deployment pattern
-- [Grafana Suricata EVE JSON dashboard](https://grafana.com/grafana/dashboards/22247-suricata-logs-json/) — dashboard reference
-- [N100 IPFire hardware community thread](https://community.ipfire.org/t/cwwk-n100-n150-is-a-good-option/13811) — N100 zone/NIC configuration in practice
+- [Malcolm system requirements (official)](https://malcolm.fyi/docs/system-requirements.html) — 24GB min, 32GB recommended, 8 cores min
+- [Malcolm live analysis documentation](https://malcolm.fyi/docs/live-analysis.html) — SPAN port, log-forward mode, Hedgehog profile
+- [Malcolm upload and ingest documentation](https://malcolm.fyi/docs/upload.html) — Filebeat, rsyslog, SFTP ingest paths
+- [cisagov/Malcolm GitHub](https://github.com/cisagov/Malcolm) — Docker Compose source, environment variable reference
+- [Malcolm OpenSearch instances](https://cisagov.github.io/Malcolm/docs/opensearch-instances.html) — heap tuning, external OpenSearch
+- [fdtn-ai/Foundation-Sec-8B-Q4_K_M-GGUF (Hugging Face)](https://huggingface.co/fdtn-ai/Foundation-Sec-8B-Q4_K_M-GGUF) — Q4_K_M file size ~4.92GB
+- [fdtn-ai/Foundation-Sec-8B-Q8_0-GGUF (Hugging Face)](https://huggingface.co/fdtn-ai/Foundation-Sec-8B-Q8_0-GGUF) — Q8_0 file size ~8.54GB
+- [llama.cpp GitHub](https://github.com/ggml-org/llama.cpp) — server compilation, OpenAI-compatible API
+- [llama.cpp GGUF VRAM requirements (LocalLLM.in)](https://localllm.in/blog/llamacpp-vram-requirements-for-local-llms) — Q4_K_M memory sizing
+- [OpenSearch Docker heap sizing](https://docs.opensearch.org/latest/install-and-configure/install-opensearch/docker/) — JVM heap = 50% RAM rule
+- [OpenSearch memory usage best practices (opster.io)](https://opster.com/guides/opensearch/opensearch-capacity-planning/memory-usage/) — heap + OS file cache sizing
+- [ChromaDB local deployment](https://www.trychroma.com/) — persistent vector store, local-only
+- [LangChain RAG with llama.cpp (MachineLearningMastery)](https://machinelearningmastery.com/building-a-rag-pipeline-with-llama-cpp-in-python/) — RAG pipeline pattern
+- [sentence-transformers all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) — embedding model, ~90MB
 
 ---
 
-*Architecture research for: IPFire hardened firewall appliance with 6 NICs, Suricata IDS, telemetry stack*
-*Researched: 2026-03-21*
+*Architecture research for: Local AI SOC — Malcolm NSM + Foundation-Sec-8B + RAG on 16GB supportTAK-server*
+*Researched: 2026-03-31*
+*Supersedes: v1.0 architecture (IPFire + Loki/Alloy/Grafana), which remains valid for the IPFire on-box sections*
