@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Local AI SOC
-status: active
-stopped_at: Roadmap created — ready for Phase 9 planning
-last_updated: "2026-03-31T00:00:00.000Z"
+status: unknown
+stopped_at: Roadmap created for v2.0
+last_updated: "2026-04-01T12:35:53.214Z"
 progress:
   total_phases: 6
   completed_phases: 0
-  total_plans: 0
+  total_plans: 2
   completed_plans: 0
 ---
 
@@ -19,18 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-31)
 
 **Core value:** A secure, observable, AI-augmented network perimeter where threats are detected, triaged, and investigated locally
-**Current focus:** v2.0 Local AI SOC — Phase 9: Malcolm NSM Deployment
+**Current focus:** Phase 09 — malcolm-nsm-deployment
 
 ## Current Position
 
-Phase: 9 — Malcolm NSM Deployment
-Plan: Not started
-Status: Ready for planning
-Last activity: 2026-03-31 — v2.0 roadmap created (6 phases, 31 requirements mapped)
-
-```
-v2.0 Progress: [----------] 0/6 phases
-```
+Phase: 09 (malcolm-nsm-deployment) — EXECUTING
+Plan: 1 of 2
 
 ## Performance Metrics
 
