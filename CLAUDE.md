@@ -1,19 +1,27 @@
 <!-- GSD:project-start source:PROJECT.md -->
 ## Project
 
-**Firewall Appliance**
+**Firewall Appliance → Local AI SOC**
 
-A fully configured, hardened, reproducible firewall appliance built on an Intel N100-class 6-NIC mini-PC running IPFire. It serves as the primary network gateway with IDS/IPS, network telemetry, threat-tracing dashboards, and automated rebuild capability. All configs, scripts, and validation artifacts live in a Git repo for reproducibility.
+A local-first AI SOC platform built on an IPFire perimeter appliance (Intel N100, 6-NIC) with Malcolm-based network security monitoring (Zeek + Suricata + PCAP + OpenSearch), a local AI security analyst (Foundation-Sec-8B), and RAG-augmented investigation workflows. v1.0 shipped a hardened firewall with telemetry; v2.0 evolves it into an AI-augmented SOC.
 
-**Core Value:** A secure, observable network perimeter that can be rebuilt from scratch in minutes — if the box dies, the repo rebuilds it identically.
+**Core Value:** A secure, observable, AI-augmented network perimeter where threats are detected, triaged, and investigated locally — no cloud dependencies, no vendor lock-in.
+
+### Infrastructure
+
+- **IPFire box:** Intel N100, 6x Intel i226-V NICs, 16GB DDR5, IPFire 2.29 CU200, Suricata 8.0.3
+- **SOC host (supportTAK-server):** GMKtec NucBox G3 Plus, Intel N150, 4 cores, 16GB RAM, 912GB NVMe, Ubuntu 22.04, IP 192.168.1.22
+- **Management:** SSH key-only (ed25519) on port 22 from 192.168.1.100, WUI at :444
+- **SSH access from this PC:** `ssh opsadmin@192.168.1.22` (SOC host), `ssh root@192.168.1.1` (IPFire)
 
 ### Constraints
 
 - **Platform:** IPFire-native tools and architecture only — no mixing distro paradigms
-- **Architecture:** Core firewall/routing/NAT MUST be native; Docker rejected by IPFire — telemetry runs off-box
-- **Hardware:** N100 is low-power — telemetry stack must be lightweight or off-boxable
+- **Architecture:** Core firewall/routing/NAT MUST be native; Docker rejected by IPFire — telemetry/AI runs off-box on supportTAK-server
+- **Hardware:** N100 is low-power (firewall only); N150 SOC host has 16GB RAM (tight for Malcolm + AI model)
+- **RAM budget:** Malcolm (OpenSearch 6GB + Logstash 1GB) + AI model (on-demand ~5GB) + OS (~2GB) = ~14GB of 16GB
 - **Access:** Must preserve management access (anti-lockout) during all network changes
-- **Repos:** Only vetted, actively maintained upstream repos (Suricata, Grafana, Loki, Alloy, Prometheus)
+- **Repos:** Only vetted, actively maintained upstream repos
 - **Zones:** IPFire hard limit of 4 named zones (RED/GREEN/BLUE/ORANGE); extra NICs use Bridge mode
 - **Updates:** Core Updates overwrite custom configs — must use backup includes + post-update validation
 - **No placeholders:** All configs must be complete and executable, no pseudocode

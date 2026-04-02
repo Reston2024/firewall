@@ -1,12 +1,16 @@
-# Firewall Appliance
+# Firewall Appliance → Local AI SOC
 
-A fully configured, hardened, reproducible firewall/router/security gateway built on an Intel N100 6-NIC mini-PC running IPFire. Includes IDS/IPS (Suricata), off-box telemetry (Grafana + Loki + Alloy), and git-based disaster recovery.
+A hardened, reproducible firewall appliance evolving into a local-first AI Security Operations Center. Built on an Intel N100 6-NIC mini-PC running IPFire, with Malcolm NSM (Zeek + Suricata + PCAP + OpenSearch), a local AI security analyst (Foundation-Sec-8B), and RAG-augmented investigation workflows.
 
 ## Core Value
 
-**If the box dies, the repo rebuilds it identically in under 15 minutes.**
+**A secure, observable, AI-augmented network perimeter where threats are detected, triaged, and investigated locally — no cloud dependencies, no vendor lock-in.**
 
-Every configuration, script, validation test, and runbook for completed phases lives in this repository. Phases 6-7 are in progress.
+### v1.0 (Shipped 2026-03-26)
+Hardened IPFire perimeter with Suricata IDS/IPS, off-box telemetry (Grafana + Loki + Alloy), git-based disaster recovery (15-min rebuild), full validation suite, and 12 ADRs. 8 phases, 27 plans, 124 commits, 192 files.
+
+### v2.0 (In Progress)
+Malcolm NSM deployment, local AI analyst, RAG over operating corpus, alert triage pipeline, SBOM generation, signed releases.
 
 ## Architecture
 
@@ -17,16 +21,27 @@ Every configuration, script, validation test, and runbook for completed phases l
   LAN Switch ------>|  GREEN    | (192.168.1.0/24)
     |               |           |
     +-- Win PC      |  BLUE     | (192.168.2.0/24 - WiFi/IoT)
-    +-- Ubuntu Tel  |           |
+    +-- SOC Host    |           |
                     |  ORANGE   | (192.168.3.0/24 - DMZ)
                     +-----------+
                       IPFire N100
 
-  Telemetry Host (192.168.1.101 - Ubuntu 22.04)
-    +-- Grafana    :3000  (dashboards)
-    +-- Loki       :3100  (log storage)
-    +-- Alloy      :514   (syslog collector)
-    +-- Prometheus  :9090  (metrics)
+  SOC Host (192.168.1.22 - GMKtec NucBox G3 Plus, Ubuntu 22.04)
+  ┌─ v1.0 stack (being replaced) ──────────────┐
+  │  Grafana    :3000  (dashboards)             │
+  │  Loki       :3100  (log storage)            │
+  │  Alloy      :514   (syslog collector)       │
+  │  Prometheus  :9090  (metrics)               │
+  └─────────────────────────────────────────────┘
+  ┌─ v2.0 stack (deploying) ────────────────────┐
+  │  Malcolm NSM       :5601  (OpenSearch Dash) │
+  │    +-- OpenSearch   :9200  (log/alert store) │
+  │    +-- Logstash     :5044  (ingest)         │
+  │    +-- Zeek         (network metadata)      │
+  │    +-- Arkime       (PCAP - future)         │
+  │  Foundation-Sec-8B  (AI analyst, on-demand) │
+  │  ChromaDB           (RAG vector store)      │
+  └─────────────────────────────────────────────┘
 ```
 
 ## Hardware
@@ -39,7 +54,7 @@ Every configuration, script, validation test, and runbook for completed phases l
 | Kernel | 6.18.7 LTS |
 | RAM | 16GB DDR5 (single-channel) |
 | Storage | NVMe |
-| Telemetry Host | GMKtec mini-PC, Ubuntu 22.04, Docker |
+| SOC Host | GMKtec NucBox G3 Plus, Intel N150, 16GB RAM, 912GB NVMe, Ubuntu 22.04 |
 
 ## Network Zones
 
@@ -74,9 +89,15 @@ Firewall/
 |   +-- validate-phase3.sh      # Phase 3 SSH hardening tests
 |   +-- validate-phase4.sh      # Phase 4 Suricata IDS tests
 |   +-- validate-phase5.sh      # Phase 5 telemetry pipeline tests
+|   +-- validate-phase6.sh      # Phase 6 system hardening tests
+|   +-- validate-phase9.sh      # Phase 9 Malcolm NSM tests
+|   +-- validate-all.sh         # Full validation suite (all phases)
 |   +-- validate-firewall.sh    # Standalone firewall rule checks
+|   +-- check-integrity.sh      # SHA256 integrity monitor (8 files)
+|   +-- check-drift.sh          # Config drift detection (12 files)
+|   +-- validate-reboot.sh      # Reboot persistence validator
 |   +-- check-suricata-integrity.sh  # Post-Core-Update config checker
-+-- telemetry/
++-- telemetry/                      # v1.0 stack (Loki/Alloy/Grafana — being replaced by Malcolm)
 |   +-- docker-compose.yml      # Grafana + Loki + Alloy + Prometheus
 |   +-- alloy/config.alloy      # Syslog + EVE JSON pipeline
 |   +-- loki/loki-config.yml    # Storage, retention, query limits
@@ -90,11 +111,10 @@ Firewall/
 |   +-- ssh-management-runbook.md  # SSH hardening deployment
 |   +-- suricata-ids-runbook.md # IDS/IPS deployment procedure
 |   +-- zone-policy-runbook.md  # Firewall zone policy steps
-+-- services/               # Service-specific configs (future)
-+-- validation/             # Test artifacts (Phase 6)
-+-- rollback/               # Rollback procedures (Phase 7)
-+-- manifests/              # Pakfire addon manifest (Phase 7)
-+-- decisions/              # Architecture Decision Records (ADRs)
++-- validation/             # Hardening configs (sysctl, integrity baselines)
++-- rollback/               # Rollback procedures (7 categories)
++-- manifests/              # Pakfire addon manifest, drift manifest
++-- decisions/              # Architecture Decision Records (12 ADRs)
 +-- .planning/              # GSD project planning artifacts
 ```
 
@@ -119,7 +139,7 @@ bash /root/firewall-repo/scripts/validate-phase3.sh
 bash /root/firewall-repo/scripts/validate-phase4.sh
 ```
 
-### Deploy Telemetry Stack (run on Ubuntu host)
+### Deploy v1.0 Telemetry Stack (run on SOC host at 192.168.1.22)
 
 ```bash
 cd /opt
@@ -128,7 +148,15 @@ cd /opt/telemetry/telemetry
 sudo docker compose up -d
 
 # Access Grafana
-# http://192.168.1.101:3000 (login with GF_SECURITY_ADMIN_PASSWORD from .env)
+# http://192.168.1.22:3000 (login with GF_SECURITY_ADMIN_PASSWORD from .env)
+```
+
+### Deploy v2.0 Malcolm NSM (run on SOC host at 192.168.1.22)
+
+```bash
+# Malcolm is deployed to /opt/malcolm via install.py
+# See docs/telemetry-deployment-runbook.md for full procedure
+# Access OpenSearch Dashboards: https://192.168.1.22:5601
 ```
 
 ## Security Features
@@ -142,11 +170,19 @@ sudo docker compose up -d
 | Management lockout prevention | Active | firewall.local CUSTOMINPUT rules |
 | DNSSEC | Active | Mandatory validation via Unbound |
 | DNS-over-TLS | Active | Cloudflare + Quad9 upstream |
-| IDS/IPS (Suricata) | Active | ET Community rules, surveillance mode |
+| IDS/IPS (Suricata) | Active | ET Community rules, monitor mode |
 | NIC persistence | Active | udev MAC-based zone binding |
 | Backup protection | Active | include.user for Core Update survival |
+| Sysctl hardening | Active | ICMP redirects, SYN cookies, source routing disabled |
+| File integrity monitoring | Active | SHA256 baseline for 8 critical files |
+| Config drift detection | Active | 12 managed files tracked |
+| Reboot persistence | Validated | iptables rules survive reboot |
+| Rebuild from repo | Validated | 15-minute RTO via rebuild.sh |
+| Rollback procedures | Active | 7 change categories covered |
 
 ## Build Phases
+
+### v1.0 — Firewall Appliance (Shipped 2026-03-26)
 
 | # | Phase | Status |
 |---|-------|--------|
@@ -154,9 +190,21 @@ sudo docker compose up -d
 | 2 | Core Network Services (DHCP/DNS/NTP) | Complete |
 | 3 | SSH Hardening & Management Security | Complete |
 | 4 | Suricata IDS/IPS | Complete |
-| 5 | Telemetry Pipeline & Dashboards | In Progress |
-| 6 | System Hardening & Validation Suite | Planned |
-| 7 | Reproducibility & Disaster Recovery | Planned |
+| 5 | Telemetry Pipeline & Dashboards | Complete |
+| 6 | System Hardening & Validation Suite | Complete |
+| 7 | Reproducibility & Disaster Recovery | Complete |
+| 8 | Milestone Gap Closure | Complete |
+
+### v2.0 — Local AI SOC (In Progress)
+
+| # | Phase | Status |
+|---|-------|--------|
+| 9 | Malcolm NSM Deployment | In Progress |
+| 10 | Data Ingestion & Loki Migration | Planned |
+| 11 | Foundation-Sec-8B AI Analyst Setup | Planned |
+| 12 | RAG Pipeline | Planned |
+| 13 | Alert Triage Integration | Planned |
+| 14 | SBOM & Signed Releases | Planned |
 
 ## Key Files for Rebuild
 
