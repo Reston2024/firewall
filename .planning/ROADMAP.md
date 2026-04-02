@@ -57,7 +57,10 @@ Plans:
   3. Loki/Alloy/Grafana/Prometheus containers are stopped and removed; `docker ps` on supportTAK-server shows only Malcolm containers
   4. validate-phase5.sh (or its replacement) checks Malcolm endpoints and passes with no FAIL results
   5. Telemetry runbook accurately describes the Filebeat-to-Malcolm architecture — no references to Alloy, Loki, or SCP cron as active paths
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 10-01-PLAN.md — Wire EVE JSON and syslog into Malcolm via Filebeat and rsyslog relay, verify parallel ingestion
+- [ ] 10-02-PLAN.md — Decommission Loki stack, create validate-phase10.sh, rewrite telemetry runbook
 
 ### Phase 11: Foundation-Sec-8B AI Analyst
 **Goal**: Foundation-Sec-8B Q4_K_M is running via Ollama on supportTAK-server with measured inference throughput documented, memory behavior validated, and the AI constrained to recommendations only
@@ -117,7 +120,7 @@ Plans:
 | 7. Reproducibility and Disaster Recovery | v1.0 | 5/5 | Complete | 2026-03-26 |
 | 8. Milestone Gap Closure | v1.0 | 3/3 | Complete | 2026-03-26 |
 | 9. Malcolm NSM Deployment | v2.0 | 0/2 | Planning complete | - |
-| 10. Telemetry Migration to Malcolm | v2.0 | 0/- | Not started | - |
+| 10. Telemetry Migration to Malcolm | v2.0 | 0/2 | Planning complete | - |
 | 11. Foundation-Sec-8B AI Analyst | v2.0 | 0/- | Not started | - |
 | 12. RAG Knowledge Pipeline | v2.0 | 0/- | Not started | - |
 | 13. Alert Triage Integration | v2.0 | 0/- | Not started | - |
