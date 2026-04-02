@@ -15,14 +15,8 @@
 
 if [ "${1}" = "--full" ]; then FULL=1; else FULL=0; fi
 
-# Malcolm credentials — read from environment to avoid hardcoding secrets
-MALCOLM_USER="${MALCOLM_USER:-admin}"
-MALCOLM_PASS="${MALCOLM_PASS:-}"
-if [ -z "$MALCOLM_PASS" ]; then
-  echo "WARNING: MALCOLM_PASS not set. OpenSearch heap check (MAL-01b) will be skipped."
-  echo "         Export the Malcolm admin password: export MALCOLM_PASS=<password>"
-  echo ""
-fi
+# Malcolm internal credentials are auto-discovered from the running containers
+# via the dashboards-helper curlrc file — no manual password needed.
 
 FAIL=0
 PASS=0
@@ -68,11 +62,14 @@ echo ""
 # --- MAL-01b: OpenSearch heap within 6GB boundary ---
 echo "[MAL-01b] OpenSearch JVM heap within 6GB boundary"
 
-if [ -z "$MALCOLM_PASS" ]; then
-  skip "MAL-01b: MALCOLM_PASS not set — export MALCOLM_PASS=<password> and re-run"
+  # Use Malcolm internal service account via curlrc file for OpenSearch API access
+  INTERNAL_CREDS=$(ssh $SSH_OPTS "$SSH_TARGET" \
+    "docker exec malcolm-dashboards-helper-1 cat /var/local/curlrc/.opensearch.primary.curlrc 2>/dev/null | grep '^user:' | sed 's/^user: \"//;s/\"$//'" 2>/dev/null)
+if [ -z "$INTERNAL_CREDS" ]; then
+  skip "MAL-01b: Cannot read Malcolm internal credentials — verify Malcolm is running"
 else
   MAL01B_OUT=$(ssh $SSH_OPTS "$SSH_TARGET" \
-    "sudo docker exec malcolm-opensearch-1 curl -sk -u \"${MALCOLM_USER}:${MALCOLM_PASS}\" http://localhost:9200/_nodes/stats/jvm 2>/dev/null" 2>/dev/null)
+    "docker exec malcolm-opensearch-1 curl -sk -u \"${INTERNAL_CREDS}\" https://localhost:9200/_nodes/stats/jvm 2>/dev/null" 2>/dev/null)
   MAL01B_EXIT=$?
 
   if [ $MAL01B_EXIT -ne 0 ] || [ -z "$MAL01B_OUT" ]; then
@@ -184,11 +181,16 @@ echo "[MAL-04] OpenSearch ISM retention policy 'malcolm-retention' exists"
 if [ "$FULL" -eq 0 ]; then
   skip "MAL-04: ISM policy check skipped in quick mode — run with --full to include (expected to FAIL until Plan 02 configures it)"
 else
-  if [ -z "$MALCOLM_PASS" ]; then
-    skip "MAL-04: MALCOLM_PASS not set — export MALCOLM_PASS=<password> and re-run with --full"
-  else
+    # Re-fetch internal creds if not already available
+    if [ -z "$INTERNAL_CREDS" ]; then
+      INTERNAL_CREDS=$(ssh $SSH_OPTS "$SSH_TARGET" \
+        "docker exec malcolm-dashboards-helper-1 cat /var/local/curlrc/.opensearch.primary.curlrc 2>/dev/null | grep '^user:' | sed 's/^user: \"//;s/\"$//'" 2>/dev/null)
+    fi
+    if [ -z "$INTERNAL_CREDS" ]; then
+      skip "MAL-04: Cannot read Malcolm internal credentials — verify Malcolm is running"
+    else
     MAL04_OUT=$(ssh $SSH_OPTS "$SSH_TARGET" \
-      "sudo docker exec malcolm-opensearch-1 curl -sk -u \"${MALCOLM_USER}:${MALCOLM_PASS}\" http://localhost:9200/_plugins/_ism/policies/malcolm-retention 2>/dev/null" 2>/dev/null)
+      "docker exec malcolm-opensearch-1 curl -sk -u \"${INTERNAL_CREDS}\" https://localhost:9200/_plugins/_ism/policies/malcolm-retention 2>/dev/null" 2>/dev/null)
     MAL04_EXIT=$?
 
     if [ $MAL04_EXIT -ne 0 ] || [ -z "$MAL04_OUT" ]; then
