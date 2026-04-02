@@ -205,21 +205,22 @@ fi
 echo ""
 
 # --- MAL-05: OpenSearch Dashboards accessible (--full mode) ---
-echo "[MAL-05] OpenSearch Dashboards accessible at :5601"
+echo "[MAL-05] OpenSearch Dashboards accessible via Malcolm nginx at :443"
 
 if [ "$FULL" -eq 0 ]; then
   skip "MAL-05: Dashboards accessibility check skipped in quick mode — run with --full to include"
 else
+  # Malcolm serves dashboards through nginx at :443, not directly at :5601
   MAL05_OUT=$(ssh $SSH_OPTS "$SSH_TARGET" \
-    "curl -sk -o /dev/null -w '%{http_code}' https://localhost:5601/ 2>/dev/null" 2>/dev/null)
+    "curl -sk -o /dev/null -w '%{http_code}' https://localhost:443/ 2>/dev/null" 2>/dev/null)
   MAL05_EXIT=$?
 
   if [ $MAL05_EXIT -ne 0 ] || [ -z "$MAL05_OUT" ]; then
-    fail "MAL-05: Cannot check OpenSearch Dashboards at https://192.168.1.22:5601. Verify Malcolm is running and nginx is healthy."
-  elif [ "$MAL05_OUT" = "200" ] || [ "$MAL05_OUT" = "302" ]; then
-    pass "MAL-05: OpenSearch Dashboards returns HTTP ${MAL05_OUT} at :5601 (login redirect expected)"
+    fail "MAL-05: Cannot check Malcolm web UI at https://192.168.1.22:443. Verify Malcolm is running and nginx-proxy is healthy."
+  elif [ "$MAL05_OUT" = "200" ] || [ "$MAL05_OUT" = "302" ] || [ "$MAL05_OUT" = "401" ]; then
+    pass "MAL-05: Malcolm web UI returns HTTP ${MAL05_OUT} at :443 (401=auth required, 302=redirect — both indicate nginx+dashboards are serving)"
   else
-    fail "MAL-05: OpenSearch Dashboards returned unexpected HTTP ${MAL05_OUT} at :5601. Expected 200 or 302 (login redirect)."
+    fail "MAL-05: Malcolm web UI returned unexpected HTTP ${MAL05_OUT} at :443. Expected 200, 302, or 401."
   fi
 fi
 echo ""
