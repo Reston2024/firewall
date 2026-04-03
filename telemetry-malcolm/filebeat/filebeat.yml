@@ -1,0 +1,22 @@
+filebeat.config.modules:
+  path: /etc/filebeat/modules.d/*.yml
+
+filebeat.modules:
+  - module: suricata
+    eve:
+      enabled: true
+      var.paths:
+        - /var/log/ipfire-eve/eve.json
+
+setup.ilm.enabled: false
+setup.template.enabled: false
+
+output.logstash:
+  hosts: ["localhost:5044"]
+
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat
+  keepfiles: 7
