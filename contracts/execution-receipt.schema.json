@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Reston2024/firewall/contracts/execution-receipt.schema.json",
+  "title": "Firewall Execution Receipt",
+  "description": "Versioned, immutable receipt emitted by the firewall executor for every recommendation artifact it processes. Governed by ADR-E01. Canonical owner: firewall.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "receipt_id",
+    "recommendation_id",
+    "case_id",
+    "failure_taxonomy",
+    "received_at",
+    "processed_at",
+    "detail"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Schema version; must match the version field of this document."
+    },
+    "receipt_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "UUID v4. Primary key for this receipt. Immutable once set."
+    },
+    "recommendation_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "UUID v4. Echoes the recommendation_id from the processed artifact. Links receipt to recommendation for audit trail."
+    },
+    "case_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "UUID v4. Echoes the case_id from the processed artifact. Links receipt to the investigation case."
+    },
+    "failure_taxonomy": {
+      "type": "string",
+      "enum": [
+        "applied",
+        "noop_already_present",
+        "validation_failed",
+        "expired_rejected",
+        "rolled_back"
+      ],
+      "description": "Mutually exclusive disposition of the processed artifact. Exactly one value per receipt. See ADR-E01 for definitions."
+    },
+    "received_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC timestamp when the firewall executor received the artifact. Uses the firewall's own system clock, not the dispatch system's clock."
+    },
+    "processed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC timestamp when the firewall executor completed processing (rule applied, rejected, or rolled back). Uses the firewall's own system clock."
+    },
+    "detail": {
+      "type": "string",
+      "description": "Human-readable explanation of the outcome. Required when failure_taxonomy is not 'applied'. For 'applied', may be empty string. For 'rolled_back', MUST document: (1) which post-apply validation check failed, (2) expected vs. observed state, (3) whether rollback succeeded."
+    },
+    "firewall_rule_id": {
+      "type": "string",
+      "description": "Identifier of the firewall rule that was created or matched. Populated when failure_taxonomy is 'applied' (the new rule ID) or 'noop_already_present' (the existing rule ID). Null or absent for all other taxonomy values."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "failure_taxonomy": {
+            "enum": ["validation_failed", "expired_rejected", "rolled_back"]
+          }
+        },
+        "required": ["failure_taxonomy"]
+      },
+      "then": {
+        "properties": {
+          "detail": {
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "failure_taxonomy": {
+            "enum": ["applied", "noop_already_present"]
+          }
+        },
+        "required": ["failure_taxonomy"]
+      },
+      "then": {
+        "required": ["firewall_rule_id"],
+        "properties": {
+          "firewall_rule_id": {
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ]
+}
