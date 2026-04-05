@@ -1,22 +1,14 @@
-filebeat.config.modules:
-  path: /etc/filebeat/modules.d/*.yml
-
-filebeat.modules:
-  - module: suricata
-    eve:
-      enabled: true
-      var.paths:
-        - /var/log/ipfire-eve/eve.json
-
-setup.ilm.enabled: false
-setup.template.enabled: false
-
-output.logstash:
-  hosts: ["localhost:5044"]
-
-logging.level: info
-logging.to_files: true
-logging.files:
-  path: /var/log/filebeat
-  name: filebeat
-  keepfiles: 7
+# System Filebeat is NOT used for EVE JSON ingestion.
+# Malcolm's internal Filebeat handles EVE JSON via the suricata-logs volume.
+# EVE JSON delivery path:
+#   IPFire /var/log/suricata/eve.json
+#     → SCP cron (sync-eve.sh, 60s)
+#     → /opt/malcolm/suricata-logs/suricata-ipfire/eve.json
+#     → Malcolm internal Filebeat (tag: _filebeat_suricata_malcolm_upload)
+#     → Malcolm Logstash (suricata pipeline)
+#     → OpenSearch (arkime_sessions3-* indices)
+#
+# System Filebeat was initially attempted for external shipping but
+# Malcolm's Logstash pipeline routes based on internal tags that external
+# Filebeat cannot replicate. Using Malcolm's built-in file monitoring
+# is the industry-standard approach.
