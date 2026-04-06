@@ -71,7 +71,10 @@ Plans:
   2. `llama-bench` output is documented with actual tokens/second on N150 CPU (result committed to repo as benchmark artifact)
   3. After 5 minutes of idle, model is unloaded from RAM — confirmed via `free -m` showing RAM recovered and `OLLAMA_KEEP_ALIVE=5m` in systemd override
   4. `free -m` with Malcolm at steady state and Ollama loaded simultaneously shows total usage under 15.5GB
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 11-01-PLAN.md — Install Ollama, apply security override (ADR-E02), pull Foundation-Sec-8B Q4_K_M, create validation script
+- [ ] 11-02-PLAN.md — Run throughput benchmarks, measure RAM coexistence, document results, evaluate Phase 13 gate
 
 ### Phase 12: RAG Knowledge Pipeline
 **Goal**: The operating corpus (ADRs, runbooks, validation results, control docs) is indexed in ChromaDB and RAG retrieval produces accurate, contextually relevant chunks validated by manual query testing
@@ -121,7 +124,7 @@ Plans:
 | 8. Milestone Gap Closure | v1.0 | 3/3 | Complete | 2026-03-26 |
 | 9. Malcolm NSM Deployment | v2.0 | 0/2 | Planning complete | - |
 | 10. Telemetry Migration to Malcolm | v2.0 | 0/2 | Planning complete | - |
-| 11. Foundation-Sec-8B AI Analyst | v2.0 | 0/- | Not started | - |
+| 11. Foundation-Sec-8B AI Analyst | v2.0 | 0/2 | Planning complete | - |
 | 12. RAG Knowledge Pipeline | v2.0 | 0/- | Not started | - |
 | 13. Alert Triage Integration | v2.0 | 0/- | Not started | - |
 | 14. PCAP Investigation + Supply Chain | v2.0 | 0/- | Not started | - |
