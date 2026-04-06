@@ -73,7 +73,7 @@ Plans:
   4. `free -m` with Malcolm at steady state and Ollama loaded simultaneously shows total usage under 15.5GB
 **Plans**: 2 plans
 Plans:
-- [ ] 11-01-PLAN.md — Install Ollama, apply security override (ADR-E02), pull Foundation-Sec-8B Q4_K_M, create validation script
+- [x] 11-01-PLAN.md — Install Ollama, apply security override (ADR-E02), pull Foundation-Sec-8B Q4_K_M, create validation script
 - [ ] 11-02-PLAN.md — Run throughput benchmarks, measure RAM coexistence, document results, evaluate Phase 13 gate
 
 ### Phase 12: RAG Knowledge Pipeline
@@ -124,7 +124,7 @@ Plans:
 | 8. Milestone Gap Closure | v1.0 | 3/3 | Complete | 2026-03-26 |
 | 9. Malcolm NSM Deployment | v2.0 | 0/2 | Planning complete | - |
 | 10. Telemetry Migration to Malcolm | v2.0 | 0/2 | Planning complete | - |
-| 11. Foundation-Sec-8B AI Analyst | v2.0 | 0/2 | Planning complete | - |
+| 11. Foundation-Sec-8B AI Analyst | v2.0 | 1/2 | In Progress|  |
 | 12. RAG Knowledge Pipeline | v2.0 | 0/- | Not started | - |
 | 13. Alert Triage Integration | v2.0 | 0/- | Not started | - |
 | 14. PCAP Investigation + Supply Chain | v2.0 | 0/- | Not started | - |

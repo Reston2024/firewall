@@ -25,10 +25,10 @@ Requirements for Local AI SOC milestone. Each maps to roadmap phases.
 
 ### AI Security Analyst
 
-- [ ] **AI-01**: Ollama installed natively (not Docker) on supportTAK-server with Foundation-Sec-8B Q4_K_M model
-- [ ] **AI-02**: OLLAMA_KEEP_ALIVE=5m configured to unload model after idle periods, preventing permanent 5GB RAM pinning
+- [x] **AI-01**: Ollama installed natively (not Docker) on supportTAK-server with Foundation-Sec-8B Q4_K_M model
+- [x] **AI-02**: OLLAMA_KEEP_ALIVE=5m configured to unload model after idle periods, preventing permanent 5GB RAM pinning
 - [ ] **AI-03**: llama-bench throughput benchmark run and documented to establish actual N150 tokens/second before triage pipeline design
-- [ ] **AI-04**: AI analyst produces recommendations only — no automated firewall rule changes or response actions
+- [x] **AI-04**: AI analyst produces recommendations only — no automated firewall rule changes or response actions
 
 ### RAG Knowledge Pipeline
 
@@ -108,10 +108,10 @@ Deferred to future release. Tracked but not in current roadmap.
 | MIG-02 | Phase 10 | Pending |
 | MIG-03 | Phase 10 | Pending |
 | MIG-04 | Phase 10 | Pending |
-| AI-01 | Phase 11 | Pending |
-| AI-02 | Phase 11 | Pending |
+| AI-01 | Phase 11 | Complete |
+| AI-02 | Phase 11 | Complete |
 | AI-03 | Phase 11 | Pending |
-| AI-04 | Phase 11 | Pending |
+| AI-04 | Phase 11 | Complete |
 | RAG-01 | Phase 12 | Pending |
 | RAG-02 | Phase 12 | Pending |
 | RAG-03 | Phase 12 | Pending |

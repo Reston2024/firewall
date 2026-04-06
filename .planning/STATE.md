@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Local AI SOC
-status: active
-stopped_at: Phase 9 complete
-last_updated: "2026-04-02T23:40:00.000Z"
+status: unknown
+stopped_at: Completed 11-01-PLAN.md — Ollama + Foundation-Sec-8B installed, ADR-E02 compliant, validate-phase11.sh passing
+last_updated: "2026-04-06T13:14:19.676Z"
 progress:
   total_phases: 6
-  completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  completed_phases: 2
+  total_plans: 6
+  completed_plans: 5
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-31)
 
 **Core value:** A secure, observable, AI-augmented network perimeter where threats are detected, triaged, and investigated locally
-**Current focus:** Phase 09 — malcolm-nsm-deployment
+**Current focus:** Phase 11 — foundation-sec-8b-ai-analyst
 
 ## Current Position
 
-Phase: 09 (malcolm-nsm-deployment) — COMPLETE
-Plan: 2 of 2 (done)
+Phase: 11 (foundation-sec-8b-ai-analyst) — EXECUTING
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -46,6 +46,7 @@ Plan: 2 of 2 (done)
 | 14 - PCAP + Supply Chain | - | - | - |
 
 *Updated after each plan completion*
+| Phase 11 P01 | 27 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -64,6 +65,9 @@ Recent decisions affecting current work:
 - [v2.0 architecture]: all-MiniLM-L6-v2 is the embedding model — never use Foundation-Sec-8B for embeddings (RAM-prohibitive double-load at 16GB)
 - [v2.0 architecture]: cosign v3 with --bundle flag from day one — do not start with v2.x to avoid migration debt
 - [Phase 11 gate]: If llama-bench measures below 2 t/s on N150, triage pipeline design requires revision before Phase 13 is planned
+- [Phase 11]: OLLAMA_CONTEXT_LENGTH=2048 added to systemd override to reduce KV cache RAM footprint for Malcolm coexistence
+- [Phase 11]: UFW deny rule for port 11434 configured but UFW is inactive on supportTAK-server; primary ADR-E02 control is 127.0.0.1 binding which works correctly
+- [Phase 11]: Temporal separation confirmed required in practice: Foundation-Sec-8B needs 5.4GB, Malcolm uses 12-14GB of 16GB — simultaneous load requires pausing OpenSearch/Logstash
 
 ### Key RAM Budget (supportTAK-server 16GB)
 
@@ -102,7 +106,7 @@ Temporal separation between Malcolm indexing peaks and AI triage is mandatory �
 
 ## Session Continuity
 
-Last session: 2026-04-02
-Stopped at: Phase 9 complete — Malcolm NSM deployed on supportTAK-server
+Last session: 2026-04-06T13:14:19.671Z
+Stopped at: Completed 11-01-PLAN.md — Ollama + Foundation-Sec-8B installed, ADR-E02 compliant, validate-phase11.sh passing
 Resume file: None
 Next action: `/gsd:plan-phase 10` — Data Ingestion & Loki Migration
