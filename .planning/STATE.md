@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Local AI SOC
 status: unknown
-stopped_at: Completed 11-01-PLAN.md — Ollama + Foundation-Sec-8B installed, ADR-E02 compliant, validate-phase11.sh passing
-last_updated: "2026-04-06T13:14:19.676Z"
+stopped_at: Completed 12-01-PLAN.md — RAG corpus indexed 387 chunks, query_corpus() working, validate-phase12.sh 10/10 PASS
+last_updated: "2026-04-07T01:30:17.890Z"
 progress:
   total_phases: 6
-  completed_phases: 2
-  total_plans: 6
-  completed_plans: 5
+  completed_phases: 3
+  total_plans: 8
+  completed_plans: 7
 ---
 
 # Project State
@@ -19,11 +19,11 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-31)
 
 **Core value:** A secure, observable, AI-augmented network perimeter where threats are detected, triaged, and investigated locally
-**Current focus:** Phase 11 — foundation-sec-8b-ai-analyst
+**Current focus:** Phase 12 — rag-knowledge-pipeline
 
 ## Current Position
 
-Phase: 11 (foundation-sec-8b-ai-analyst) — EXECUTING
+Phase: 12 (rag-knowledge-pipeline) — EXECUTING
 Plan: 2 of 2
 
 ## Performance Metrics
@@ -47,6 +47,7 @@ Plan: 2 of 2
 
 *Updated after each plan completion*
 | Phase 11 P01 | 27 | 2 tasks | 2 files |
+| Phase 12 P01 | 47 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -68,6 +69,8 @@ Recent decisions affecting current work:
 - [Phase 11]: OLLAMA_CONTEXT_LENGTH=2048 added to systemd override to reduce KV cache RAM footprint for Malcolm coexistence
 - [Phase 11]: UFW deny rule for port 11434 configured but UFW is inactive on supportTAK-server; primary ADR-E02 control is 127.0.0.1 binding which works correctly
 - [Phase 11]: Temporal separation confirmed required in practice: Foundation-Sec-8B needs 5.4GB, Malcolm uses 12-14GB of 16GB — simultaneous load requires pausing OpenSearch/Logstash
+- [Phase 12]: langchain_community.vectorstores.Chroma used instead of langchain-chroma: no version of langchain-chroma bridges chromadb 0.6.3 + langchain 0.3.x (1.x requires chromadb 1.x; 0.1.x requires chromadb<0.6.0)
+- [Phase 12]: chromadb 0.6.3 pinned confirmed correct; 1.x uses ONNX internal embeddings incompatible with HuggingFaceEmbeddings pattern
 
 ### Key RAM Budget (supportTAK-server 16GB)
 
@@ -106,7 +109,7 @@ Temporal separation between Malcolm indexing peaks and AI triage is mandatory �
 
 ## Session Continuity
 
-Last session: 2026-04-06T13:14:19.671Z
-Stopped at: Completed 11-01-PLAN.md — Ollama + Foundation-Sec-8B installed, ADR-E02 compliant, validate-phase11.sh passing
+Last session: 2026-04-07T01:30:17.884Z
+Stopped at: Completed 12-01-PLAN.md — RAG corpus indexed 387 chunks, query_corpus() working, validate-phase12.sh 10/10 PASS
 Resume file: None
 Next action: `/gsd:plan-phase 10` — Data Ingestion & Loki Migration

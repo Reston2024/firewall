@@ -32,9 +32,9 @@ Requirements for Local AI SOC milestone. Each maps to roadmap phases.
 
 ### RAG Knowledge Pipeline
 
-- [ ] **RAG-01**: ChromaDB embedded vector store initialized on supportTAK-server NVMe
-- [ ] **RAG-02**: all-MiniLM-L6-v2 embedding model deployed (~90MB) — Foundation-Sec-8B never used for embeddings
-- [ ] **RAG-03**: ADRs, runbooks, validation results, and control docs indexed with header-aware Markdown chunking (400-600 tokens, 10-15% overlap)
+- [x] **RAG-01**: ChromaDB embedded vector store initialized on supportTAK-server NVMe
+- [x] **RAG-02**: all-MiniLM-L6-v2 embedding model deployed (~90MB) — Foundation-Sec-8B never used for embeddings
+- [x] **RAG-03**: ADRs, runbooks, validation results, and control docs indexed with header-aware Markdown chunking (400-600 tokens, 10-15% overlap)
 - [ ] **RAG-04**: RAG retrieval validated with 10 manual queries against the corpus before production use
 
 ### Alert Triage
@@ -112,9 +112,9 @@ Deferred to future release. Tracked but not in current roadmap.
 | AI-02 | Phase 11 | Complete |
 | AI-03 | Phase 11 | Pending |
 | AI-04 | Phase 11 | Complete |
-| RAG-01 | Phase 12 | Pending |
-| RAG-02 | Phase 12 | Pending |
-| RAG-03 | Phase 12 | Pending |
+| RAG-01 | Phase 12 | Complete |
+| RAG-02 | Phase 12 | Complete |
+| RAG-03 | Phase 12 | Complete |
 | RAG-04 | Phase 12 | Pending |
 | TRI-01 | Phase 13 | Pending |
 | TRI-02 | Phase 13 | Pending |
