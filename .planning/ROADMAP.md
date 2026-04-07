@@ -85,7 +85,10 @@ Plans:
   2. A query about a specific ADR decision returns the rationale section of that ADR as a top-3 retrieved chunk — no chunk splits mid-decision
   3. 10 manual security queries against the corpus all return chunks that contain the relevant technical content (not just keyword matches)
   4. Foundation-Sec-8B produces a coherent answer to a security question with RAG context injected — end-to-end pipeline confirmed working
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 12-01-PLAN.md — Install RAG Python environment, create ingestion + query scripts, index corpus into ChromaDB
+- [ ] 12-02-PLAN.md — Validate retrieval quality with 10 queries, end-to-end LLM test, reboot persistence check
 
 ### Phase 13: Alert Triage Integration
 **Goal**: High-severity Suricata alerts are enriched with RAG context and AI-generated ATT&CK-mapped summaries on a systemd-timer schedule, with results visible in OpenSearch Dashboards and temporal separation from Malcolm indexing enforced
@@ -125,6 +128,6 @@ Plans:
 | 9. Malcolm NSM Deployment | v2.0 | 0/2 | Planning complete | - |
 | 10. Telemetry Migration to Malcolm | v2.0 | 0/2 | Planning complete | - |
 | 11. Foundation-Sec-8B AI Analyst | v2.0 | 1/2 | In Progress|  |
-| 12. RAG Knowledge Pipeline | v2.0 | 0/- | Not started | - |
+| 12. RAG Knowledge Pipeline | v2.0 | 0/2 | Planning complete | - |
 | 13. Alert Triage Integration | v2.0 | 0/- | Not started | - |
 | 14. PCAP Investigation + Supply Chain | v2.0 | 0/- | Not started | - |
