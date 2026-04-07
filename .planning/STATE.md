@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Local AI SOC
 status: unknown
-stopped_at: Completed 12-01-PLAN.md — RAG corpus indexed 387 chunks, query_corpus() working, validate-phase12.sh 10/10 PASS
-last_updated: "2026-04-07T01:30:17.890Z"
+stopped_at: "Checkpoint: supportTAK-server did not come back after reboot — requires physical intervention. 10/10 queries pass, RAG-04 end-to-end confirmed, reboot persistence test blocked."
+last_updated: "2026-04-07T03:18:25.665Z"
 progress:
   total_phases: 6
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 8
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -48,6 +48,7 @@ Plan: 2 of 2
 *Updated after each plan completion*
 | Phase 11 P01 | 27 | 2 tasks | 2 files |
 | Phase 12 P01 | 47 | 2 tasks | 3 files |
+| Phase 12 P02 | 105 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -71,6 +72,8 @@ Recent decisions affecting current work:
 - [Phase 11]: Temporal separation confirmed required in practice: Foundation-Sec-8B needs 5.4GB, Malcolm uses 12-14GB of 16GB — simultaneous load requires pausing OpenSearch/Logstash
 - [Phase 12]: langchain_community.vectorstores.Chroma used instead of langchain-chroma: no version of langchain-chroma bridges chromadb 0.6.3 + langchain 0.3.x (1.x requires chromadb 1.x; 0.1.x requires chromadb<0.6.0)
 - [Phase 12]: chromadb 0.6.3 pinned confirmed correct; 1.x uses ONNX internal embeddings incompatible with HuggingFaceEmbeddings pattern
+- [Phase 12]: Use openai client directly for Foundation-Sec-8B queries: langchain_community.chat_models.ChatOllama returns empty content in chromadb 0.6.3 + langchain 0.3.x venv; openai client confirmed working with 1125-char coherent responses
+- [Phase 12]: Chunk context limit set to 400 chars in query_with_llm: 600-char limit causes prompt to overflow OLLAMA_CONTEXT_LENGTH=2048 with 3 chunks + template overhead; 400-char confirmed working
 
 ### Key RAM Budget (supportTAK-server 16GB)
 
@@ -109,7 +112,7 @@ Temporal separation between Malcolm indexing peaks and AI triage is mandatory �
 
 ## Session Continuity
 
-Last session: 2026-04-07T01:30:17.884Z
-Stopped at: Completed 12-01-PLAN.md — RAG corpus indexed 387 chunks, query_corpus() working, validate-phase12.sh 10/10 PASS
+Last session: 2026-04-07T03:18:25.658Z
+Stopped at: Checkpoint: supportTAK-server did not come back after reboot — requires physical intervention. 10/10 queries pass, RAG-04 end-to-end confirmed, reboot persistence test blocked.
 Resume file: None
 Next action: `/gsd:plan-phase 10` — Data Ingestion & Loki Migration

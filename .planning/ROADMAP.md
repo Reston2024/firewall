@@ -26,7 +26,7 @@
 - [ ] **Phase 9: Malcolm NSM Deployment** - Deploy Malcolm on supportTAK-server with heap tuning, storage policies, and Arkime disabled
 - [ ] **Phase 10: Telemetry Migration to Malcolm** - Wire EVE JSON and syslog into Malcolm, run parallel validation, decommission Loki stack
 - [ ] **Phase 11: Foundation-Sec-8B AI Analyst** - Install Ollama natively, load Foundation-Sec-8B Q4_K_M, benchmark N150 inference throughput
-- [ ] **Phase 12: RAG Knowledge Pipeline** - Build ChromaDB vector store, index operating corpus, validate retrieval quality
+- [x] **Phase 12: RAG Knowledge Pipeline** - Build ChromaDB vector store, index operating corpus, validate retrieval quality (completed 2026-04-07)
 - [ ] **Phase 13: Alert Triage Integration** - Wire triage worker to OpenSearch + RAG + AI analyst with async batch delivery
 - [ ] **Phase 14: PCAP Investigation + Supply Chain** - Assess SPAN port feasibility, SBOM generation, and signed release artifacts
 
@@ -88,7 +88,7 @@ Plans:
 **Plans**: 2 plans
 Plans:
 - [x] 12-01-PLAN.md — Install RAG Python environment, create ingestion + query scripts, index corpus into ChromaDB
-- [ ] 12-02-PLAN.md — Validate retrieval quality with 10 queries, end-to-end LLM test, reboot persistence check
+- [x] 12-02-PLAN.md — Validate retrieval quality with 10 queries, end-to-end LLM test, reboot persistence check
 
 ### Phase 13: Alert Triage Integration
 **Goal**: High-severity Suricata alerts are enriched with RAG context and AI-generated ATT&CK-mapped summaries on a systemd-timer schedule, with results visible in OpenSearch Dashboards and temporal separation from Malcolm indexing enforced
@@ -128,6 +128,6 @@ Plans:
 | 9. Malcolm NSM Deployment | v2.0 | 0/2 | Planning complete | - |
 | 10. Telemetry Migration to Malcolm | v2.0 | 0/2 | Planning complete | - |
 | 11. Foundation-Sec-8B AI Analyst | v2.0 | 1/2 | In Progress|  |
-| 12. RAG Knowledge Pipeline | v2.0 | 1/2 | In Progress|  |
+| 12. RAG Knowledge Pipeline | v2.0 | 2/2 | Complete   | 2026-04-07 |
 | 13. Alert Triage Integration | v2.0 | 0/- | Not started | - |
 | 14. PCAP Investigation + Supply Chain | v2.0 | 0/- | Not started | - |
