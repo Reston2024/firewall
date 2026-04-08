@@ -37,12 +37,14 @@ Requirements for Local AI SOC milestone. Each maps to roadmap phases.
 - [x] **RAG-03**: ADRs, runbooks, validation results, and control docs indexed with header-aware Markdown chunking (400-600 tokens, 10-15% overlap)
 - [x] **RAG-04**: RAG retrieval validated with 10 manual queries against the corpus before production use
 
-### Alert Triage
+### Alert Triage & SOC Integration
 
-- [ ] **TRI-01**: Triage worker script queries OpenSearch for high-severity Suricata alerts via opensearch-py REST API
-- [ ] **TRI-02**: Each alert enriched with RAG context from operating corpus and AI-generated summary including ATT&CK mapping
-- [ ] **TRI-03**: Enriched triage results written to dedicated OpenSearch triage-results-* index (not polluting Malcolm's network data indices)
-- [ ] **TRI-04**: Triage runs as async batch process (systemd timer), not synchronous blocking — designed for 3-8 tok/s CPU inference speed
+- [ ] **TRI-01**: Malcolm OpenSearch API exposed to LAN via authenticated reverse proxy — local-ai-soc on Windows desktop queries alerts via opensearch-py or HTTP
+- [ ] **TRI-02**: Each alert enriched with RAG context from operating corpus and AI-generated summary including ATT&CK mapping — using desktop GPU (qwen3:14b) for real-time inference
+- [ ] **TRI-03**: Enriched triage results written to both local-ai-soc DuckDB and OpenSearch triage-results-* index
+- [ ] **TRI-04**: local-ai-soc FirewallCollector configured to pull from Malcolm OpenSearch (not file-tailing) with FIREWALL_ENABLED=true
+- [ ] **TRI-05**: Recommendation dispatch wired — local-ai-soc generates recommendation artifacts (recommendation.schema.json v1.0) that can be sent to firewall executor gate (execution-receipt.schema.json v1.0)
+- [ ] **TRI-06**: End-to-end verified: IPFire alert → Malcolm ingest → SOC pull → detect → investigate → recommend → receipt
 
 ### Supply Chain Assurance
 
