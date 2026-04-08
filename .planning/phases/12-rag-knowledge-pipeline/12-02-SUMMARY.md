@@ -206,3 +206,13 @@ None — all RAG functionality is wired end-to-end with real ChromaDB data and r
 ---
 *Phase: 12-rag-knowledge-pipeline*
 *Completed: 2026-04-07 (partial — reboot persistence blocked)*
+
+## Self-Check: PASSED (with noted blocker)
+
+- FOUND: scripts/rag_query.py
+- FOUND: scripts/validate-phase12.sh
+- FOUND: .planning/phases/12-rag-knowledge-pipeline/12-02-SUMMARY.md
+- FOUND commit: b27a9d0 (Task 1: --llm flag)
+- FOUND commit: c1eaf79 (docs: plan metadata)
+- FOUND: --llm flag in scripts/rag_query.py
+- BLOCKER: supportTAK-server not accessible post-reboot — reboot persistence count cannot be verified automatically
