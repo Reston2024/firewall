@@ -1,46 +1,53 @@
-# Firewall Appliance → Local AI SOC
+# Firewall Appliance + Local AI SOC
 
-A hardened, reproducible firewall appliance evolving into a local-first AI Security Operations Center. Built on an Intel N100 6-NIC mini-PC running IPFire, with Malcolm NSM (Zeek + Suricata + PCAP + OpenSearch), a local AI security analyst (Foundation-Sec-8B), and RAG-augmented investigation workflows.
+A two-tier local-first AI SOC: a hardened IPFire perimeter appliance with Malcolm NSM as the data collection layer, feeding a desktop SOC Brain (RTX 5080) for GPU-accelerated AI analysis. Raw telemetry flows from firewall → indexer → analyst with no AI on the data path.
 
 ## Core Value
 
-**A secure, observable, AI-augmented network perimeter where threats are detected, triaged, and investigated locally — no cloud dependencies, no vendor lock-in.**
+**Raw telemetry collected, preserved with chain of custody, and served to a GPU-powered local SOC for AI-assisted analysis — no cloud, no data distortion between collection and analysis.**
 
 ### v1.0 (Shipped 2026-03-26)
 Hardened IPFire perimeter with Suricata IDS/IPS, off-box telemetry (Grafana + Loki + Alloy), git-based disaster recovery (15-min rebuild), full validation suite, and 12 ADRs. 8 phases, 27 plans, 124 commits, 192 files.
 
 ### v2.0 (In Progress)
-Malcolm NSM deployment, local AI analyst, RAG over operating corpus, alert triage pipeline, SBOM generation, signed releases.
+Malcolm NSM data layer (10 active containers), desktop SOC integration via OpenSearch API, raw log archival with chain of custody. AI removed from data layer per ADR-E04 — desktop SOC (local-ai-soc, RTX 5080) handles all inference. 17 Malcolm containers disabled pending SPAN hardware (~$48).
 
 ## Architecture
 
 ```
-                    +-----------+
-  ISP/Modem ------->|   RED     | (WAN - DHCP)
-                    |           |
-  LAN Switch ------>|  GREEN    | (192.168.1.0/24)
-    |               |           |
-    +-- Win PC      |  BLUE     | (192.168.2.0/24 - WiFi/IoT)
-    +-- SOC Host    |           |
-                    |  ORANGE   | (192.168.3.0/24 - DMZ)
-                    +-----------+
-                      IPFire N100
+  ISP Modem
+      |
+  IPFire N100 (192.168.1.1) ── firewall, routing, Suricata IDS
+      |  Port 1 (GREEN) ── only 2 of 6 ports in use
+      |  Port 3 (RED) ── WAN
+      |
+  GS305 Switch (unmanaged — no SPAN capability)
+      |
+      +── Laptop
+      +── Desktop SOC (RTX 5080, local-ai-soc)
+      +── supportTAK-server (192.168.1.22)
 
-  SOC Host (192.168.1.22 - GMKtec NucBox G3 Plus, Ubuntu 22.04)
-  ┌─ v1.0 stack (being replaced) ──────────────┐
-  │  Grafana    :3000  (dashboards)             │
-  │  Loki       :3100  (log storage)            │
-  │  Alloy      :514   (syslog collector)       │
-  │  Prometheus  :9090  (metrics)               │
+  supportTAK-server — DATA LAYER (NO AI)
+  ┌─────────────────────────────────────────────┐
+  │  Malcolm NSM (10 active / 17 disabled)      │
+  │    OpenSearch   :9200  (alert/log store)    │
+  │    Logstash     :5044  (EVE JSON ingest)    │
+  │    Filebeat     :5514  (syslog relay)       │
+  │    Dashboards   :443   (web UI, basic auth) │
+  │  ChromaDB API   :8200  (RAG corpus, 387ch)  │
+  │  17 containers DISABLED (no SPAN hardware)  │
+  │  NO AI — raw data only (ADR-E04)            │
   └─────────────────────────────────────────────┘
-  ┌─ v2.0 stack (deploying) ────────────────────┐
-  │  Malcolm NSM       :5601  (OpenSearch Dash) │
-  │    +-- OpenSearch   :9200  (log/alert store) │
-  │    +-- Logstash     :5044  (ingest)         │
-  │    +-- Zeek         (network metadata)      │
-  │    +-- Arkime       (PCAP - future)         │
-  │  Foundation-Sec-8B  (AI analyst, on-demand) │
-  │  ChromaDB           (RAG vector store)      │
+
+  Desktop SOC — ANALYSIS LAYER (ALL AI HERE)
+  ┌─────────────────────────────────────────────┐
+  │  local-ai-soc (FastAPI + Svelte 5)          │
+  │    Ollama qwen3:14b (RTX 5080 GPU)          │
+  │    DuckDB (event store)                     │
+  │    ChromaDB (local embeddings)              │
+  │    Sigma detection engine                   │
+  │    SOAR playbooks + HITL gates              │
+  │    Pulls from Malcolm OpenSearch API        │
   └─────────────────────────────────────────────┘
 ```
 

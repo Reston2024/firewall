@@ -1,8 +1,9 @@
 # Telemetry Deployment Runbook — v2.0 Malcolm NSM
 
-**Date:** 2026-04-06
-**Stack:** Malcolm v26.02.0 (OpenSearch, Logstash 2GB heap, Zeek, Arkime disabled)
-**SOC host:** supportTAK-server (192.168.1.22, Intel N150, 16GB RAM, Ubuntu 22.04)
+**Date:** 2026-04-08 (updated for ADR-E04 architecture pivot)
+**Stack:** Malcolm v26.02.0 — 10 active containers (17 disabled, no SPAN hardware)
+**Role:** DATA LAYER ONLY — no AI inference (see ADR-E04)
+**SOC host:** supportTAK-server (192.168.1.22, Intel N150, 16GB RAM, Ubuntu 22.04, LUKS encrypted)
 **IPFire:** 192.168.1.1 (IPFire 2.29 CU200, Suricata 8.0.3)
 **Repo root (dev machine):** C:\Users\ablan\Firewall
 

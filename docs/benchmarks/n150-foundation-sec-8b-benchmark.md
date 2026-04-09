@@ -1,3 +1,7 @@
+> **DEPRECATED — ADR-E04:** AI removed from data layer. Model deleted from supportTAK-server.
+> All AI inference now runs on the desktop SOC (RTX 5080, qwen3:14b).
+> Retained for audit trail only.
+
 # Foundation-Sec-8B Benchmark on Intel N150
 
 **Date:** 2026-04-06

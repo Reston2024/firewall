@@ -2,22 +2,26 @@
 
 ## What This Is
 
-A local-first AI SOC platform built on an IPFire perimeter appliance (Intel N100, 6-NIC) with Malcolm-based network security monitoring (Zeek + Suricata + PCAP + OpenSearch), a local AI security analyst (Foundation-Sec-8B), and RAG-augmented investigation workflows. The firewall appliance is reproducible from Git; the SOC platform provides deep network visibility, AI-assisted alert triage, and case-level investigation capability.
+A two-tier local-first AI SOC: an IPFire perimeter appliance (Intel N100, 6-NIC) with Malcolm NSM as a data collection and indexing layer on supportTAK-server, feeding a desktop SOC Brain (RTX 5080, local-ai-soc) that handles all AI inference, detection, investigation, and response. Raw data flows from firewall to indexer to analyst — no AI interpretation on the data layer.
 
 ## Core Value
 
-A secure, observable, AI-augmented network perimeter where threats are detected, triaged, and investigated locally — no cloud dependencies, no vendor lock-in.
+A secure, observable network perimeter where raw telemetry is collected, preserved, and served to a GPU-powered local SOC for AI-assisted analysis — no cloud dependencies, no data distortion between collection and analysis.
 
 ## Current Milestone: v2.0 Local AI SOC
 
-**Goal:** Evolve from firewall + telemetry platform into a local-first AI SOC with deep network visibility and AI-assisted analyst workflows.
+**Goal:** Hardened firewall with Malcolm NSM data layer serving a desktop AI SOC.
 
-**Target features:**
-- Malcolm NSM deployment (Zeek + PCAP + OpenSearch replacing Loki/Alloy/Grafana)
-- Local AI security analyst (Foundation-Sec-8B GGUF on supportTAK-server)
-- RAG over operating corpus (ADRs, runbooks, validation results, control docs)
-- Alert triage and case management workflow
-- SBOM generation and signed release artifacts
+**Architecture (ADR-E04):**
+- **IPFire (N100):** Firewall, routing, Suricata IDS, syslog source
+- **supportTAK-server (N150, 16GB):** Malcolm NSM data layer — 10 active containers (OpenSearch, Logstash, Filebeat, dashboards). Collects, indexes, serves. NO AI.
+- **Desktop SOC (RTX 5080):** local-ai-soc — all AI inference (qwen3:14b), Sigma detection, investigation, SOAR, recommendation generation
+- **External drive on N150:** Raw log archive with SHA256 chain of custody
+
+**What was removed (ADR-E04):**
+- Ollama + Foundation-Sec-8B removed from N150 (desktop does this 30x faster)
+- 17 idle Malcolm containers disabled (no SPAN hardware — see ADR-E03)
+- Executor scaffold removed from N150 (desktop dispatches directly)
 - Broader telemetry ingestion (endpoint, auth, asset inventory)
 
 ## Requirements

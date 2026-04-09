@@ -1,30 +1,37 @@
 <!-- GSD:project-start source:PROJECT.md -->
 ## Project
 
-**Firewall Appliance → Local AI SOC**
+**Firewall Appliance + Local AI SOC**
 
-A local-first AI SOC platform built on an IPFire perimeter appliance (Intel N100, 6-NIC) with Malcolm-based network security monitoring (Zeek + Suricata + PCAP + OpenSearch), a local AI security analyst (Foundation-Sec-8B), and RAG-augmented investigation workflows. v1.0 shipped a hardened firewall with telemetry; v2.0 evolves it into an AI-augmented SOC.
+Two-tier architecture: IPFire perimeter + Malcolm NSM data layer on supportTAK-server (collect, index, serve) feeding a desktop SOC Brain (local-ai-soc, RTX 5080) for all AI inference and analysis. NO AI on the data layer — raw data only (ADR-E04).
 
-**Core Value:** A secure, observable, AI-augmented network perimeter where threats are detected, triaged, and investigated locally — no cloud dependencies, no vendor lock-in.
+**Core Value:** Raw telemetry collected, preserved with chain of custody, and served to a GPU-powered local SOC — no cloud, no data distortion between collection and analysis.
 
 ### Infrastructure
 
 - **IPFire box:** Intel N100, 6x Intel i226-V NICs, 16GB DDR5, IPFire 2.29 CU200, Suricata 8.0.3
-- **SOC host (supportTAK-server):** GMKtec NucBox G3 Plus, Intel N150, 4 cores, 16GB RAM, 912GB NVMe, Ubuntu 22.04, IP 192.168.1.22
-- **Management:** SSH key-only (ed25519) on port 22 from 192.168.1.100, WUI at :444
-- **SSH access from this PC:** `ssh opsadmin@192.168.1.22` (SOC host), `ssh root@192.168.1.1` (IPFire)
+- **supportTAK-server (DATA LAYER):** GMKtec NucBox G3 Plus, Intel N150, 4 cores, 16GB RAM, 912GB NVMe (LUKS encrypted — requires boot passphrase), Ubuntu 22.04, IP 192.168.1.22
+- **Desktop SOC (ANALYSIS LAYER):** RTX 5080, local-ai-soc (FastAPI + Svelte 5 + Ollama qwen3:14b)
+- **Management:** SSH key-only (ed25519), WUI at :444
+- **SSH access:** `ssh opsadmin@192.168.1.22` (data layer), `ssh root@192.168.1.1` (IPFire)
+
+### Architecture Rules (ADR-E04)
+
+- **supportTAK-server does NOT run AI.** No Ollama, no LLM inference, no pre-processing of alerts. Raw data only.
+- **Desktop SOC handles ALL AI.** qwen3:14b on RTX 5080. Pulls raw events from Malcolm OpenSearch API.
+- **Malcolm runs 10 containers, not 27.** 17 disabled — require SPAN hardware (~$48) to produce data.
+- **NIC map is UNVERIFIED.** Port-to-zone assignments in docs/nic-map.md were assigned by PCIe bus order, not physical verification. Only green0 and red0 are confirmed working.
+- **GMKtec has LUKS disk encryption.** After power loss, it requires a passphrase on the console before SSH is available. This is NOT a hardware failure.
 
 ### Constraints
 
-- **Platform:** IPFire-native tools and architecture only — no mixing distro paradigms
-- **Architecture:** Core firewall/routing/NAT MUST be native; Docker rejected by IPFire — telemetry/AI runs off-box on supportTAK-server
-- **Hardware:** N100 is low-power (firewall only); N150 SOC host has 16GB RAM (tight for Malcolm + AI model)
-- **RAM budget:** Malcolm (OpenSearch 6GB + Logstash 1GB) + AI model (on-demand ~5GB) + OS (~2GB) = ~14GB of 16GB
-- **Access:** Must preserve management access (anti-lockout) during all network changes
-- **Repos:** Only vetted, actively maintained upstream repos
-- **Zones:** IPFire hard limit of 4 named zones (RED/GREEN/BLUE/ORANGE); extra NICs use Bridge mode
-- **Updates:** Core Updates overwrite custom configs — must use backup includes + post-update validation
+- **Platform:** IPFire-native tools and architecture only
+- **Architecture:** Firewall on-box, Malcolm data layer off-box, AI on desktop only
+- **Hardware:** N150 has 16GB RAM for Malcolm (10 containers use ~11GB). No GPU.
+- **SPAN required:** Zeek, Arkime, PCAP capture, file extraction all need a managed switch with mirror port + USB Ethernet adapter (~$48 total)
+- **Access:** Must preserve management access (anti-lockout) during all changes
 - **No placeholders:** All configs must be complete and executable, no pseudocode
+- **Verify before documenting:** Never fabricate hardware specs, port maps, or wiring diagrams without physical confirmation
 <!-- GSD:project-end -->
 
 <!-- GSD:stack-start source:research/STACK.md -->

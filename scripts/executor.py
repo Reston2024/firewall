@@ -1,3 +1,7 @@
+# DEPRECATED — ADR-E04: AI removed from data layer. This script validated
+# components that have been removed from supportTAK-server. Retained for
+# audit trail only. Do not run.
+#
 #!/usr/bin/env python3
 """Firewall Executor — processes recommendation artifacts through the gate contract.
 

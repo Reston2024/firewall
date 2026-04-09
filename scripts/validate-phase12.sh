@@ -1,3 +1,7 @@
+# DEPRECATED — ADR-E04: AI removed from data layer. This script validated
+# components that have been removed from supportTAK-server. Retained for
+# audit trail only. Do not run.
+#
 #!/usr/bin/env bash
 # validate-phase12.sh — Phase 12 RAG Knowledge Pipeline validation suite
 # Run FROM local machine — SSHes to supportTAK-server (192.168.1.22) as opsadmin
