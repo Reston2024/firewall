@@ -60,10 +60,10 @@ fi
 
 echo ""
 echo "NOTE: Syslog remote forwarding destination is configured via WUI > Logs > Log Settings"
-echo "      Set remote syslog server to 192.168.1.101 (supportTAK monitoring host), port 514"
+echo "      Set remote syslog server to 192.168.1.22 (supportTAK monitoring host), port 514"
 echo ""
 echo "NOTE: Off-box telemetry stack (Grafana/Loki/Alloy) is deployed separately on the"
-echo "      monitoring host at 192.168.1.101 — see docs/telemetry-deployment-runbook.md"
+echo "      monitoring host at 192.168.1.22 — see docs/telemetry-deployment-runbook.md"
 echo ""
 echo "=== Phase 5 complete: $PASS pass, $FAIL fail ==="
 [ "$FAIL" -eq 0 ] && exit 0 || exit 1

@@ -7,7 +7,7 @@ A two-tier local-first AI SOC: a hardened IPFire perimeter appliance with Malcol
 **Raw telemetry collected, preserved with chain of custody, and served to a GPU-powered local SOC for AI-assisted analysis — no cloud, no data distortion between collection and analysis.**
 
 ### v1.0 (Shipped 2026-03-26)
-Hardened IPFire perimeter with Suricata IDS/IPS, off-box telemetry (Grafana + Loki + Alloy), git-based disaster recovery (15-min rebuild), full validation suite, and 12 ADRs. 8 phases, 27 plans, 124 commits, 192 files.
+Hardened IPFire perimeter with Suricata IDS/IPS, off-box telemetry (Grafana + Loki + Alloy), git-based disaster recovery (rebuild.sh + manual WUI steps), full validation suite, and 12 ADRs. 8 phases, 27 plans, 124 commits, 192 files.
 
 ### v2.0 (In Progress)
 Malcolm NSM data layer (10 active containers), desktop SOC integration via OpenSearch API, raw log archival with chain of custody. AI removed from data layer per ADR-E04 — desktop SOC (local-ai-soc, RTX 5080) handles all inference. 17 Malcolm containers disabled pending SPAN hardware (~$48).
@@ -189,7 +189,7 @@ sudo docker compose up -d
 | File integrity monitoring | Active | SHA256 baseline for 8 critical files |
 | Config drift detection | Active | 12 managed files tracked |
 | Reboot persistence | Validated | iptables rules survive reboot |
-| Rebuild from repo | Validated | 15-minute RTO via rebuild.sh |
+| Rebuild from repo | Validated | rebuild.sh restores repo-managed state; WUI steps required for DHCP, IDS rules, Guardian config |
 | Rollback procedures | Active | 7 change categories covered |
 
 ## Build Phases

@@ -1,0 +1,166 @@
+# topology.yaml — Canonical source of truth for all hosts, IPs, ports, and roles
+# All documentation and scripts should reference this file.
+# Last verified: 2026-04-09 against live hardware
+#
+# Usage in docs: "See topology.yaml for current values"
+# Usage in scripts: parse this file or use the values directly
+
+---
+version: "2.0"
+verified_date: "2026-04-09"
+
+# ── Hosts ──────────────────────────────────────────────────────────
+
+hosts:
+  ipfire:
+    hostname: ipfire.localdomain
+    role: "Perimeter firewall, routing, Suricata IDS"
+    hardware: "Intel N100 6-NIC mini-PC"
+    os: "IPFire 2.29 Core Update 200"
+    kernel: "6.18.7 LTS"
+    ram: "16GB DDR5"
+    storage: "NVMe"
+    ip:
+      green: "192.168.1.1"
+      red: "DHCP (currently 192.168.1.106)"
+      orange: "192.168.3.1"
+      blue: "192.168.2.1"
+    ssh:
+      port: 22
+      user: root
+      auth: key-only (ed25519)
+      key: "configs/ssh/authorized_keys"
+      sshd_hardening:
+        AllowTcpForwarding: "no"
+        AllowAgentForwarding: "no"
+        PermitRootLogin: "prohibit-password"
+    nics:
+      ETH0: { zone: RED, interface: red0, mac: "a8:b8:e0:09:83:39", status: active }
+      ETH1: { zone: ORANGE, interface: orange0, mac: "a8:b8:e0:09:83:3a", status: unused }
+      ETH2: { zone: ORANGE_BRIDGE, interface: orange1, mac: "a8:b8:e0:09:83:3b", status: unused }
+      ETH3: { zone: BLUE, interface: blue0, mac: "a8:b8:e0:09:83:3c", status: unused }
+      ETH4: { zone: GREEN, interface: green0, mac: "a8:b8:e0:09:83:3d", status: active }
+      ETH5: { zone: GREEN_BRIDGE, interface: green1, mac: "a8:b8:e0:09:83:3e", status: unused }
+
+  supporttak:
+    hostname: supportTAK-server
+    role: "Data layer — Malcolm NSM. NO AI inference (ADR-E04)"
+    hardware: "GMKtec NucBox G3 Plus, Intel N150"
+    os: "Ubuntu 22.04"
+    ram: "16GB DDR5"
+    storage: "912GB NVMe (LUKS encrypted — requires boot passphrase)"
+    ip: "192.168.1.22"
+    zone: GREEN
+    ssh:
+      port: 22
+      user: opsadmin
+      auth: key-only (ed25519)
+    nics:
+      enp3s0: { role: network, ip: "192.168.1.22", status: active }
+      wlp1s0: { role: wifi, ip: none, status: dormant }
+      enx6c6e072d459d: { role: "SPAN capture (promiscuous, no IP)", ip: none, status: active }
+    services:
+      malcolm:
+        version: "v26.02.0"
+        containers: 27
+        compose_file: "/opt/malcolm/docker-compose.yml"
+      opensearch: { port: 9200, binding: "0.0.0.0", auth: "TLS + malcolm_internal creds" }
+      logstash: { port: 5044, binding: "0.0.0.0", auth: "TLS certs" }
+      filebeat_syslog: { port: 5514, protocol: udp, binding: "0.0.0.0", auth: none }
+      dashboards: { port: 443, binding: "0.0.0.0", auth: "basic (admin)" }
+      chromadb_api: { port: 8200, binding: "0.0.0.0", auth: "bearer token" }
+      rsyslog: { port: 514, protocol: udp, binding: "0.0.0.0", auth: none }
+    external_drive:
+      model: "Seagate Portable 1.8TB"
+      mount: "/media/opsadmin/Seagate Portable Drive"
+      purpose: "Raw log archive with SHA256 chain of custody"
+      cron: "0 * * * * /opt/malcolm/scripts/archive-logs.sh"
+
+  desktop_soc:
+    hostname: "DESKTOP-R5MSQJQ"
+    role: "Analysis layer — ALL AI inference, detection, investigation, SOAR"
+    hardware: "Desktop PC, RTX 5080 GPU"
+    os: "Windows"
+    software: "local-ai-soc (FastAPI + Svelte 5 + Ollama qwen3:14b)"
+    ip: "192.168.1.102 (DHCP)"
+    zone: GREEN
+    repo: "https://github.com/Reston2024/local-ai-soc"
+
+  laptop:
+    hostname: "DESKTOP-10HLENL"
+    role: "Management workstation"
+    ip: "192.168.1.100 (DHCP)"
+    zone: GREEN
+
+# ── Network ────────────────────────────────────────────────────────
+
+network:
+  switch:
+    model: "Netgear GS308EP"
+    type: managed
+    management_ip: "192.168.1.104"
+    management_url: "http://192.168.1.104"
+    span:
+      source_port: 1
+      source_direction: both
+      destination_port: 5
+    ports:
+      1: { device: "IPFire ETH4 (GREEN)", role: "LAN uplink + SPAN source" }
+      2: { device: laptop, role: management }
+      3: { device: desktop_soc, role: "analysis layer" }
+      4: { device: "supporttak enp3s0", role: "data layer network" }
+      5: { device: "supporttak USB adapter", role: "SPAN capture destination" }
+      6: { device: empty }
+      7: { device: empty }
+      8: { device: empty }
+
+  modem:
+    ip: "192.168.1.254"
+    mode: "bridge (NAT on same subnet as GREEN — known issue)"
+    connection: "IPFire ETH0 (RED)"
+
+  subnets:
+    green: "192.168.1.0/24"
+    red: "192.168.1.0/24 (modem NAT — same subnet as GREEN)"
+    orange: "192.168.3.0/24"
+    blue: "192.168.2.0/24"
+
+# ── Data Flows ─────────────────────────────────────────────────────
+
+data_flows:
+  syslog:
+    source: "IPFire syslog.conf → UDP :514 → 192.168.1.22"
+    relay: "rsyslog :514 → omfwd → Malcolm Filebeat :5514"
+    index: "malcolm_beats_syslog_*"
+
+  eve_json:
+    source: "IPFire /var/log/suricata/eve.json"
+    transport: "SCP cron (60s) via sync-eve.sh"
+    destination: "/opt/malcolm/suricata-logs/suricata-ipfire/eve.json"
+    processor: "Malcolm internal Filebeat (_filebeat_suricata_malcolm_upload)"
+    index: "arkime_sessions3-*"
+
+  span_capture:
+    source: "GS308EP SPAN mirror Port 1 → Port 5"
+    interface: "enx6c6e072d459d (promiscuous)"
+    processors:
+      - "Zeek (2 workers) → network-* indices"
+      - "Suricata live (2 threads) → arkime_sessions3-*"
+
+  archive:
+    source: "Raw EVE JSON, syslog, Zeek logs"
+    destination: "Seagate 1.8TB at /media/opsadmin/Seagate Portable Drive"
+    schedule: "hourly cron"
+    integrity: "SHA256 checksums per file per day"
+
+# ── Deprecated ─────────────────────────────────────────────────────
+
+deprecated:
+  v1_telemetry:
+    note: "Loki/Alloy/Grafana/Prometheus decommissioned 2026-04-06"
+    old_host_ip: "192.168.1.101 (no longer valid — host renumbered to .22)"
+    old_compose: "telemetry/docker-compose.yml (retained for reference only)"
+
+  ai_on_data_layer:
+    note: "Ollama + Foundation-Sec-8B removed from supportTAK-server per ADR-E04"
+    reason: "Desktop GPU is 30x faster; AI on data layer distorts raw events"

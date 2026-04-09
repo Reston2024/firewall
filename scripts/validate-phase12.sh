@@ -23,7 +23,7 @@ fail() { echo "FAIL: $1"; FAIL=$((FAIL + 1)); }
 skip() { echo "SKIP: $1"; SKIP=$((SKIP + 1)); }
 
 TARGET="opsadmin@192.168.1.22"
-SSH_OPTS="-o StrictHostKeyChecking=no -o ConnectTimeout=15 -o BatchMode=yes"
+SSH_OPTS="-o StrictHostKeyChecking=yes -o ConnectTimeout=15 -o BatchMode=yes"
 RAG_PYTHON="/opt/rag/bin/python3"
 CHROMA_PATH="/var/lib/chromadb"
 COLLECTION="firewall-corpus"

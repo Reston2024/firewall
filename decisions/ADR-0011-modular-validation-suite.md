@@ -17,12 +17,12 @@ Implement per-phase validation scripts (`validate-phase1.sh` through `validate-p
 - Each script is independently testable and maintainable
 - Adding a new phase means adding one new script, not modifying a growing monolith
 - The pass/fail/skip pattern is consistent and simple across all scripts — SKIP indicates a valid non-failure state (e.g., no static DHCP leases, optional infrastructure offline)
-- Phase 5 (telemetry) validation runs remotely via SSH to the monitoring host (192.168.1.101) — this different execution model is cleanly encapsulated in `validate-phase5.sh` without affecting other scripts
+- Phase 5 (telemetry) validation runs remotely via SSH to the monitoring host (192.168.1.22) — this different execution model is cleanly encapsulated in `validate-phase5.sh` without affecting other scripts
 - `--phase N` flag in `validate-all.sh` enables single-phase execution for rapid iteration
 
 ## Consequences
 
 - `validate-all.sh` is the single acceptance gate for rebuild completion — the rebuild procedure is not complete until `validate-all.sh` passes (D-06)
-- Phase 5 validation requires SSH access from IPFire to the supportTAK-server (192.168.1.101) — if the monitoring host is offline, Phase 5 validation returns SKIP (not FAIL), reflecting that it is optional off-box infrastructure
+- Phase 5 validation requires SSH access from IPFire to the supportTAK-server (192.168.1.22) — if the monitoring host is offline, Phase 5 validation returns SKIP (not FAIL), reflecting that it is optional off-box infrastructure
 - SKIP status is a valid terminal state for certain checks — documented per-check in each script
 - validate-phase4.sh IDS-04 (Suricata monitor mode) is permanently SKIP — monitor mode cannot be verified from CLI reliably, WUI verification required

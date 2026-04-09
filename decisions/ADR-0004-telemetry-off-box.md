@@ -9,7 +9,7 @@ IPFire does not support Docker (rejected by IPFire developers). The telemetry st
 
 ## Decision
 
-Run the entire telemetry stack on a separate Ubuntu 22.04 host (supportTAK-server, 192.168.1.101) on the GREEN LAN, orchestrated via Docker Compose.
+Run the entire telemetry stack on a separate Ubuntu 22.04 host (supportTAK-server, 192.168.1.22) on the GREEN LAN, orchestrated via Docker Compose.
 
 ## Rationale
 

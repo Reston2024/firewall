@@ -7,7 +7,7 @@
 
 REPO="/root/firewall-repo"
 SCRIPTS="$REPO/scripts"
-SUPPORTTAK_HOST="opsadmin@192.168.1.101"
+SUPPORTTAK_HOST="opsadmin@192.168.1.22"
 
 # --- Parse arguments ---
 SINGLE_PHASE=""

@@ -1,6 +1,6 @@
 #!/bin/bash
 # validate-phase5.sh — Phase 5 validation suite: Telemetry Pipeline and Dashboards
-# Run ON supportTAK-server (192.168.1.101) as opsadmin
+# Run ON supportTAK-server (192.168.1.22) as opsadmin
 # Usage: source /opt/telemetry/telemetry/.env && bash /opt/telemetry/scripts/validate-phase5.sh [--full]
 # Quick mode: TEL-01 through TEL-08 and DASH-01 through DASH-04 smoke tests
 # Full mode (--full): includes live EVE JSON ingest verification (requires 90 seconds)
@@ -27,23 +27,23 @@ skip() { echo "SKIP: $1 (manual verification required)"; SKIP=$((SKIP + 1)); }
 echo "=== Phase 5 Validation Suite — Telemetry Pipeline and Dashboards — $(date) ==="
 echo ""
 
-# --- TEL-01: IPFire syslog forwarding configured to 192.168.1.101 ---
-echo "[TEL-01] IPFire syslog forwarding configured to 192.168.1.101"
+# --- TEL-01: IPFire syslog forwarding configured to 192.168.1.22 ---
+echo "[TEL-01] IPFire syslog forwarding configured to 192.168.1.22"
 
 TEL01_OUT=$(ssh -i /home/opsadmin/.ssh/ipfire_ed25519 \
-  -o StrictHostKeyChecking=no \
+  -o StrictHostKeyChecking=yes \
   -o ConnectTimeout=10 \
   -o BatchMode=yes \
   root@192.168.1.1 \
-  'grep -i "192.168.1.101" /etc/syslog.conf 2>/dev/null' 2>/dev/null)
+  'grep -i "192.168.1.22" /etc/syslog.conf 2>/dev/null' 2>/dev/null)
 TEL01_EXIT=$?
 
 if [ $TEL01_EXIT -ne 0 ]; then
-  skip "TEL-01: Cannot SSH to IPFire — verify manually via WUI: Logs > Log Settings > Syslog Server = 192.168.1.101"
+  skip "TEL-01: Cannot SSH to IPFire — verify manually via WUI: Logs > Log Settings > Syslog Server = 192.168.1.22"
 elif [ -n "$TEL01_OUT" ]; then
-  pass "TEL-01: syslog.conf contains 192.168.1.101 — syslog forwarding configured"
+  pass "TEL-01: syslog.conf contains 192.168.1.22 — syslog forwarding configured"
 else
-  fail "TEL-01: 192.168.1.101 not found in /etc/syslog.conf. Configure via WUI: Logs > Log Settings > Syslog Server = 192.168.1.101"
+  fail "TEL-01: 192.168.1.22 not found in /etc/syslog.conf. Configure via WUI: Logs > Log Settings > Syslog Server = 192.168.1.22"
 fi
 echo ""
 

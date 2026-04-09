@@ -12,7 +12,7 @@ Grafana was published as `0.0.0.0:3000`, exposing the dashboard to all interface
 Bind Grafana to `127.0.0.1:3000`. Access via SSH tunnel from the management host:
 
 ```bash
-ssh -L 3000:127.0.0.1:3000 opsadmin@192.168.1.101
+ssh -L 3000:127.0.0.1:3000 opsadmin@192.168.1.22
 ```
 
 ## Rationale

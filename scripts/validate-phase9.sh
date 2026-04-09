@@ -27,7 +27,7 @@ fail() { echo "FAIL: $1"; FAIL=$((FAIL + 1)); }
 skip() { echo "SKIP: $1 (manual verification required)"; SKIP=$((SKIP + 1)); }
 
 SSH_TARGET="opsadmin@192.168.1.22"
-SSH_OPTS="-o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes"
+SSH_OPTS="-o StrictHostKeyChecking=yes -o ConnectTimeout=10 -o BatchMode=yes"
 
 echo "=== Phase 9 Validation Suite — Malcolm NSM Deployment — $(date) ==="
 echo ""

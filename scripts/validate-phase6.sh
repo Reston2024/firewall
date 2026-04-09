@@ -202,10 +202,12 @@ for CERT_FILE in /etc/httpd/server.crt /etc/httpd/server-ecdsa.crt; do
     DAYS_LEFT=$(( (ENDEPOCH - NOW_EPOCH) / 86400 ))
     CERT_NAME=$(basename "$CERT_FILE")
 
-    if [ "$DAYS_LEFT" -gt 365 ]; then
-      pass "HARD-05: $CERT_NAME valid for ${DAYS_LEFT} days (expires: ${ENDDATE})"
+    if [ "$DAYS_LEFT" -lt 30 ]; then
+      fail "HARD-05: $CERT_NAME expires in ${DAYS_LEFT} days (${ENDDATE}) — renew immediately via WUI: System > Certificates"
+    elif [ "$DAYS_LEFT" -lt 90 ]; then
+      pass "HARD-05: $CERT_NAME valid for ${DAYS_LEFT} days (expires: ${ENDDATE}) — WARNING: renewal recommended within 90 days"
     else
-      fail "HARD-05: $CERT_NAME expires in ${DAYS_LEFT} days (${ENDDATE}) — consider renewing via WUI: System > Certificates"
+      pass "HARD-05: $CERT_NAME valid for ${DAYS_LEFT} days (expires: ${ENDDATE})"
     fi
     break  # Only need to check one
   fi

@@ -6,7 +6,7 @@ check: lint validate
 # Lint all config and script files
 lint:
 	@echo "=== YAML lint ==="
-	yamllint -d relaxed telemetry/*.yml telemetry/**/*.yml 2>/dev/null || true
+	yamllint -d relaxed telemetry/*.yml telemetry/**/*.yml topology.yaml
 	@echo "=== Shell lint ==="
 	shellcheck scripts/*.sh
 	@echo "=== Compose validate ==="

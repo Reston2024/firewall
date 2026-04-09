@@ -8,7 +8,7 @@ fail() { echo "FAIL: $1"; FAIL=$((FAIL + 1)); }
 skip() { echo "SKIP: $1"; SKIP=$((SKIP + 1)); }
 
 SSH_TARGET="opsadmin@192.168.1.22"
-SSH_OPTS="-o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes"
+SSH_OPTS="-o StrictHostKeyChecking=yes -o ConnectTimeout=10 -o BatchMode=yes"
 CREDS="malcolm_internal:AzZqIn8B6AS1RuX0K8NbbzJZuYaTDARks9Tu"
 
 echo "=== Phase 13 Validation — Alert Triage & SOC Integration — $(date) ==="
