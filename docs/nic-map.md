@@ -33,14 +33,14 @@ lspci -nn | grep '8086:125c'
 
 Fill in this table before writing udev rules. Every cell marked FILL_IN must be completed.
 
-| Physical Port | Zone | Device Name | MAC Address | PCIe Bus | Driver | Notes |
-|--------------|------|-------------|-------------|----------|--------|-------|
-| Port 1 | GREEN (LAN) | green0 | a8:b8:e0:09:83:39 | 0000:01:00.0 | igc | Primary trusted LAN |
-| Port 2 | BLUE (Wireless) | blue0 | a8:b8:e0:09:83:3a | 0000:02:00.0 | igc | Wireless/guest zone |
-| Port 3 | RED (WAN) | red0 | a8:b8:e0:09:83:3b | 0000:03:00.0 | igc | Connect to ISP/modem |
-| Port 4 | ORANGE (DMZ) | orange0 | a8:b8:e0:09:83:3c | 0000:04:00.0 | igc | DMZ / untrusted servers |
-| Port 5 | GREEN Bridge | green1 | a8:b8:e0:09:83:3d | 0000:05:00.0 | igc | Bridged to green0 |
-| Port 6 | GREEN Bridge | green2 | a8:b8:e0:09:83:3e | 0000:07:00.0 | igc | Bridged to green0 |
+| Label | Zone | Device Name | MAC Address | PCIe Bus | Driver | Verified |
+|-------|------|-------------|-------------|----------|--------|----------|
+| ETH0 | GREEN (LAN) | green0 | a8:b8:e0:09:83:39 | 0000:01:00.0 | igc | ✅ 2026-04-09 cable-plug test |
+| ETH1 | BLUE (WiFi/IoT) | blue0 | a8:b8:e0:09:83:3a | 0000:02:00.0 | igc | ✅ 2026-04-09 cable-plug test |
+| ETH2 | RED (WAN) | red0 | a8:b8:e0:09:83:3b | 0000:03:00.0 | igc | ✅ 2026-04-09 cable-plug test |
+| ETH3 | ORANGE (DMZ) | orange0 | a8:b8:e0:09:83:3c | 0000:04:00.0 | igc | ✅ 2026-04-09 cable-plug test |
+| ETH4 | GREEN Bridge | green1 | a8:b8:e0:09:83:3d | 0000:05:00.0 | igc | ✅ 2026-04-09 cable-plug test |
+| ETH5 | GREEN Bridge | green2 | a8:b8:e0:09:83:3e | 0000:07:00.0 | igc | ✅ 2026-04-09 cable-plug test |
 
 ## IP Addressing
 
