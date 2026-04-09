@@ -23,12 +23,15 @@ Requirements for Local AI SOC milestone. Each maps to roadmap phases.
 - [x] **MIG-03**: validate-phase10.sh created checking Malcolm endpoints (replaces validate-phase5.sh)
 - [x] **MIG-04**: Telemetry runbook fully rewritten for Malcolm architecture (55 Malcolm references, 0 Loki references)
 
-### AI Security Analyst
+### AI Security Analyst — RETRACTED per ADR-E04
 
-- [x] **AI-01**: Ollama installed natively (not Docker) on supportTAK-server with Foundation-Sec-8B Q4_K_M model
-- [x] **AI-02**: OLLAMA_KEEP_ALIVE=5m configured to unload model after idle periods, preventing permanent 5GB RAM pinning
-- [x] **AI-03**: Throughput benchmark documented — 2.47 tok/s generation, 5.82 tok/s prompt eval on N150 CPU
-- [x] **AI-04**: AI analyst produces recommendations only — no automated firewall rule changes or response actions
+> AI removed from supportTAK-server. All inference runs on desktop SOC (RTX 5080, qwen3:14b).
+> These requirements were completed then retracted — retained for audit trail.
+
+- [x] ~~**AI-01**: Ollama installed on supportTAK-server~~ → REMOVED (ADR-E04: desktop does this 30x faster)
+- [x] ~~**AI-02**: OLLAMA_KEEP_ALIVE=5m configured~~ → REMOVED (Ollama deleted from N150)
+- [x] ~~**AI-03**: Throughput benchmark documented — 2.47 tok/s~~ → RETAINED as docs/benchmarks/ (deprecated)
+- [x] **AI-04**: AI analyst produces recommendations only — no automated firewall rule changes ← STILL VALID (enforced on desktop SOC)
 
 ### RAG Knowledge Pipeline
 

@@ -53,22 +53,17 @@
     └────────────┘   │ or .100 │  │  OS: Ubuntu 22.04      │
                      │         │  │                        │
                      │ Mgmt    │  │  ┌─── Malcolm NSM ───┐ │
-                     │ Host    │  │  │ OpenSearch  :9200  │ │
-                     │         │  │  │ Logstash   :5044  │ │
-                     │ SSH key │  │  │ Filebeat   :5514  │ │
-                     │ access  │  │  │ Zeek, Arkime      │ │
-                     │ to both │  │  │ Dashboards :443   │ │
-                     │ boxes   │  │  │ 27 containers     │ │
+                     │ Host    │  │  │ DATA LAYER ONLY   │ │
+                     │         │  │  │ (ADR-E04: NO AI)  │ │
+                     │ SSH key │  │  │                   │ │
+                     │ access  │  │  │ OpenSearch  :9200  │ │
+                     │ to both │  │  │ Logstash   :5044  │ │
+                     │ boxes   │  │  │ Filebeat   :5514  │ │
+                     │         │  │  │ Dashboards :443   │ │
+                     │         │  │  │ 10 active / 17 off│ │
                      │         │  │  └───────────────────┘ │
-                     │         │  │                        │
-                     │         │  │  ┌─── AI Stack ─────┐ │
-                     │         │  │  │ Ollama    :11434  │ │
-                     │         │  │  │ (127.0.0.1 only)  │ │
-                     │         │  │  │ Foundation-Sec-8B │ │
-                     │         │  │  │ ChromaDB (embed)  │ │
-                     │         │  │  │ RAG pipeline      │ │
-                     │         │  │  └───────────────────┘ │
-                     │         │  │                        │
+                     │         │  │  ChromaDB API :8200    │
+                     │         │  │  (RAG corpus, 387 ch)  │
                      └─────────┘  └────────────────────────┘
 ```
 
@@ -78,12 +73,10 @@
 |---------|------|----|---------|
 | 1 | ISP Modem Ethernet out | N100 **Port 3** (RED) | WAN internet uplink |
 | 2 | N100 **Port 1** (GREEN) | LAN Switch | Primary LAN gateway |
-| 3 | LAN Switch | Windows PC (`192.168.1.93` / `.100`) | Management workstation |
-| 4 | LAN Switch | GMKtec NucBox G3 Plus (`192.168.1.22`) | SOC host (Malcolm + AI) |
-| 5 | *(optional)* N100 **Port 5** (GREEN bridge) | LAN Switch | Extra LAN port |
-| 6 | *(optional)* N100 **Port 6** (GREEN bridge) | LAN Switch | Extra LAN port |
-| 7 | *(future)* N100 **Port 2** (BLUE) | WiFi AP | Wireless/IoT zone |
-| 8 | *(future)* N100 **Port 4** (ORANGE) | DMZ switch/host | DMZ servers |
+| 3 | LAN Switch | Laptop | Management / this session |
+| 4 | LAN Switch | Desktop SOC (RTX 5080) | Analysis layer (local-ai-soc, ALL AI here) |
+| 5 | LAN Switch | GMKtec NucBox G3 Plus (`192.168.1.22`) | Data layer (Malcolm, NO AI) |
+| 6 | *(unused)* N100 Ports 2,4,5,6 | — | BLUE/ORANGE/bridge not connected |
 
 ## Data Flow Paths
 
@@ -154,8 +147,8 @@ IPFire Suricata EVE ──── SCP cron (60s) ──────────�
 | 514 | UDP | rsyslog (receives IPFire syslog) | 0.0.0.0 | None (UDP) |
 | 5044 | TCP | Malcolm Logstash (Beats) | 0.0.0.0 | TLS certs |
 | 5514 | UDP | Malcolm Filebeat (syslog relay) | 0.0.0.0 | None (internal relay) |
-| 9200 | TCP | OpenSearch (internal only) | Docker network | Malcolm internal |
-| 11434 | TCP | Ollama (AI model API) | **127.0.0.1 only** | None (ADR-E02) |
+| 8200 | TCP | ChromaDB RAG API | 0.0.0.0 | Bearer token |
+| 9200 | TCP | OpenSearch API | 0.0.0.0 | TLS + malcolm_internal creds |
 
 ## Power Cycle Checklist
 
@@ -165,6 +158,11 @@ After a power outage or reboot of either box:
 1. Verify boot completed — SSH: `ssh root@192.168.1.1 "uptime"`
 2. Check authorized_keys: `cat /root/.ssh/authorized_keys` — should have 2 keys
 3. If keys missing: restore from `configs/ssh/authorized_keys` in repo
+
+### SOC Host (GMKtec) — LUKS ENCRYPTED
+1. **REQUIRES PASSPHRASE ON CONSOLE BEFORE SSH WORKS.** Connect monitor + keyboard, enter LUKS passphrase at boot prompt. This is NOT a hardware failure.
+2. After LUKS unlock, verify IP: `ip a | grep inet` — must show 192.168.1.22
+3. If wrong IP: check `cat /etc/netplan/01-network-manager-all.yaml`
 4. Check syslog target: `grep 192.168 /etc/syslog.conf` — should be `192.168.1.22`
 
 ### SOC Host (GMKtec)

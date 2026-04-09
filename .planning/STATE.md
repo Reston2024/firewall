@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Local AI SOC
-status: unknown
-stopped_at: "Checkpoint: supportTAK-server did not come back after reboot — requires physical intervention. 10/10 queries pass, RAG-04 end-to-end confirmed, reboot persistence test blocked."
-last_updated: "2026-04-07T03:18:25.665Z"
+status: active
+stopped_at: "ADR-E04 architecture pivot complete. AI removed from data layer. Awaiting E2E test with desktop SOC."
+last_updated: "2026-04-08T20:00:00.000Z"
 progress:
   total_phases: 6
-  completed_phases: 4
-  total_plans: 8
-  completed_plans: 8
+  completed_phases: 5
+  total_plans: 10
+  completed_plans: 10
 ---
 
 # Project State
@@ -75,26 +75,26 @@ Recent decisions affecting current work:
 - [Phase 12]: Use openai client directly for Foundation-Sec-8B queries: langchain_community.chat_models.ChatOllama returns empty content in chromadb 0.6.3 + langchain 0.3.x venv; openai client confirmed working with 1125-char coherent responses
 - [Phase 12]: Chunk context limit set to 400 chars in query_with_llm: 600-char limit causes prompt to overflow OLLAMA_CONTEXT_LENGTH=2048 with 3 chunks + template overhead; 400-char confirmed working
 
-### Key RAM Budget (supportTAK-server 16GB)
+### Key RAM Budget (supportTAK-server 16GB) — UPDATED ADR-E04
 
 | Component | Resident RAM |
 |-----------|-------------|
 | Malcolm OpenSearch JVM heap | 6.0 GB |
-| Malcolm Logstash JVM heap | 1.0 GB |
-| Malcolm other containers (Zeek, Filebeat, nginx) | ~1.5 GB |
+| Malcolm Logstash JVM heap | 2.0 GB |
+| Malcolm other containers (Filebeat, nginx, dashboards, redis) | ~1.5 GB |
 | Ubuntu OS baseline | ~1.5 GB |
-| Foundation-Sec-8B Q4_K_M (loaded) | ~5.5 GB |
-| Worst-case simultaneous | ~15.5 GB |
-| Headroom | ~0.5 GB |
+| ChromaDB API (lightweight) | ~0.3 GB |
+| **Total (10 containers)** | **~11.3 GB** |
+| **Headroom** | **~4.7 GB** |
 
-Temporal separation between Malcolm indexing peaks and AI triage is mandatory — not an optimization.
+NO AI on this box. Ollama + Foundation-Sec-8B REMOVED per ADR-E04.
+17 idle Malcolm containers STOPPED (no SPAN hardware).
 
-### Research Flags
+### Architecture (ADR-E04)
 
-- **Phase 11 (needs validation):** No N150-specific llama-bench results exist in public sources; 3-8 t/s is an order-of-magnitude estimate from different hardware; actual throughput gates Phase 13 design
-- **Phase 13 (needs validation):** OpenSearch heap hot-resize API behavior under production load; OLLAMA_KEEP_ALIVE cold-start (~15-20s) acceptability in batch triage workflow
-- **Phase 9 (standard pattern):** Malcolm Docker Compose + heap tuning is fully documented in official docs and GitHub issue history
-- **Phase 10 (standard pattern):** Filebeat Suricata module + Malcolm Logstash Beats :5044 is a documented Malcolm setup path
+- supportTAK-server = DATA LAYER: collect, index, archive, serve. No AI.
+- Desktop SOC = ANALYSIS LAYER: all AI inference, detection, investigation, SOAR.
+- Raw data flows from firewall → indexer → analyst. No AI interpretation on data path.
 - **Phase 12 (standard pattern):** LangChain + ChromaDB + all-MiniLM-L6-v2 RAG is well-established; only corpus-specific chunking validation is project-specific
 - **Phase 14 (standard pattern):** Syft + cosign release pipeline is documented via Anchore and Sigstore official docs
 

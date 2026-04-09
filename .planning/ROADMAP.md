@@ -62,19 +62,14 @@ Plans:
 - [ ] 10-01-PLAN.md — Wire EVE JSON and syslog into Malcolm via Filebeat and rsyslog relay, verify parallel ingestion
 - [ ] 10-02-PLAN.md — Decommission Loki stack, create validate-phase10.sh, rewrite telemetry runbook
 
-### Phase 11: Foundation-Sec-8B AI Analyst
-**Goal**: Foundation-Sec-8B Q4_K_M is running via Ollama on supportTAK-server with measured inference throughput documented, memory behavior validated, and the AI constrained to recommendations only
-**Depends on**: Phase 9
-**Requirements**: AI-01, AI-02, AI-03, AI-04
-**Success Criteria** (what must be TRUE):
-  1. `ollama run fdtn-ai/Foundation-Sec-8B-Q4_K_M` responds to a security question from the command line on supportTAK-server
-  2. `llama-bench` output is documented with actual tokens/second on N150 CPU (result committed to repo as benchmark artifact)
-  3. After 5 minutes of idle, model is unloaded from RAM — confirmed via `free -m` showing RAM recovered and `OLLAMA_KEEP_ALIVE=5m` in systemd override
-  4. `free -m` with Malcolm at steady state and Ollama loaded simultaneously shows total usage under 15.5GB
-**Plans**: 2 plans
-Plans:
-- [x] 11-01-PLAN.md — Install Ollama, apply security override (ADR-E02), pull Foundation-Sec-8B Q4_K_M, create validation script
-- [ ] 11-02-PLAN.md — Run throughput benchmarks, measure RAM coexistence, document results, evaluate Phase 13 gate
+### Phase 11: Foundation-Sec-8B AI Analyst — RETRACTED (ADR-E04)
+> **RETRACTED:** Ollama + Foundation-Sec-8B removed from supportTAK-server per ADR-E04.
+> AI inference moved to desktop SOC (RTX 5080, qwen3:14b, 30x faster).
+> Phase was completed then reversed — components deployed, benchmarked, then deleted.
+> Benchmark artifact retained at docs/benchmarks/ (deprecated) for audit trail.
+**Original Goal**: Foundation-Sec-8B on N150 CPU
+**Actual Outcome**: Deployed at 2.47 tok/s, determined to be 20-30x slower than desktop GPU, removed
+**Plans**: 2 plans (executed then retracted)
 
 ### Phase 12: RAG Knowledge Pipeline
 **Goal**: The operating corpus (ADRs, runbooks, validation results, control docs) is indexed in ChromaDB and RAG retrieval produces accurate, contextually relevant chunks validated by manual query testing
