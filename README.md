@@ -16,28 +16,33 @@ Malcolm NSM data layer (10 active containers), desktop SOC integration via OpenS
 
 ```
   ISP Modem
-      |
+      │
   IPFire N100 (192.168.1.1) ── firewall, routing, Suricata IDS
-      |  Port 1 (GREEN) ── only 2 of 6 ports in use
-      |  Port 3 (RED) ── WAN
-      |
-  GS305 Switch (unmanaged — no SPAN capability)
-      |
-      +── Laptop
-      +── Desktop SOC (RTX 5080, local-ai-soc)
-      +── supportTAK-server (192.168.1.22)
-
-  supportTAK-server — DATA LAYER (NO AI)
+      │  ETH0 (RED)   ── WAN to modem
+      │  ETH4 (GREEN) ── LAN to switch
+      │  ETH1/2 (ORANGE) ── sniffer/honeypot (future)
+      │  ETH3 (BLUE)  ── WiFi/IoT (future)
+      │
+  GS308EP Managed Switch (SPAN mirror active)
+      │  Port 1 ← IPFire GREEN (SPAN source)
+      │  Port 2 → Laptop
+      │  Port 3 → Desktop SOC (RTX 5080)
+      │  Port 4 → GMKtec enp3s0 (network)
+      │  Port 5 → GMKtec USB adapter (SPAN capture destination)
+      │
+  supportTAK-server (192.168.1.22) — DATA LAYER (NO AI)
   ┌─────────────────────────────────────────────┐
-  │  Malcolm NSM (10 active / 17 disabled)      │
+  │  Malcolm NSM v26.02.0 (27/27 healthy)       │
   │    OpenSearch   :9200  (alert/log store)    │
   │    Logstash     :5044  (EVE JSON ingest)    │
   │    Filebeat     :5514  (syslog relay)       │
   │    Dashboards   :443   (web UI, basic auth) │
+  │    Zeek live    2 workers capturing packets │
+  │    Suricata live 2 threads on USB NIC       │
   │  ChromaDB API   :8200  (RAG corpus, 387ch)  │
-  │  17 containers DISABLED (no SPAN hardware)  │
   │  NO AI — raw data only (ADR-E04)            │
   └─────────────────────────────────────────────┘
+  Seagate 1.8TB — raw log archive + SHA256 checksums
 
   Desktop SOC — ANALYSIS LAYER (ALL AI HERE)
   ┌─────────────────────────────────────────────┐

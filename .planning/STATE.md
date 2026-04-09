@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Local AI SOC
 status: active
-stopped_at: "ADR-E04 architecture pivot complete. AI removed from data layer. Awaiting E2E test with desktop SOC."
-last_updated: "2026-04-08T20:00:00.000Z"
+stopped_at: "Zone reassignment complete. SPAN capture active. Full Malcolm 27/27. Raw log archival running. Awaiting E2E test with desktop SOC."
+last_updated: "2026-04-09T21:00:00.000Z"
 progress:
   total_phases: 6
   completed_phases: 5
@@ -16,10 +16,10 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-31)
+See: .planning/PROJECT.md (updated 2026-04-09)
 
-**Core value:** A secure, observable, AI-augmented network perimeter where threats are detected, triaged, and investigated locally
-**Current focus:** Phase 12 — rag-knowledge-pipeline
+**Core value:** Raw telemetry collected, preserved with chain of custody, and served to a GPU-powered local SOC — no cloud, no data distortion
+**Current focus:** v2.0 near-complete. Awaiting desktop SOC E2E test (TRI-06).
 
 ## Current Position
 

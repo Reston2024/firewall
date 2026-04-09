@@ -35,23 +35,23 @@ Fill in this table before writing udev rules. Every cell marked FILL_IN must be 
 
 | Label | Zone | Device Name | MAC Address | PCIe Bus | Driver | Verified |
 |-------|------|-------------|-------------|----------|--------|----------|
-| ETH0 | GREEN (LAN) | green0 | a8:b8:e0:09:83:39 | 0000:01:00.0 | igc | ✅ 2026-04-09 cable-plug test |
-| ETH1 | BLUE (WiFi/IoT) | blue0 | a8:b8:e0:09:83:3a | 0000:02:00.0 | igc | ✅ 2026-04-09 cable-plug test |
-| ETH2 | RED (WAN) | red0 | a8:b8:e0:09:83:3b | 0000:03:00.0 | igc | ✅ 2026-04-09 cable-plug test |
-| ETH3 | ORANGE (DMZ) | orange0 | a8:b8:e0:09:83:3c | 0000:04:00.0 | igc | ✅ 2026-04-09 cable-plug test |
-| ETH4 | GREEN Bridge | green1 | a8:b8:e0:09:83:3d | 0000:05:00.0 | igc | ✅ 2026-04-09 cable-plug test |
-| ETH5 | GREEN Bridge | green2 | a8:b8:e0:09:83:3e | 0000:07:00.0 | igc | ✅ 2026-04-09 cable-plug test |
+| ETH0 | RED (WAN) | red0 | a8:b8:e0:09:83:39 | 0000:01:00.0 | igc | ✅ 2026-04-09 cable-plug + zone reassign |
+| ETH1 | ORANGE (sniffer/honeypot) | orange0 | a8:b8:e0:09:83:3a | 0000:02:00.0 | igc | ✅ 2026-04-09 cable-plug + zone reassign |
+| ETH2 | ORANGE bridge | orange1 | a8:b8:e0:09:83:3b | 0000:03:00.0 | igc | ✅ 2026-04-09 cable-plug + zone reassign |
+| ETH3 | BLUE (WiFi/IoT) | blue0 | a8:b8:e0:09:83:3c | 0000:04:00.0 | igc | ✅ 2026-04-09 cable-plug + zone reassign |
+| ETH4 | GREEN (LAN) | green0 | a8:b8:e0:09:83:3d | 0000:05:00.0 | igc | ✅ 2026-04-09 cable-plug + zone reassign |
+| ETH5 | GREEN bridge | green1 | a8:b8:e0:09:83:3e | 0000:07:00.0 | igc | ✅ 2026-04-09 cable-plug + zone reassign |
 
 ## IP Addressing
 
-| Zone | Interface | IP Address | Subnet | Purpose |
-|------|-----------|------------|--------|---------|
-| GREEN | green0 | 192.168.1.1 | 255.255.255.0 | Default gateway for LAN clients |
-| GREEN Bridge | green1 | (bridged) | (bridged) | Bridged with green0 (same subnet) |
-| GREEN Bridge | green2 | (bridged) | (bridged) | Bridged with green0 (same subnet) |
-| BLUE | blue0 | 192.168.2.1 | 255.255.255.0 | Default gateway for wireless clients |
-| ORANGE | orange0 | 192.168.3.1 | 255.255.255.0 | Default gateway for DMZ hosts |
-| RED | red0 | DHCP from ISP | N/A | WAN / internet uplink |
+| Zone | Interface (ETH port) | IP Address | Subnet | Purpose |
+|------|---------------------|------------|--------|---------|
+| RED | red0 (ETH0) | DHCP (192.168.1.106) | /24 | WAN — modem NAT (same subnet as GREEN) |
+| ORANGE | orange0 (ETH1) | 192.168.3.1 | /24 | Sniffer / honeypot (future) |
+| ORANGE bridge | orange1 (ETH2) | (bridged) | — | Bridged with orange0 |
+| BLUE | blue0 (ETH3) | 192.168.2.1 | /24 | WiFi / IoT (future) |
+| GREEN | green0 (ETH4) | 192.168.1.1 | /24 | LAN gateway — switch uplink |
+| GREEN bridge | green1 (ETH5) | (bridged) | — | Bridged with green0 |
 
 ## After Filling This Table
 

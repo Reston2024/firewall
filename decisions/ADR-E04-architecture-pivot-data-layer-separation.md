@@ -36,9 +36,11 @@ It does NOT:
 
 All AI inference, detection, investigation, and recommendation generation happens on the desktop with GPU acceleration.
 
-### Malcolm runs 10 containers, not 27.
+### Malcolm runs 27/27 containers (SPAN hardware acquired 2026-04-09).
 
-17 idle containers disabled until SPAN mirror hardware is available (~$48: managed switch + USB Ethernet adapter).
+> Originally 17 containers were disabled (no SPAN hardware). GS308EP managed switch
+> and USB Ethernet adapter were acquired and deployed on 2026-04-09. All containers
+> re-enabled with live capture on enx6c6e072d459d. Zeek and Suricata are now producing data.
 
 ## Active Malcolm Containers (10)
 

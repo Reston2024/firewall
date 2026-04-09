@@ -1,8 +1,13 @@
 # ADR-E03: PCAP Capture Feasibility Assessment
 
-- **Date:** 2026-04-08
-- **Status:** Accepted
+- **Date:** 2026-04-08 (original), 2026-04-09 (superseded — hardware acquired)
+- **Status:** Superseded — PCAP capture is NOW ACTIVE
 - **References:** PCAP-01, PCAP-02, PCAP-03, PCAP-04
+
+> **UPDATE 2026-04-09:** GS308EP managed switch and USB Ethernet adapter acquired and deployed.
+> SPAN mirror active (Port 1 → Port 5). Zeek (2 workers) and Suricata (2 threads)
+> capturing live packets on enx6c6e072d459d. Arkime re-enabled. This ADR's "DEFERRED"
+> conclusion is no longer current — PCAP capture is operational.
 
 ## Context
 

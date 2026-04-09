@@ -103,42 +103,45 @@ Deferred to future release. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MAL-01 | Phase 9 | Pending |
-| MAL-04 | Phase 9 | Pending |
-| MAL-05 | Phase 9 | Pending |
-| MAL-06 | Phase 9 | Pending |
-| MAL-02 | Phase 10 | Pending |
-| MAL-03 | Phase 10 | Pending |
-| MIG-01 | Phase 10 | Pending |
-| MIG-02 | Phase 10 | Pending |
-| MIG-03 | Phase 10 | Pending |
-| MIG-04 | Phase 10 | Pending |
-| AI-01 | Phase 11 | Complete |
-| AI-02 | Phase 11 | Complete |
-| AI-03 | Phase 11 | Pending |
-| AI-04 | Phase 11 | Complete |
-| RAG-01 | Phase 12 | Complete |
+| MAL-01 | Phase 9 | Complete |
+| MAL-04 | Phase 9 | Complete |
+| MAL-05 | Phase 9 | Complete |
+| MAL-06 | Phase 9 | Complete (re-enabled with SPAN in Phase 14+) |
+| MAL-02 | Phase 10 | Complete |
+| MAL-03 | Phase 10 | Complete |
+| MIG-01 | Phase 10 | Complete |
+| MIG-02 | Phase 10 | Complete |
+| MIG-03 | Phase 10 | Complete |
+| MIG-04 | Phase 10 | Complete |
+| AI-01 | Phase 11 | Removed (ADR-E04) |
+| AI-02 | Phase 11 | Removed (ADR-E04) |
+| AI-03 | Phase 11 | Removed (ADR-E04) |
+| AI-04 | Phase 11 | Retained — enforced on desktop SOC |
+| RAG-01 | Phase 12 | Complete (ChromaDB API at :8200) |
 | RAG-02 | Phase 12 | Complete |
 | RAG-03 | Phase 12 | Complete |
 | RAG-04 | Phase 12 | Complete |
-| TRI-01 | Phase 13 | Pending |
-| TRI-02 | Phase 13 | Pending |
-| TRI-03 | Phase 13 | Pending |
-| TRI-04 | Phase 13 | Pending |
-| PCAP-01 | Phase 14 | Pending |
-| PCAP-02 | Phase 14 | Pending |
-| PCAP-03 | Phase 14 | Pending |
-| PCAP-04 | Phase 14 | Pending |
-| SCA-01 | Phase 14 | Pending |
-| SCA-02 | Phase 14 | Pending |
-| SCA-03 | Phase 14 | Pending |
-| SCA-04 | Phase 14 | Pending |
-| SCA-05 | Phase 14 | Pending |
+| TRI-01 | Phase 13 | Complete (OpenSearch :9200 LAN-exposed) |
+| TRI-02 | Phase 13 | Complete (ChromaDB API serving desktop) |
+| TRI-03 | Phase 13 | Complete (triage-results-* template created) |
+| TRI-04 | Phase 13 | Complete (integration prompt delivered) |
+| TRI-05 | Phase 13 | Complete (executor gate scaffold) |
+| TRI-06 | Phase 13 | Pending (desktop SOC E2E test) |
+| PCAP-01 | Phase 14 | Complete (GS308EP SPAN active) |
+| PCAP-02 | Phase 14 | Complete (USB adapter on Port 5) |
+| PCAP-03 | Phase 14 | Complete (Arkime re-enabled, Zeek + Suricata live) |
+| PCAP-04 | Phase 14 | Complete (ADR-E03 updated) |
+| SCA-01 | Phase 14 | Pending (syft not installed) |
+| SCA-02 | Phase 14 | Pending (syft not installed) |
+| SCA-03 | Phase 14 | Pending (grype not installed) |
+| SCA-04 | Phase 14 | Pending (cosign not installed) |
+| SCA-05 | Phase 14 | Complete (process documented) |
 
 **Coverage:**
-- v2.0 requirements: 31 total
-- Mapped to phases: 31
-- Unmapped: 0
+- v2.0 requirements: 33 total
+- Complete: 27
+- Removed (ADR-E04): 3
+- Pending: 3 (TRI-06 E2E test, SCA-01-04 tooling)
 
 ---
 *Requirements defined: 2026-03-31*
