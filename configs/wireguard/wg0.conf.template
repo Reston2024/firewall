@@ -1,0 +1,16 @@
+[Interface]
+Address = 10.0.0.1/24
+ListenPort = 51820
+PrivateKey = REDACTED
+PostUp = iptables -A CUSTOMINPUT -p udp --dport 51820 -j ACCEPT; iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o red0 -j MASQUERADE
+PostDown = iptables -D CUSTOMINPUT -p udp --dport 51820 -j ACCEPT; iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o red0 -j MASQUERADE
+
+[Peer]
+# Phone
+PublicKey = V6WvIUkW+bMeXAOpW1QclEA3uG2I5FkrNrZmZmRXkhg=
+AllowedIPs = 10.0.0.2/32
+
+[Peer]
+# Laptop
+PublicKey = ZKlk9GFbGa+kj+3ZS3Kw2sJk/2I+1n60Tn98Hebsygc=
+AllowedIPs = 10.0.0.3/32
