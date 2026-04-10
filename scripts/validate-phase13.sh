@@ -1,14 +1,22 @@
 #!/bin/bash
 # validate-phase13.sh — Phase 13 validation: Alert Triage & SOC Integration
-# Run FROM local Windows machine
+# Run FROM the laptop (192.168.1.100) or IPFire (both can reach 192.168.1.22)
+#
+# Scope: infrastructure prerequisites for the TRI-06 end-to-end test.
+# The actual E2E receipt verification lives in validate-tri06.sh.
+#
+# History:
+# - TRI-05 was an IPFire-local executor scaffold check (:8300 /health).
+#   Retracted per ADR-E04: the executor gate lives on the desktop SOC.
+#   Retained as documented SKIP so the intent is preserved, not silently removed.
+# - TRI-06 (ISM policy coverage) renamed to TRI-03b. The real TRI-06 E2E
+#   (receipt-in-index) is now gated by scripts/validate-tri06.sh.
 
 FAIL=0; PASS=0; SKIP=0
 pass() { echo "PASS: $1"; PASS=$((PASS + 1)); }
 fail() { echo "FAIL: $1"; FAIL=$((FAIL + 1)); }
 skip() { echo "SKIP: $1"; SKIP=$((SKIP + 1)); }
 
-SSH_TARGET="opsadmin@192.168.1.22"
-SSH_OPTS="-o StrictHostKeyChecking=yes -o ConnectTimeout=10 -o BatchMode=yes"
 CREDS="malcolm_internal:AzZqIn8B6AS1RuX0K8NbbzJZuYaTDARks9Tu"
 
 echo "=== Phase 13 Validation — Alert Triage & SOC Integration — $(date) ==="
@@ -46,6 +54,17 @@ else
 fi
 echo ""
 
+# --- TRI-03b: ISM retention policy covers triage-results ---
+# (Was TRI-06 infra-check; the real TRI-06 E2E gate lives in validate-tri06.sh.)
+echo "[TRI-03b] ISM retention policy includes triage-results-*"
+TRI03B_OUT=$(curl -sk -u "${CREDS}" "https://192.168.1.22:9200/_plugins/_ism/policies/malcolm-retention" 2>/dev/null)
+if echo "$TRI03B_OUT" | grep -q "triage-results"; then
+  pass "TRI-03b: ISM policy malcolm-retention covers triage-results-*"
+else
+  fail "TRI-03b: ISM policy does not cover triage-results-* indices"
+fi
+echo ""
+
 # --- TRI-04: ChromaDB RAG API accessible ---
 echo "[TRI-04] ChromaDB RAG API accessible from Windows desktop"
 TRI04_OUT=$(curl -s "http://192.168.1.22:8200/health" 2>/dev/null)
@@ -57,24 +76,21 @@ else
 fi
 echo ""
 
-# --- TRI-05: Firewall executor endpoint running ---
-echo "[TRI-05] Firewall executor endpoint running (scaffold mode)"
-TRI05_OUT=$(ssh $SSH_OPTS "$SSH_TARGET" "curl -s http://127.0.0.1:8300/health" 2>/dev/null)
-if echo "$TRI05_OUT" | grep -q '"mode": "scaffold"'; then
-  pass "TRI-05: Executor running in scaffold mode on localhost:8300"
-else
-  fail "TRI-05: Executor not running at 127.0.0.1:8300"
-fi
+# --- TRI-05: Firewall executor endpoint (retracted per ADR-E04) ---
+# Original intent: check scaffold executor at 127.0.0.1:8300 (on IPFire or supportTAK).
+# ADR-E04 moved the executor gate to the desktop SOC (192.168.1.102), which is
+# outside this repo's validation scope. Recorded as SKIP with rationale so the
+# requirement history is preserved.
+echo "[TRI-05] Firewall executor endpoint (scaffold retracted)"
+skip "TRI-05: executor gate retracted from data layer per ADR-E04; E2E validated via TRI-06 receipt in scripts/validate-tri06.sh"
 echo ""
 
-# --- TRI-06: ISM policy covers triage-results ---
-echo "[TRI-06] ISM retention policy includes triage-results-*"
-TRI06_OUT=$(curl -sk -u "${CREDS}" "https://192.168.1.22:9200/_plugins/_ism/policies/malcolm-retention" 2>/dev/null)
-if echo "$TRI06_OUT" | grep -q "triage-results"; then
-  pass "TRI-06: ISM policy malcolm-retention covers triage-results-*"
-else
-  fail "TRI-06: ISM policy does not cover triage-results-* indices"
-fi
+# --- TRI-06: End-to-end receipt in OpenSearch ---
+# The actual E2E gate lives in scripts/validate-tri06.sh so it can be run
+# independently, orchestrated by validate-all.sh, and rerun after the desktop
+# SOC emits a receipt. This line is a pointer, not a duplicate check.
+echo "[TRI-06] End-to-end receipt verification"
+skip "TRI-06: run scripts/validate-tri06.sh (dedicated E2E gate; see docs/tri06-receipt-contract.md)"
 echo ""
 
 # --- Summary ---
