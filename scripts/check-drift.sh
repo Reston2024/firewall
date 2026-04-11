@@ -27,6 +27,9 @@ MANAGED_FILES=(
   /etc/ssh/sshd_config
   # Phase 4: Suricata IDS/IPS
   /etc/suricata/suricata.yaml
+  # v2.0.1 — Suricata eve.json logrotate (added 2026-04-11 to prevent
+  # unbounded eve.json growth on NVMe; observed 253 MB before remediation)
+  /etc/logrotate.d/suricata
   # Phase 5: Telemetry
   /etc/syslog.conf
   # Phase 6: System Hardening

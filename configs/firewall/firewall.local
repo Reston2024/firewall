@@ -26,7 +26,39 @@ case "$1" in
       wg setconf wg0 <(grep -v "^Address\|^PostUp\|^PostDown" /etc/wireguard/wg0.conf)
       ip link set wg0 up
       /sbin/iptables -A CUSTOMINPUT -p udp --dport 51820 -j ACCEPT
-      /sbin/iptables -A FORWARD -i wg0 -j ACCEPT
+
+      # VPN forwarding policy (v2.0.1 hardening, 2026-04-11).
+      # Previously: -A FORWARD -i wg0 -j ACCEPT (blanket allow).
+      # Now: specific ACCEPT for SOC management surface + DROP for the
+      # rest of GREEN. Non-GREEN destinations fall through to the
+      # existing POLICYFWD ACCEPT for `wg+`, which is IPFire's native
+      # way of accepting VPN traffic.
+      #
+      # Why CUSTOMFORWARD and not FORWARD: IPFire evaluates
+      # CUSTOMFORWARD at FORWARD rule #3 (early) and POLICYFWD at
+      # FORWARD rule #21 (late). POLICYFWD already has
+      # `ACCEPT all -- wg+ *` which would otherwise short-circuit any
+      # rule we put at the tail of FORWARD. CUSTOMFORWARD runs first.
+      #
+      # Order matters: specific ACCEPTs for the SOC management targets
+      # come first, then a DROP for anything else into GREEN. Anything
+      # not matched falls through to POLICYFWD which still ACCEPTs
+      # non-GREEN (i.e., internet) traffic from wg+.
+      #
+      # Audit reference: v2.0.1 debugging-team finding D-14.
+
+      # 1. Allow VPN → IPFire itself (DNS, routing, WUI over HTTPS)
+      /sbin/iptables -A CUSTOMFORWARD -i wg0 -d 192.168.1.1 -j ACCEPT
+      # 2. Allow VPN → supportTAK Malcolm services (specific ports only)
+      /sbin/iptables -A CUSTOMFORWARD -i wg0 -d 192.168.1.22 -p tcp --dport 443 -j ACCEPT
+      /sbin/iptables -A CUSTOMFORWARD -i wg0 -d 192.168.1.22 -p tcp --dport 9200 -j ACCEPT
+      /sbin/iptables -A CUSTOMFORWARD -i wg0 -d 192.168.1.22 -p tcp --dport 8200 -j ACCEPT
+      # 3. Drop everything else into GREEN (no lateral movement to other LAN hosts)
+      /sbin/iptables -A CUSTOMFORWARD -i wg0 -d 192.168.1.0/24 -j DROP
+      # 4. Non-GREEN (internet) destinations fall through to POLICYFWD's
+      #    existing `wg+ *` ACCEPT rule, which is the IPFire-native way
+      #    of permitting VPN-to-internet traffic.
+
       /sbin/iptables -t nat -A POSTROUTING -o red0 -s 10.0.0.0/24 -j MASQUERADE
     fi
     ;;
@@ -51,7 +83,24 @@ case "$1" in
     # WireGuard
     if [ -d /sys/class/net/wg0 ]; then
       /sbin/iptables -D CUSTOMINPUT -p udp --dport 51820 -j ACCEPT 2>/dev/null
+
+      # Remove v2.0.1 VPN forwarding policy from CUSTOMFORWARD.
+      # Also try deleting the prior blanket FORWARD rule and the
+      # previous attempt's FORWARD entries, if they exist, so `stop`
+      # works from any historical state.
       /sbin/iptables -D FORWARD -i wg0 -j ACCEPT 2>/dev/null
+      /sbin/iptables -D FORWARD -i wg0 -d 192.168.1.0/24 -j DROP 2>/dev/null
+      /sbin/iptables -D FORWARD -i wg0 -d 192.168.1.22 -p tcp --dport 8200 -j ACCEPT 2>/dev/null
+      /sbin/iptables -D FORWARD -i wg0 -d 192.168.1.22 -p tcp --dport 9200 -j ACCEPT 2>/dev/null
+      /sbin/iptables -D FORWARD -i wg0 -d 192.168.1.22 -p tcp --dport 443 -j ACCEPT 2>/dev/null
+      /sbin/iptables -D FORWARD -i wg0 -d 192.168.1.1 -j ACCEPT 2>/dev/null
+
+      /sbin/iptables -D CUSTOMFORWARD -i wg0 -d 192.168.1.0/24 -j DROP 2>/dev/null
+      /sbin/iptables -D CUSTOMFORWARD -i wg0 -d 192.168.1.22 -p tcp --dport 8200 -j ACCEPT 2>/dev/null
+      /sbin/iptables -D CUSTOMFORWARD -i wg0 -d 192.168.1.22 -p tcp --dport 9200 -j ACCEPT 2>/dev/null
+      /sbin/iptables -D CUSTOMFORWARD -i wg0 -d 192.168.1.22 -p tcp --dport 443 -j ACCEPT 2>/dev/null
+      /sbin/iptables -D CUSTOMFORWARD -i wg0 -d 192.168.1.1 -j ACCEPT 2>/dev/null
+
       /sbin/iptables -t nat -D POSTROUTING -o red0 -s 10.0.0.0/24 -j MASQUERADE 2>/dev/null
       ip link del wg0
     fi

@@ -1,0 +1,46 @@
+{
+  "policy": {
+    "policy_id": "malcolm-retention",
+    "description": "Malcolm 30-day index retention. Covers all growing index patterns: network-* (Zeek), arkime_sessions3-* (Suricata alerts + Arkime sessions), triage-results-* (TRI-06 execution receipts), malcolm_beats_* (Filebeat syslog + beats). v2.0.1 expanded 2026-04-11 to include malcolm_beats_* which had been silently growing uncapped (observed 28M docs/day, ~4 GB/day before coverage).",
+    "default_state": "hot",
+    "states": [
+      {
+        "name": "hot",
+        "actions": [],
+        "transitions": [
+          {
+            "state_name": "delete",
+            "conditions": {
+              "min_index_age": "30d"
+            }
+          }
+        ]
+      },
+      {
+        "name": "delete",
+        "actions": [
+          {
+            "retry": {
+              "count": 3,
+              "backoff": "exponential",
+              "delay": "1m"
+            },
+            "delete": {}
+          }
+        ],
+        "transitions": []
+      }
+    ],
+    "ism_template": [
+      {
+        "index_patterns": [
+          "network-*",
+          "arkime_sessions3-*",
+          "triage-results-*",
+          "malcolm_beats_*"
+        ],
+        "priority": 100
+      }
+    ]
+  }
+}

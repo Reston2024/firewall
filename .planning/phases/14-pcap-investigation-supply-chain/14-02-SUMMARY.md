@@ -100,12 +100,12 @@ as findings are dispositioned.
 
 ### Signing identity (pinnable for strict verify)
 
-- Identity: `ablanks10@gmail.com`
+- Identity: `[REDACTED-operator-email]`
 - Issuer: `https://github.com/login/oauth`
 - Verify command with strict pinning:
   ```bash
   cosign verify-blob --bundle releases/v2.0.0/v2.0.0-bundle.cosign \
-    --certificate-identity='ablanks10@gmail.com' \
+    --certificate-identity='[REDACTED-operator-email]' \
     --certificate-oidc-issuer='https://github.com/login/oauth' \
     releases/v2.0.0/v2.0.0-bundle.tar.gz
   ```
@@ -165,7 +165,7 @@ as findings are dispositioned.
 2. **Cosign keyless requires interactive OAuth device flow** for
    local runs. Works for this one-time v2.0 release (GitHub OAuth
    device flow completed 2026-04-10 with identity
-   `ablanks10@gmail.com`), but future release automation should move
+   `[REDACTED-operator-email]`), but future release automation should move
    to GitHub Actions with `id-token: write` permission so releases get
    signed by a stable workflow OIDC identity — no human in the loop.
    Tracked as v2.1 task.

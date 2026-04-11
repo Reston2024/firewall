@@ -4,12 +4,16 @@ milestone: v2.0
 milestone_name: Local AI SOC
 status: shipped
 stopped_at: ""
-last_updated: "2026-04-10T21:30:00.000Z"
+last_updated: "2026-04-11T22:35:00.000Z"
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 12
-  completed_plans: 12
+  total_phases: 7
+  completed_phases: 7
+  total_plans: 13
+  completed_plans: 13
+patches:
+  - version: v2.0.1
+    applied: 2026-04-11
+    summary: "Audit remediation patch: dma-loop incident recovery, sync-eve silent-failure fix, host firewall, WireGuard VPN segmentation, rsyslog disk queue, ILM coverage expansion, eve.json logrotate, sync-eve watchdog."
 ---
 
 # Project State
@@ -111,7 +115,7 @@ NO AI on this box. Ollama + Foundation-Sec-8B REMOVED per ADR-E04.
 
 ## Session Continuity
 
-Last session: 2026-04-10 — v2.0 milestone closure
-Stopped at: v2.0 SHIPPED. Phase 13 + 14 complete; release tag v2.0.0 created with CycloneDX SBOMs and cosign v3 keyless signature. TRI-06 Firewall-side rails live-tested (3 PASS / 2 SKIP awaiting desktop forwarder).
+Last session: 2026-04-11 — v2.0.1 audit remediation patch
+Stopped at: v2.0.1 SHIPPED. Response to external audit. Discovered and recovered from IPFire dma-loop incident (10.5 GB leak, Suricata OOM). Discovered and fixed sync-eve had never actually run via cron. Applied host firewall (UFW + DOCKER-USER), WireGuard VPN segmentation, rsyslog disk queue, eve.json logrotate, ILM expansion, sync-eve watchdog. validate-all.sh laptop role: 6 PASS / 0 FAIL / 8 SKIP.
 Resume file: None
-Next action: v2.1 planning (TRI-06 desktop-side forwarder) OR v3.0 per REQUIREMENTS.md v3.0 section.
+Next action: v2.1 planning (TRI-06 desktop forwarder, CVE triage, DOCKER-USER systemd unit, IPFire SMTP relay reconfig) OR v3.0.

@@ -22,7 +22,7 @@ hosts:
     storage: "NVMe"
     ip:
       green: "192.168.1.1"
-      red: "DHCP (currently 192.168.1.106)"
+      red: "DHCP (verified 2026-04-11: 162.228.116.144/22 — real public-ish ISP range, NOT 192.168.1.x)"
       orange: "192.168.3.1"
       blue: "192.168.2.1"
     ssh:
@@ -116,12 +116,12 @@ network:
 
   modem:
     ip: "192.168.1.254"
-    mode: "bridge (NAT on same subnet as GREEN — known issue)"
+    mode: "bridge (ISP-side NAT; IPFire RED gets a real public-ish IP on a separate subnet — NOT sharing GREEN /24)"
     connection: "IPFire ETH0 (RED)"
 
   subnets:
     green: "192.168.1.0/24"
-    red: "192.168.1.0/24 (modem NAT — same subnet as GREEN)"
+    red: "162.228.116.0/22 (ISP-assigned via DHCP; verified 2026-04-11 during v2.0.1 audit — previously this field incorrectly claimed '192.168.1.0/24 same subnet as GREEN' which was never true in practice)"
     orange: "192.168.3.0/24"
     blue: "192.168.2.0/24"
 

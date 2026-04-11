@@ -64,6 +64,50 @@ Requirements for Local AI SOC milestone. Each maps to roadmap phases.
 - [x] **PCAP-03**: Arkime + Zeek (2 workers) + Suricata live (2 threads) all healthy on supportTAK consuming SPAN mirror
 - [x] **PCAP-04**: ADR-E03 updated 2026-04-09 documenting hardware acquisition and live-capture posture
 
+## v2.0.1 Patches (Audit Remediation, 2026-04-11)
+
+Response to an external debugging-team audit. Covers **Firewall repo + IPFire + supportTAK** only;
+desktop-SOC audit findings were forwarded to that team. See
+`.planning/phases/15-audit-remediation-v2.0.1/15-01-SUMMARY.md` for full detail.
+
+### Incident response (discovered during audit verification)
+
+- [x] **INC-01**: IPFire mail-queue fork bomb — 181,935 stuck mail in /var/spool/dma, 20,557 dma processes, 10.5 GB RAM leaked, Suricata OOM-killed. Root cause: IPFire IPS alert `ENABLE_EMAIL=on` with no outbound SMTP relay → bounce loop since 2026-03-27. Disabled email output in /var/ipfire/suricata/settings + reporter.conf; killed workers; archived spool to dma.old.20260411; restarted Suricata.
+- [x] **INC-02**: sync-eve cron silently broken since deployment — `>> /var/log/sync-eve.log` redirect failed because opsadmin cannot write /var/log (mode 0775 root:syslog). Bash refuses to execute the command when its output redirect fails, so sync-eve.sh had never actually run via cron. No IPFire-origin alerts had ever reached Malcolm. Rewrote sync-eve.sh with self-logging to $HOME and deployed.
+
+### Silent-failure watchdogs
+
+- [x] **SYNC-01**: scripts/validate-sync-eve.sh — 6 checks (heartbeat, sentinel, dest mtime, source mtime, log FAIL lines, archive freshness). Integrated into validate-all.sh laptop role.
+
+### Host firewall (supportTAK)
+
+- [x] **HFW-01**: UFW active with SSH/ChromaDB/syslog rules trusted to laptop + desktop SOC + IPFire
+- [x] **HFW-02**: DOCKER-USER chain rules for Malcolm-published ports (:9200, :443, :5044, :5514) persisted via @reboot + */5 min reapply cron
+
+### WireGuard VPN segmentation
+
+- [x] **VPN-01**: IPFire CUSTOMFORWARD rules limit wg0 clients to IPFire:DNS + supportTAK:443/9200/8200 — no broad GREEN /24 access (was blanket `-j ACCEPT`)
+
+### Telemetry hardening
+
+- [x] **TEL-01**: IPFire /etc/logrotate.d/suricata — 100 MB rotate, 24 kept, copytruncate (prevents eve.json unbounded growth)
+- [x] **TEL-02**: supportTAK rsyslog disk-backed queue (saveOnShutdown, /var/spool/rsyslog) — survives rsyslog restart
+- [x] **TEL-03**: OpenSearch ISM policy malcolm-retention extended to cover malcolm_beats_* (was growing uncapped at ~4 GB/day)
+- [x] **TEL-04**: sync-eve.sh rewritten with byte-offset incremental append (same-inode for Filebeat continuity)
+- [x] **TEL-05**: IPFire Suricata IPS email alerting disabled permanently (root cause of INC-01)
+
+### Documentation corrections
+
+- [x] **DOC-01**: topology.yaml RED subnet corrected from "192.168.1.0/24 (same subnet as GREEN — known issue)" to the real ISP-assigned 162.228.116.0/22 range
+- [x] **DOC-02**: configs/syslog.conf corrected from `@192.168.1.101` to `@192.168.1.22` (live system was correct; repo copy was stale)
+
+### Documented v2.1 carry-overs
+
+- [ ] **V21-01**: supportTAK duplicate systemd-timesyncd process (harmless but unusual)
+- [ ] **V21-02**: v2.0.0 grype 68 High CVEs in Ubuntu 22.04 system SBOM (still open from v2.0.0)
+- [ ] **V21-03**: DOCKER-USER persistence via systemd unit (currently 5-min cron reapply)
+- [ ] **V21-04**: Reconfigure IPFire IPS alerts with proper outbound SMTP relay (currently disabled entirely)
+
 ## v3.0 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -145,4 +189,4 @@ Deferred to future release. Tracked but not in current roadmap.
 
 ---
 *Requirements defined: 2026-03-31*
-*Last updated: 2026-04-10 — v2.0 milestone closure (29/33 complete, 3 retracted, 1 partial)*
+*Last updated: 2026-04-11 — v2.0.1 audit remediation patch (incident response + security hardening)*

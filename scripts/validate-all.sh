@@ -183,6 +183,30 @@ run_tri06() {
   fi
 }
 
+# --- run_sync_eve(): v2.0.1 sync-eve pipeline watchdog ---
+run_sync_eve() {
+  echo ""
+  echo "========== SYNC-EVE VALIDATION =========="
+  echo "Script: $SCRIPTS/validate-sync-eve.sh"
+  echo ""
+  if [ ! -f "$SCRIPTS/validate-sync-eve.sh" ]; then
+    echo "SKIP: validate-sync-eve.sh not found"
+    PHASE_RESULTS+=("sync-eve|SKIP|script not found")
+    PHASE_SKIP=$((PHASE_SKIP + 1))
+    return
+  fi
+  bash "$SCRIPTS/validate-sync-eve.sh"
+  local EXIT_CODE=$?
+  if [ "$EXIT_CODE" -eq 0 ]; then
+    PHASE_RESULTS+=("sync-eve|PASS|IPFire→Malcolm sync-eve pipeline")
+    PHASE_PASS=$((PHASE_PASS + 1))
+  else
+    PHASE_RESULTS+=("sync-eve|FAIL|IPFire→Malcolm sync-eve pipeline")
+    PHASE_FAIL=$((PHASE_FAIL + 1))
+    OVERALL_FAIL=$((OVERALL_FAIL + 1))
+  fi
+}
+
 if [ -n "$SINGLE_PHASE" ]; then
   # Single-phase mode: run only the requested phase
   echo "Mode: single phase ($SINGLE_PHASE)"
@@ -200,7 +224,8 @@ if [ -n "$SINGLE_PHASE" ]; then
     13) run_phase 13 "$SCRIPTS/validate-phase13.sh" "Alert Triage & SOC Integration" ;;
     14) run_phase 14 "$SCRIPTS/validate-phase14.sh" "PCAP + Supply Chain Assurance" ;;
     tri06|TRI06|tri-06) run_tri06 ;;
-    *) echo "ERROR: Unknown phase '$SINGLE_PHASE'. Valid: 1-6, 9-14, tri06"; exit 1 ;;
+    sync-eve|sync_eve|synceve) run_sync_eve ;;
+    *) echo "ERROR: Unknown phase '$SINGLE_PHASE'. Valid: 1-6, 9-14, tri06, sync-eve"; exit 1 ;;
   esac
 else
   # Full run: scope by host role.
@@ -224,6 +249,8 @@ else
       run_phase_skip 14 "skipped on ipfire host — run from laptop"
       PHASE_RESULTS+=("tri06|SKIP|skipped on ipfire host — run from laptop")
       PHASE_SKIP=$((PHASE_SKIP + 1))
+      PHASE_RESULTS+=("sync-eve|SKIP|skipped on ipfire host — run from laptop")
+      PHASE_SKIP=$((PHASE_SKIP + 1))
       ;;
     laptop)
       # v2.0 phases only — laptop cannot run IPFire-local tools.
@@ -239,6 +266,7 @@ else
       run_phase_skip 12 "validator deprecated per ADR-E04; RAG verified via validate-phase13.sh TRI-04"
       run_phase 13 "$SCRIPTS/validate-phase13.sh" "Alert Triage & SOC Integration"
       run_phase 14 "$SCRIPTS/validate-phase14.sh" "PCAP + Supply Chain Assurance"
+      run_sync_eve
       run_tri06
       ;;
     all)
@@ -257,6 +285,7 @@ else
       run_phase_skip 12 "validator deprecated per ADR-E04; RAG verified via validate-phase13.sh TRI-04"
       run_phase 13 "$SCRIPTS/validate-phase13.sh" "Alert Triage & SOC Integration"
       run_phase 14 "$SCRIPTS/validate-phase14.sh" "PCAP + Supply Chain Assurance"
+      run_sync_eve
       run_tri06
       ;;
     *)

@@ -1,0 +1,43 @@
+# IPFire Suricata eve.json rotation
+# Deploy to: /etc/logrotate.d/suricata on IPFire
+# Added: v2.0.1 remediation (2026-04-11)
+#
+# Context: prior to this, /var/log/suricata/eve.json grew unbounded.
+# Observed at 253 MB during v2.0.1 audit. Without rotation, the file
+# will eventually consume all available space on the NVMe, and the
+# sync-eve.sh pipeline has to SCP a progressively larger file every
+# minute (wasting bandwidth and IPFire CPU).
+#
+# Rotation policy:
+#   - Hourly check, rotate only if size >= 100 MB
+#   - Keep 24 rotated copies (~24 hours of peak history)
+#   - copytruncate is mandatory: Suricata uses O_APPEND and does NOT
+#     support SIGHUP reopen in IPFire's build. copytruncate is the
+#     safe-for-running-Suricata pattern — logrotate copies the file,
+#     then truncates the original in-place, so Suricata keeps writing
+#     to the same fd without any restart or signal.
+#   - compress: gzip rotated copies for space efficiency
+#   - delaycompress: don't compress the most recent rotation
+#     (sync-eve.sh doesn't need to handle .gz, only the current file)
+#   - missingok: don't error if the file is absent (e.g., after a
+#     Suricata re-init)
+#   - notifempty: skip rotation if file is empty
+#
+# Sync-eve interaction: my sync-eve.sh uses byte-offset append with
+# rotation detection (if remote size < local cursor, reset). When
+# logrotate copytruncates eve.json, the source size drops to 0
+# (or back to zero after a fresh Suricata write). sync-eve detects
+# the shrinkage on next run and resets cursor + truncates dest.
+# This is the same inode on the dest side, so Filebeat continues
+# tailing without duplication.
+
+/var/log/suricata/eve.json {
+    hourly
+    size 100M
+    rotate 24
+    copytruncate
+    compress
+    delaycompress
+    missingok
+    notifempty
+}
