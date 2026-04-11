@@ -10,6 +10,16 @@ desktop.ini
 *.tar.gz
 *.iso
 
+# Release artifacts: SBOMs + signed bundles are audit evidence and are
+# tracked in git alongside the corresponding v*.0.0 tag (see
+# docs/release-process.md). The *.tar.gz rule above would otherwise
+# silently drop the cosign bundle — re-include releases/**/*.tar.gz.
+!releases/**/*.tar.gz
+
+# Release-candidate dry runs are transient and must never be committed.
+releases/*-rc/
+releases/*-dev/
+
 # Sensitive — never commit real credentials or private keys
 *.pem
 *.key
