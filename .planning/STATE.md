@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Local AI SOC
-status: active
-stopped_at: "Zone reassignment complete. SPAN capture active. Full Malcolm 27/27. Raw log archival running. Awaiting E2E test with desktop SOC."
-last_updated: "2026-04-09T21:00:00.000Z"
+status: shipped
+stopped_at: ""
+last_updated: "2026-04-10T21:30:00.000Z"
 progress:
   total_phases: 6
-  completed_phases: 5
-  total_plans: 10
-  completed_plans: 10
+  completed_phases: 6
+  total_plans: 12
+  completed_plans: 12
 ---
 
 # Project State
@@ -19,12 +19,11 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-09)
 
 **Core value:** Raw telemetry collected, preserved with chain of custody, and served to a GPU-powered local SOC — no cloud, no data distortion
-**Current focus:** v2.0 near-complete. Awaiting desktop SOC E2E test (TRI-06).
+**Current focus:** v2.0 SHIPPED 2026-04-10. TRI-06 desktop-side forwarder tracked as v2.1 follow-up; rails live-tested.
 
 ## Current Position
 
-Phase: 12 (rag-knowledge-pipeline) — EXECUTING
-Plan: 2 of 2
+Milestone: v2.0 shipped. Next: v2.1 planning (TRI-06 desktop forwarder) or v3.0 per REQUIREMENTS.md.
 
 ## Performance Metrics
 
@@ -112,7 +111,7 @@ NO AI on this box. Ollama + Foundation-Sec-8B REMOVED per ADR-E04.
 
 ## Session Continuity
 
-Last session: 2026-04-07T03:18:25.658Z
-Stopped at: Checkpoint: supportTAK-server did not come back after reboot — requires physical intervention. 10/10 queries pass, RAG-04 end-to-end confirmed, reboot persistence test blocked.
+Last session: 2026-04-10 — v2.0 milestone closure
+Stopped at: v2.0 SHIPPED. Phase 13 + 14 complete; release tag v2.0.0 created with CycloneDX SBOMs and cosign v3 keyless signature. TRI-06 Firewall-side rails live-tested (3 PASS / 2 SKIP awaiting desktop forwarder).
 Resume file: None
-Next action: `/gsd:plan-phase 10` — Data Ingestion & Loki Migration
+Next action: v2.1 planning (TRI-06 desktop-side forwarder) OR v3.0 per REQUIREMENTS.md v3.0 section.

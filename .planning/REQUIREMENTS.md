@@ -14,7 +14,7 @@ Requirements for Local AI SOC milestone. Each maps to roadmap phases.
 - [x] **MAL-03**: IPFire syslog forwarded to Malcolm via rsyslog relay → Filebeat syslog :5514
 - [x] **MAL-04**: OpenSearch ISM storage policy configured (hot→delete, 30-day max age, covers network-*, arkime_sessions3-*, triage-results-*)
 - [x] **MAL-05**: Malcolm prebuilt dashboards accessible at :443 with 53K+ Suricata alerts visible
-- [x] **MAL-06**: Arkime disabled until PCAP mirror hardware is available (ADR-E03)
+- [x] **MAL-06**: Arkime capture state consistent with SPAN posture — post-SPAN (GS308EP acquired 2026-04-09) Arkime + Zeek + Suricata live containers healthy; validate-phase9.sh MAL-06 accepts pre-SPAN and post-SPAN modes per updated ADR-E03
 
 ### Telemetry Migration
 
@@ -46,23 +46,23 @@ Requirements for Local AI SOC milestone. Each maps to roadmap phases.
 - [x] **TRI-02**: ChromaDB RAG API at :8200 serving 387 chunks for alert enrichment — desktop SOC can query
 - [x] **TRI-03**: triage-results-* index template created in OpenSearch with ISM retention policy
 - [x] **TRI-04**: Integration prompt delivered to desktop SOC (local-ai-soc) with all endpoints and credentials
-- [x] **TRI-05**: Firewall executor gate scaffold deployed at :8300 — 6-gate sequence per ADR-E01, returns execution receipts
-- [ ] **TRI-06**: End-to-end verified: IPFire alert → Malcolm ingest → SOC pull → detect → investigate → recommend → receipt
+- [x] **TRI-05**: Executor gate contract defined — 6-gate sequence per ADR-E01, schema in contracts/execution-receipt.schema.json. Original scaffold at supportTAK :8300 retracted per ADR-E04; executor gate now owned by desktop SOC
+- [~] **TRI-06**: Firewall-side rails complete and live-tested (validate-tri06.sh 3 PASS / 2 SKIP, write path proven via smoke test + reference emitter); desktop-side forwarder that emits real AI-generated receipts into triage-results-* tracked as v2.1 follow-up. See `.planning/phases/13-alert-triage-soc-integration/13-02-SUMMARY.md` and `docs/tri06-receipt-contract.md`
 
 ### Supply Chain Assurance
 
-- [ ] **SCA-01**: Syft generates CycloneDX JSON SBOM for the git repository (script ready, tools need install)
-- [ ] **SCA-02**: Syft generates a second SBOM against the live deployed system (script ready)
-- [ ] **SCA-03**: Grype vulnerability scan runs against generated SBOMs (script ready)
-- [ ] **SCA-04**: cosign v3 signs release bundles on git tag with --bundle flag (script ready)
+- [x] **SCA-01**: Syft 1.42.4 generates CycloneDX JSON SBOM for the git repository (`releases/v2.0.0/sbom-repo.json`)
+- [x] **SCA-02**: Syft 1.42.4 generates CycloneDX JSON SBOM against the live deployed system, dpkg scope for memory safety (`releases/v2.0.0/sbom-system.json`, 5.1 MB, all Ubuntu 22.04 packages with CPE strings)
+- [x] **SCA-03**: Grype 0.111.0 distro-aware vulnerability scan runs against both SBOMs (`releases/v2.0.0/grype-repo.txt`, `releases/v2.0.0/grype-system.txt`); findings disclosed in 14-02-SUMMARY per NIST SSDF audit-ship pattern (0 Critical, 68 High, 14,423 Medium, 990 Low, 280 Negligible)
+- [x] **SCA-04**: Cosign v3.0.6 keyless Sigstore signature on `releases/v2.0.0/v2.0.0-bundle.tar.gz`, verifiable with `--certificate-identity-regexp='.+@.+\..+' --certificate-oidc-issuer-regexp='^https://.+/login/oauth$'`
 - [x] **SCA-05**: Release process documented: generate-sbom.sh + docs/release-process.md
 
 ### PCAP Capture Investigation
 
-- [x] **PCAP-01**: Network hardware assessed — unmanaged switch lacks SPAN capability (ADR-E03)
-- [ ] **PCAP-02**: SPAN port deferred to v3.0 — requires managed switch hardware (~$30-50)
-- [ ] **PCAP-03**: Arkime deferred to v3.0 — requires SPAN port + USB NIC for capture
-- [x] **PCAP-04**: Decision documented in ADR-E03 — PCAP deferred with hardware requirements
+- [x] **PCAP-01**: Network hardware assessed and acquired — Netgear GS308EP managed switch + USB 2.5GbE adapter deployed 2026-04-09 (ADR-E03 updated)
+- [x] **PCAP-02**: SPAN port live — GS308EP Port 1 (IPFire GREEN uplink) mirrored to Port 5 (supportTAK USB adapter, NIC enx6c6e072d459d, promiscuous, no IP)
+- [x] **PCAP-03**: Arkime + Zeek (2 workers) + Suricata live (2 threads) all healthy on supportTAK consuming SPAN mirror
+- [x] **PCAP-04**: ADR-E03 updated 2026-04-09 documenting hardware acquisition and live-capture posture
 
 ## v3.0 Requirements
 
@@ -125,24 +125,24 @@ Deferred to future release. Tracked but not in current roadmap.
 | TRI-02 | Phase 13 | Complete (ChromaDB API serving desktop) |
 | TRI-03 | Phase 13 | Complete (triage-results-* template created) |
 | TRI-04 | Phase 13 | Complete (integration prompt delivered) |
-| TRI-05 | Phase 13 | Complete (executor gate scaffold) |
-| TRI-06 | Phase 13 | Pending (desktop SOC E2E test) |
-| PCAP-01 | Phase 14 | Complete (GS308EP SPAN active) |
-| PCAP-02 | Phase 14 | Complete (USB adapter on Port 5) |
+| TRI-05 | Phase 13 | Complete (contract defined; supportTAK scaffold retracted per ADR-E04, gate on desktop SOC) |
+| TRI-06 | Phase 13 | Partial — Firewall-side rails complete and live-tested; desktop-side forwarder tracked as v2.1 |
+| PCAP-01 | Phase 14 | Complete (GS308EP + USB NIC acquired and deployed 2026-04-09) |
+| PCAP-02 | Phase 14 | Complete (Port 1 → Port 5 mirror active) |
 | PCAP-03 | Phase 14 | Complete (Arkime re-enabled, Zeek + Suricata live) |
-| PCAP-04 | Phase 14 | Complete (ADR-E03 updated) |
-| SCA-01 | Phase 14 | Pending (syft not installed) |
-| SCA-02 | Phase 14 | Pending (syft not installed) |
-| SCA-03 | Phase 14 | Pending (grype not installed) |
-| SCA-04 | Phase 14 | Pending (cosign not installed) |
+| PCAP-04 | Phase 14 | Complete (ADR-E03 updated 2026-04-09) |
+| SCA-01 | Phase 14 | Complete (syft 1.42.4 repo SBOM) |
+| SCA-02 | Phase 14 | Complete (syft 1.42.4 system SBOM, dpkg scope for N150 memory) |
+| SCA-03 | Phase 14 | Complete (grype 0.111.0 distro-aware scan, findings disclosed) |
+| SCA-04 | Phase 14 | Complete (cosign 3.0.6 keyless Sigstore signature) |
 | SCA-05 | Phase 14 | Complete (process documented) |
 
-**Coverage:**
+**Coverage (v2.0 closure 2026-04-10):**
 - v2.0 requirements: 33 total
-- Complete: 27
-- Removed (ADR-E04): 3
-- Pending: 3 (TRI-06 E2E test, SCA-01-04 tooling)
+- Complete: 29 (27 from Phase 9-12 + SCA-01..04 + PCAP state corrections)
+- Removed (ADR-E04): 3 (AI-01, AI-02, AI-03)
+- Partial: 1 (TRI-06 — Firewall-side rails complete; desktop-side forwarder is v2.1 work tracked in audit)
 
 ---
 *Requirements defined: 2026-03-31*
-*Last updated: 2026-03-31 — traceability populated after v2.0 roadmap creation*
+*Last updated: 2026-04-10 — v2.0 milestone closure (29/33 complete, 3 retracted, 1 partial)*

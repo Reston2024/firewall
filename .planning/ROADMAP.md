@@ -3,7 +3,7 @@
 ## Milestones
 
 - [x] **v1.0 Firewall Appliance** — Phases 1-8 (shipped 2026-03-26)
-- [ ] **v2.0 Local AI SOC** — Phases 9-14 (active)
+- [x] **v2.0 Local AI SOC** — Phases 9-14 (shipped 2026-04-10; TRI-06 desktop-side forwarder tracked as v2.1)
 
 ## Phases
 
@@ -23,12 +23,12 @@
 
 ### v2.0 Local AI SOC
 
-- [ ] **Phase 9: Malcolm NSM Deployment** - Deploy Malcolm on supportTAK-server with heap tuning, storage policies, and Arkime disabled
-- [ ] **Phase 10: Telemetry Migration to Malcolm** - Wire EVE JSON and syslog into Malcolm, run parallel validation, decommission Loki stack
-- [ ] **Phase 11: Foundation-Sec-8B AI Analyst** - Install Ollama natively, load Foundation-Sec-8B Q4_K_M, benchmark N150 inference throughput
+- [x] **Phase 9: Malcolm NSM Deployment** - Deploy Malcolm on supportTAK-server with heap tuning, storage policies (completed 2026-04-05; SPAN-live post-2026-04-09, 27/27 containers healthy)
+- [x] **Phase 10: Telemetry Migration to Malcolm** - Wire EVE JSON and syslog into Malcolm, decommission Loki stack (completed 2026-04-06)
+- [x] **Phase 11: Foundation-Sec-8B AI Analyst** - RETRACTED per ADR-E04 2026-04-07 (moved to desktop SOC; retained as audit trail)
 - [x] **Phase 12: RAG Knowledge Pipeline** - Build ChromaDB vector store, index operating corpus, validate retrieval quality (completed 2026-04-07)
-- [ ] **Phase 13: Alert Triage Integration** - Wire triage worker to OpenSearch + RAG + AI analyst with async batch delivery
-- [ ] **Phase 14: PCAP Investigation + Supply Chain** - Assess SPAN port feasibility, SBOM generation, and signed release artifacts
+- [x] **Phase 13: Alert Triage Integration** - OpenSearch LAN access, triage-results index, receipt contract, validate-tri06.sh E2E gate (completed 2026-04-10; desktop-side forwarder v2.1)
+- [x] **Phase 14: PCAP Investigation + Supply Chain** - SPAN live (2026-04-09), CycloneDX SBOMs, cosign v3 keyless signed release bundle (completed 2026-04-10)
 
 ## Phase Details
 
@@ -122,9 +122,9 @@ Plans:
 | 6. System Hardening and Validation Suite | v1.0 | 4/4 | Complete | 2026-03-26 |
 | 7. Reproducibility and Disaster Recovery | v1.0 | 5/5 | Complete | 2026-03-26 |
 | 8. Milestone Gap Closure | v1.0 | 3/3 | Complete | 2026-03-26 |
-| 9. Malcolm NSM Deployment | v2.0 | 0/2 | Planning complete | - |
-| 10. Telemetry Migration to Malcolm | v2.0 | 0/2 | Planning complete | - |
-| 11. Foundation-Sec-8B AI Analyst | v2.0 | 1/2 | In Progress|  |
-| 12. RAG Knowledge Pipeline | v2.0 | 2/2 | Complete   | 2026-04-07 |
-| 13. Alert Triage Integration | v2.0 | 0/- | Not started | - |
-| 14. PCAP Investigation + Supply Chain | v2.0 | 0/- | Not started | - |
+| 9. Malcolm NSM Deployment | v2.0 | 2/2 | Complete | 2026-04-05 |
+| 10. Telemetry Migration to Malcolm | v2.0 | 2/2 | Complete | 2026-04-06 |
+| 11. Foundation-Sec-8B AI Analyst | v2.0 | 2/2 | Retracted (ADR-E04) | 2026-04-07 |
+| 12. RAG Knowledge Pipeline | v2.0 | 2/2 | Complete | 2026-04-07 |
+| 13. Alert Triage Integration | v2.0 | 2/2 | Complete (desktop-side forwarder v2.1) | 2026-04-10 |
+| 14. PCAP Investigation + Supply Chain | v2.0 | 2/2 | Complete | 2026-04-10 |
