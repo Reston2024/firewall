@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "REPLACE_WITH_FRESH_UUID",
+  "recommendation_id": "11111111-2222-4333-8444-555555555555",
+  "case_id": "66666666-7777-4888-8999-aaaaaaaaaaaa",
+  "failure_taxonomy": "applied",
+  "received_at": "2026-04-10T22:15:00.000Z",
+  "processed_at": "2026-04-10T22:15:03.412Z",
+  "detail": "",
+  "firewall_rule_id": "FW-2026-04-10-00042"
+}

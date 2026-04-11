@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "REPLACE_WITH_FRESH_UUID",
+  "recommendation_id": "55555555-6666-4777-8888-999999999999",
+  "case_id": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+  "failure_taxonomy": "rolled_back",
+  "received_at": "2026-04-10T22:30:00.000Z",
+  "processed_at": "2026-04-10T22:30:07.220Z",
+  "detail": "Gate 6 post-apply validation failed: new BLOCK rule FW-2026-04-10-TEMP caused expected allowed traffic to be dropped (ICMP ping from 192.168.1.100 to 192.168.1.1 timed out after 3 retries, expected success). Rollback invoked via 'iptables -D'; rule successfully removed and verified absent via 'iptables -C'."
+}

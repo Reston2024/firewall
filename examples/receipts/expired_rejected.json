@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "REPLACE_WITH_FRESH_UUID",
+  "recommendation_id": "44444444-5555-4666-8777-888888888888",
+  "case_id": "99999999-aaaa-4bbb-8ccc-dddddddddddd",
+  "failure_taxonomy": "expired_rejected",
+  "received_at": "2026-04-10T22:25:00.000Z",
+  "processed_at": "2026-04-10T22:25:00.010Z",
+  "detail": "artifact expires_at 2026-04-10T22:23:55.000Z was 65s in the past at receive time (skew tolerance 60s per ADR-E01); rejected without any firewall mutation"
+}

@@ -156,9 +156,11 @@ if [ "$TOTAL" -eq 0 ] 2>/dev/null; then
   skip "TRI-06.4: no schema-valid receipts in triage-results-* — desktop SOC has not emitted a receipt yet; see docs/tri06-receipt-contract.md"
 else
   # At least one candidate receipt exists. Validate the most recent one.
-  RECEIPT_ID=$(echo "$RECEIPT_OUT" | grep -o '"receipt_id":"[^"]*"' | head -1 | cut -d'"' -f4)
-  TAXONOMY=$(echo "$RECEIPT_OUT" | grep -o '"failure_taxonomy":"[^"]*"' | head -1 | cut -d'"' -f4)
-  RECO_ID=$(echo "$RECEIPT_OUT" | grep -o '"recommendation_id":"[^"]*"' | head -1 | cut -d'"' -f4)
+  # JSON may contain whitespace between colon and value; use a more
+  # permissive pattern and pull the captured group via sed.
+  RECEIPT_ID=$(echo "$RECEIPT_OUT" | grep -oE '"receipt_id"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | sed -E 's/.*"([^"]*)"[[:space:]]*$/\1/')
+  TAXONOMY=$(echo "$RECEIPT_OUT" | grep -oE '"failure_taxonomy"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | sed -E 's/.*"([^"]*)"[[:space:]]*$/\1/')
+  RECO_ID=$(echo "$RECEIPT_OUT" | grep -oE '"recommendation_id"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | sed -E 's/.*"([^"]*)"[[:space:]]*$/\1/')
 
   # Check taxonomy is valid
   TAXONOMY_VALID=0

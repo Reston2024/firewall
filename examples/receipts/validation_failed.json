@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "REPLACE_WITH_FRESH_UUID",
+  "recommendation_id": "33333333-4444-4555-8666-777777777777",
+  "case_id": "88888888-9999-4aaa-8bbb-cccccccccccc",
+  "failure_taxonomy": "validation_failed",
+  "received_at": "2026-04-10T22:19:45.000Z",
+  "processed_at": "2026-04-10T22:19:45.050Z",
+  "detail": "pre-apply schema validation failed at Gate 1: proposed_action.target is not a valid CIDR (got '256.1.1.1/33'); artifact rejected without any firewall mutation"
+}

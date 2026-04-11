@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "REPLACE_WITH_FRESH_UUID",
+  "recommendation_id": "22222222-3333-4444-8555-666666666666",
+  "case_id": "77777777-8888-4999-8aaa-bbbbbbbbbbbb",
+  "failure_taxonomy": "noop_already_present",
+  "received_at": "2026-04-10T22:17:12.120Z",
+  "processed_at": "2026-04-10T22:17:12.340Z",
+  "detail": "rule matching src 198.51.100.42 dst 192.168.1.1 dport 22 already present in IPFire firewall.local as FW-2026-04-08-00017 (age 2d); no mutation required",
+  "firewall_rule_id": "FW-2026-04-08-00017"
+}
